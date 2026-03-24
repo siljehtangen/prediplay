@@ -1,0 +1,111 @@
+<div class="page">
+  <h1 class="page__title">Player Synergy</h1>
+  <p class="page__subtitle">Select a league, then pick 2–5 players to analyze their combined predicted points</p>
+
+  <div class="synergy-layout">
+    <mat-card class="picker-card">
+      <mat-card-header>
+        <mat-icon mat-card-avatar>group_work</mat-icon>
+        <mat-card-title>Select Players</mat-card-title>
+        <mat-card-subtitle>Pick a league, then choose 2–5 players from it</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        @if (loadingLeagues) {
+          <div class="loading-container" style="padding:30px"><mat-icon>hourglass_empty</mat-icon></div>
+        } @else {
+          <mat-form-field appearance="outline" style="width:100%; margin-bottom:8px">
+            <mat-label>League</mat-label>
+            <mat-select [(ngModel)]="selectedLeague" (ngModelChange)="onLeagueChange()">
+              <mat-option value="">Select a league…</mat-option>
+              @for (l of leagues; track l.id) {
+                <mat-option [value]="l.name">{{ l.name }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          @if (loading) {
+            <div class="loading-container" style="padding:16px"><mat-icon>hourglass_empty</mat-icon></div>
+          } @else if (selectedLeague) {
+            <mat-form-field appearance="outline" style="width:100%">
+              <mat-label>Players</mat-label>
+              <mat-select [(ngModel)]="selectedIds" multiple>
+                @for (p of allPlayers; track p.id) {
+                  <mat-option [value]="p.id">{{ p.name }} – {{ p.team_name }} ({{ p.position }})</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+
+            <div class="selected-chips">
+              @for (id of selectedIds; track id) {
+                <span class="chip chip--pos">{{ getPlayer(id)?.name }}</span>
+              }
+            </div>
+
+            <button mat-raised-button color="primary" (click)="analyze()"
+                    [disabled]="selectedIds.length < 2 || analyzing" style="width:100%; margin-top:12px">
+              @if (analyzing) { Analyzing... } @else { Analyze Synergy }
+            </button>
+          }
+        }
+      </mat-card-content>
+    </mat-card>
+
+    @if (result) {
+      <div class="result-area">
+        <div class="synergy-scores">
+          <mat-card class="score-card">
+            <mat-card-content>
+              <div class="score-card__label">Total Predicted</div>
+              <div class="score-card__value">{{ result.total_predicted | number:'1.1-1' }}</div>
+            </mat-card-content>
+          </mat-card>
+          <mat-card class="score-card score-card--bonus">
+            <mat-card-content>
+              <div class="score-card__label">Synergy Bonus</div>
+              <div class="score-card__value">+{{ result.synergy_bonus | number:'1.1-1' }}</div>
+            </mat-card-content>
+          </mat-card>
+          <mat-card class="score-card score-card--total">
+            <mat-card-content>
+              <div class="score-card__label">Synergy Score</div>
+              <div class="score-card__value">{{ result.synergy_score | number:'1.1-1' }}</div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+
+        <mat-card>
+          <mat-card-header>
+            <mat-card-title>Synergy Comparison</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="chart-container">
+              <canvas #synergyCanvas></canvas>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card>
+          <mat-card-header><mat-card-title>Selected Players</mat-card-title></mat-card-header>
+          <mat-card-content>
+            <div class="players-list">
+              @for (p of result.players; track p.id) {
+                <div class="player-row">
+                  <div class="player-row__info">
+                    <span class="player-row__name">{{ p.name }}</span>
+                    <span class="player-row__team">{{ p.team_name }}</span>
+                  </div>
+                  <div class="player-row__stats">
+                    <span class="chip chip--pos">{{ p.position }}</span>
+                    <span class="stat-mini">{{ p.goals }}G</span>
+                    <span class="stat-mini">{{ p.assists }}A</span>
+                    <span class="stat-mini">xG {{ p.xG | number:'1.1-1' }}</span>
+                  </div>
+                </div>
+              }
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    }
+  </div>
+</div>

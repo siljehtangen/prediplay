@@ -1,0 +1,150 @@
+/* Global styles – Prediplay dark theme */
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  background: #0d0d1a;
+  color: #e8e8f0;
+}
+
+/* Override Material dark background */
+body { background-color: #0d0d1a !important; }
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #1a1a2e; }
+::-webkit-scrollbar-thumb { background: #3a3a5c; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #6c63ff; }
+
+.mat-mdc-card {
+  background: #1a1a2e !important;
+  border: 1px solid rgba(108, 99, 255, 0.15) !important;
+  border-radius: 12px !important;
+  color: #e8e8f0 !important;
+}
+
+/* Chips */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+
+  &--low    { background: rgba(76,175,80,.2);  color: #81c784; border: 1px solid rgba(76,175,80,.4); }
+  &--medium { background: rgba(255,193,7,.2);  color: #ffd54f; border: 1px solid rgba(255,193,7,.4); }
+  &--high   { background: rgba(244,67,54,.2);  color: #ef9a9a; border: 1px solid rgba(244,67,54,.4); }
+  &--gem    { background: rgba(255,152,0,.2);  color: #ffb74d; border: 1px solid rgba(255,152,0,.4); }
+  &--pos    { background: rgba(108,99,255,.2); color: #a89cff; border: 1px solid rgba(108,99,255,.4); }
+}
+
+/* Score circles */
+.score-circle {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 15px;
+  border: 2px solid;
+  flex-shrink: 0;
+
+  &--low    { border-color: #ef9a9a; color: #ef9a9a; background: rgba(244,67,54,.12); }
+  &--medium { border-color: #ffd54f; color: #ffd54f; background: rgba(255,193,7,.12); }
+  &--high   { border-color: #81c784; color: #81c784; background: rgba(76,175,80,.12); }
+}
+
+/* Section header */
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+
+  h2 { margin: 0; font-size: 20px; font-weight: 600; color: #e8e8f0; }
+  .section-icon { color: #6c63ff; font-size: 22px; }
+}
+
+/* Page layout */
+.page {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+
+  &__title { font-size: 26px; font-weight: 700; margin: 0 0 6px; color: #e8e8f0; }
+  &__subtitle { font-size: 14px; color: #888; margin: 0 0 28px; }
+}
+
+/* Filters */
+.filters {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+
+  .mat-mdc-form-field { min-width: 160px; }
+}
+
+/* Player grid */
+.player-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+}
+
+/* Loading / empty states */
+.loading-container, .empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px;
+  gap: 16px;
+  color: #555;
+
+  mat-icon { font-size: 48px; width: 48px; height: 48px; }
+  p { margin: 0; font-size: 15px; }
+}
+
+/* Material form field dark overrides */
+.mat-mdc-form-field {
+  .mat-mdc-text-field-wrapper { background: rgba(255,255,255,.05) !important; }
+  .mdc-floating-label { color: #888 !important; }
+  .mat-mdc-select-value-text, .mat-mdc-input-element { color: #e8e8f0 !important; }
+}
+
+/* Material select panel */
+.mat-mdc-select-panel { background: #1a1a2e !important; }
+.mat-mdc-option { color: #e8e8f0 !important; }
+.mat-mdc-option:hover { background: rgba(108,99,255,.15) !important; }
+
+/* Progress bar color */
+.mat-mdc-progress-bar .mdc-linear-progress__bar-inner {
+  border-color: #7c73ff !important;
+}
+
+/* Material table dark overrides */
+.mat-mdc-table {
+  background: transparent !important;
+  color: #e8e8f0 !important;
+}
+.mat-mdc-header-row { background: transparent !important; }
+.mat-mdc-row {
+  background: transparent !important;
+  &:hover { background: rgba(108,99,255,.05) !important; }
+}
+.mat-mdc-header-cell {
+  color: #555 !important;
+  border-bottom-color: rgba(255,255,255,.06) !important;
+  font-size: 11px !important;
+}
+.mat-mdc-cell {
+  color: #aaa !important;
+  border-bottom-color: rgba(255,255,255,.04) !important;
+}

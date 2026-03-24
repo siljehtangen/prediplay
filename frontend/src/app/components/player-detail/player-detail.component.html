@@ -1,0 +1,216 @@
+<div class="page">
+  <a mat-button routerLink="/top-players" class="back-btn">
+    <mat-icon>arrow_back</mat-icon> Back
+  </a>
+
+  @if (loading) {
+    <div class="loading-container"><mat-icon>hourglass_empty</mat-icon><p>Loading player...</p></div>
+  } @else if (!prediction) {
+    <div class="empty-state" style="padding:60px">
+      <mat-icon>error_outline</mat-icon>
+      <p>Could not load player data. Please try again.</p>
+      <button mat-raised-button color="primary" (click)="load()" style="margin-top:12px">Retry</button>
+    </div>
+  } @else {
+    <div class="detail-layout">
+      <div class="detail-layout__main">
+
+        <!-- Player header -->
+        <mat-card class="header-card">
+          <mat-card-content>
+            <div class="player-header">
+              <div class="player-header__photo">
+                @if (!photoError) {
+                  <img [src]="photoUrl" [alt]="prediction.player.name"
+                       (error)="photoError = true" class="player-photo" />
+                } @else {
+                  <div class="player-photo-fallback"><mat-icon>person</mat-icon></div>
+                }
+              </div>
+
+              <div class="player-header__info">
+                <h1 class="player-header__name">{{ prediction.player.name }}</h1>
+                <div class="player-header__meta">
+                  <span class="team-name">{{ prediction.player.team_name }}</span>
+                  @if (prediction.player.league) {
+                    <span class="chip chip--league">{{ prediction.player.league }}</span>
+                  }
+                  <span class="chip chip--pos">{{ prediction.player.position }}</span>
+                  @if (prediction.player.jersey_number) {
+                    <span class="chip chip--jersey">#{{ prediction.player.jersey_number }}</span>
+                  }
+                  @if (prediction.hidden_gem) {
+                    <span class="chip chip--gem">🔥 Hidden Gem</span>
+                  }
+                </div>
+                <div class="player-header__bio">
+                  @if (prediction.player.nationality) {
+                    <span class="bio-item"><mat-icon>flag</mat-icon>{{ prediction.player.nationality }}</span>
+                  }
+                  @if (prediction.player.date_of_birth) {
+                    <span class="bio-item"><mat-icon>cake</mat-icon>Age {{ age(prediction.player.date_of_birth) }}</span>
+                  }
+                  @if (prediction.player.height) {
+                    <span class="bio-item"><mat-icon>height</mat-icon>{{ prediction.player.height }} cm</span>
+                  }
+                  @if (prediction.player.market_value) {
+                    <span class="bio-item"><mat-icon>euro</mat-icon>{{ marketValueM(prediction.player.market_value) }}</span>
+                  }
+                </div>
+              </div>
+
+              <div class="player-header__score">
+                <div class="score-circle score-circle--lg" [class]="scoreClass(prediction.risk_level)">
+                  {{ prediction.predicted_score | number:'1.1-1' }}
+                </div>
+                <div class="score-label">Predicted Score</div>
+                <span class="chip" [class]="'chip--' + prediction.risk_level">{{ prediction.risk_level | titlecase }} Risk</span>
+              </div>
+            </div>
+
+            <!-- Season stats summary -->
+            <div class="stats-grid">
+              <div class="stat-item">
+                <div class="stat-item__value">{{ prediction.player.goals }}</div>
+                <div class="stat-item__label">Goals</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-item__value">{{ prediction.player.assists }}</div>
+                <div class="stat-item__label">Assists</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-item__value">{{ prediction.player.xG | number:'1.2-2' }}</div>
+                <div class="stat-item__label">xG</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-item__value">{{ prediction.player.xA | number:'1.2-2' }}</div>
+                <div class="stat-item__label">xA</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-item__value">{{ prediction.player.minutes_played }}</div>
+                <div class="stat-item__label">Minutes</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-item__value">{{ prediction.player.form_score | number:'1.1-1' }}</div>
+                <div class="stat-item__label">Form</div>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Recent matches -->
+        @if (stats.length > 0) {
+          <mat-card class="stats-card">
+            <mat-card-header>
+              <mat-card-title>Recent Matches</mat-card-title>
+              <mat-card-subtitle>Last {{ stats.length }} appearances</mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="table-wrap">
+                <table mat-table [dataSource]="stats" class="stats-table">
+
+                  <ng-container matColumnDef="date">
+                    <th mat-header-cell *matHeaderCellDef>Date</th>
+                    <td mat-cell *matCellDef="let s">{{ formatDate(s.event.event_date) }}</td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="opponent">
+                    <th mat-header-cell *matHeaderCellDef>Opponent</th>
+                    <td mat-cell *matCellDef="let s" class="opponent-cell">
+                      {{ opponent(s, prediction.player.team_name) }}
+                    </td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="score">
+                    <th mat-header-cell *matHeaderCellDef>Score</th>
+                    <td mat-cell *matCellDef="let s" class="score-cell">{{ matchScore(s) }}</td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="mins">
+                    <th mat-header-cell *matHeaderCellDef>Mins</th>
+                    <td mat-cell *matCellDef="let s">{{ s.minutes_played }}'</td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="rating">
+                    <th mat-header-cell *matHeaderCellDef>Rating</th>
+                    <td mat-cell *matCellDef="let s">
+                      <span class="rating-badge" [class.rating-high]="s.rating >= 7" [class.rating-low]="s.rating > 0 && s.rating < 6">
+                        {{ s.rating > 0 ? (s.rating | number:'1.1-1') : '—' }}
+                      </span>
+                    </td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="goals">
+                    <th mat-header-cell *matHeaderCellDef>G</th>
+                    <td mat-cell *matCellDef="let s">
+                      <span [class.stat-highlight]="s.goals > 0">{{ s.goals }}</span>
+                    </td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="assists">
+                    <th mat-header-cell *matHeaderCellDef>A</th>
+                    <td mat-cell *matCellDef="let s">
+                      <span [class.stat-highlight]="s.goal_assist > 0">{{ s.goal_assist }}</span>
+                    </td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="xG">
+                    <th mat-header-cell *matHeaderCellDef>xG</th>
+                    <td mat-cell *matCellDef="let s">{{ s.expected_goals | number:'1.2-2' }}</td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="xA">
+                    <th mat-header-cell *matHeaderCellDef>xA</th>
+                    <td mat-cell *matCellDef="let s">{{ s.expected_assists | number:'1.2-2' }}</td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="shots">
+                    <th mat-header-cell *matHeaderCellDef>Shots</th>
+                    <td mat-cell *matCellDef="let s">{{ s.shots_on_target }}/{{ s.total_shots }}</td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="key_pass">
+                    <th mat-header-cell *matHeaderCellDef>KP</th>
+                    <td mat-cell *matCellDef="let s">{{ s.key_pass }}</td>
+                  </ng-container>
+
+                  <tr mat-header-row *matHeaderRowDef="statColumns"></tr>
+                  <tr mat-row *matRowDef="let row; columns: statColumns;"></tr>
+                </table>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        }
+
+        <!-- Score breakdown chart -->
+        <mat-card class="chart-card">
+          <mat-card-header>
+            <mat-card-title>Score Breakdown</mat-card-title>
+            <mat-card-subtitle>Contribution of each factor</mat-card-subtitle>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="chart-container">
+              <canvas #breakdownCanvas></canvas>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Momentum chart -->
+        <mat-card class="chart-card">
+          <mat-card-header>
+            <mat-card-title>Form Momentum</mat-card-title>
+            <mat-card-subtitle>Last 10 game performances</mat-card-subtitle>
+          </mat-card-header>
+          <mat-card-content>
+            <app-momentum-chart [playerId]="playerId"></app-momentum-chart>
+          </mat-card-content>
+        </mat-card>
+
+      </div>
+
+      <div class="detail-layout__sidebar">
+        <app-prediction-controls (weightsChange)="onWeightsChange($event)"></app-prediction-controls>
+      </div>
+    </div>
+  }
+</div>

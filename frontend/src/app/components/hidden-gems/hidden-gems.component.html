@@ -1,0 +1,110 @@
+<div class="page">
+  <h1 class="page__title">Hidden Gems 🔥</h1>
+  <p class="page__subtitle">Under-the-radar players primed to overperform — high score, medium/high risk, low ownership</p>
+
+  <div class="filters">
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>League</mat-label>
+      <mat-select [(ngModel)]="selectedLeague" (selectionChange)="load()">
+        <mat-option value="">All Leagues</mat-option>
+        @for (l of leagues; track l.id) {
+          <mat-option [value]="l.name">{{ l.name }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <div class="time-filter-toggle">
+      <button [class.active]="timeFilter === 'recent'" (click)="setTimeFilter('recent')">Recent</button>
+      <button [class.active]="timeFilter === 'overall'" (click)="setTimeFilter('overall')">Overall</button>
+    </div>
+  </div>
+
+  @if (loading) {
+    <div class="loading-container"><mat-icon>hourglass_empty</mat-icon><p>Finding hidden gems...</p></div>
+  } @else if (showGroups) {
+    @if (leagueGroups.length === 0) {
+      <div class="empty-state"><mat-icon>search_off</mat-icon><p>No hidden gems found</p></div>
+    } @else {
+      @for (group of leagueGroups; track group.name) {
+        <div class="league-section">
+          <h2 class="league-section__title">{{ group.name }}</h2>
+          <div class="gems-grid">
+            @for (gem of group.players; track gem.player.id; let i = $index) {
+              <mat-card class="gem-card" [routerLink]="['/player', gem.player.id]">
+                <mat-card-content>
+                  <div class="gem-card__glow"></div>
+                  <div class="gem-card__top">
+                    <div class="gem-card__rank">#{{ i + 1 }} Hidden Gem</div>
+                    <div class="gem-card__fire">🔥</div>
+                  </div>
+                  <div class="gem-card__header">
+                    <div>
+                      <div class="gem-card__name">{{ gem.player.name }}</div>
+                      <div class="gem-card__team">{{ gem.player.team_name }}</div>
+                    </div>
+                    <div class="score-circle" [class]="scoreClass(gem.risk_level)">
+                      {{ gem.predicted_score | number:'1.1-1' }}
+                    </div>
+                  </div>
+                  <div class="gem-card__badges">
+                    <span class="chip chip--pos">{{ gem.player.position }}</span>
+                    <span class="chip" [class]="'chip--' + gem.risk_level">{{ gem.risk_level | titlecase }} Risk</span>
+                  </div>
+                  <div class="gem-card__why">
+                    <div class="why-item"><mat-icon>trending_up</mat-icon><span>Form: {{ gem.player.form_score | number:'1.1-1' }}/10</span></div>
+                    <div class="why-item"><mat-icon>gps_fixed</mat-icon><span>xG {{ gem.player.xG | number:'1.1-1' }} / xA {{ gem.player.xA | number:'1.1-1' }}</span></div>
+                    <div class="why-item"><mat-icon>sports_soccer</mat-icon><span>{{ gem.player.goals }}G {{ gem.player.assists }}A (low ownership)</span></div>
+                  </div>
+                  <div class="gem-card__form">
+                    <span class="form-label">Form Index</span>
+                    <mat-progress-bar mode="determinate" [value]="gem.player.form_score * 10" color="accent"></mat-progress-bar>
+                  </div>
+                </mat-card-content>
+              </mat-card>
+            }
+          </div>
+        </div>
+      }
+    }
+  } @else {
+    @if (gems.length === 0) {
+      <div class="empty-state"><mat-icon>search_off</mat-icon><p>No hidden gems found</p></div>
+    } @else {
+      <div class="gems-grid">
+        @for (gem of gems; track gem.player.id; let i = $index) {
+          <mat-card class="gem-card" [routerLink]="['/player', gem.player.id]">
+            <mat-card-content>
+              <div class="gem-card__glow"></div>
+              <div class="gem-card__top">
+                <div class="gem-card__rank">#{{ i + 1 }} Hidden Gem</div>
+                <div class="gem-card__fire">🔥</div>
+              </div>
+              <div class="gem-card__header">
+                <div>
+                  <div class="gem-card__name">{{ gem.player.name }}</div>
+                  <div class="gem-card__team">{{ gem.player.team_name }}</div>
+                </div>
+                <div class="score-circle" [class]="scoreClass(gem.risk_level)">
+                  {{ gem.predicted_score | number:'1.1-1' }}
+                </div>
+              </div>
+              <div class="gem-card__badges">
+                <span class="chip chip--pos">{{ gem.player.position }}</span>
+                <span class="chip" [class]="'chip--' + gem.risk_level">{{ gem.risk_level | titlecase }} Risk</span>
+              </div>
+              <div class="gem-card__why">
+                <div class="why-item"><mat-icon>trending_up</mat-icon><span>Form: {{ gem.player.form_score | number:'1.1-1' }}/10</span></div>
+                <div class="why-item"><mat-icon>gps_fixed</mat-icon><span>xG {{ gem.player.xG | number:'1.1-1' }} / xA {{ gem.player.xA | number:'1.1-1' }}</span></div>
+                <div class="why-item"><mat-icon>sports_soccer</mat-icon><span>{{ gem.player.goals }}G {{ gem.player.assists }}A (low ownership)</span></div>
+              </div>
+              <div class="gem-card__form">
+                <span class="form-label">Form Index</span>
+                <mat-progress-bar mode="determinate" [value]="gem.player.form_score * 10" color="accent"></mat-progress-bar>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        }
+      </div>
+    }
+  }
+</div>

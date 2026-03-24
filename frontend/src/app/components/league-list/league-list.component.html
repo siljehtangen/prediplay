@@ -1,0 +1,32 @@
+<div class="page">
+  <h1 class="page__title">Leagues</h1>
+  <p class="page__subtitle">Browse competitions and explore predictions by league</p>
+
+  @if (loading) {
+    <div class="loading-container"><mat-icon>hourglass_empty</mat-icon><p>Loading leagues...</p></div>
+  } @else if (leagues.length === 0) {
+    <div class="empty-state">
+      <mat-icon>search_off</mat-icon>
+      <p>No leagues available. Make sure the backend is running.</p>
+    </div>
+  } @else {
+    <div class="leagues-grid">
+      @for (league of leagues; track league.id) {
+        <mat-card class="league-card">
+          <mat-card-content>
+            <div class="league-card__flag">{{ flag(league.country) }}</div>
+            <div class="league-card__name">{{ league.name }}</div>
+            <div class="league-card__country">{{ league.country }}</div>
+            @if (league.active) {
+              <span class="chip chip--low" style="margin-bottom:12px">Active</span>
+            }
+            <button mat-stroked-button (click)="viewPlayers(league)" style="width:100%">
+              <mat-icon>leaderboard</mat-icon>
+              View Predictions
+            </button>
+          </mat-card-content>
+        </mat-card>
+      }
+    </div>
+  }
+</div>

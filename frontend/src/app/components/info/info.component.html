@@ -1,0 +1,307 @@
+<div class="page">
+  <h1 class="page__title">How It Works</h1>
+  <p class="page__subtitle">Understanding the predictions behind every score, pick, and flag</p>
+
+  <!-- Player Prediction Score -->
+  <mat-card class="info-card">
+    <mat-card-content>
+      <div class="info-card__heading">
+        <mat-icon class="info-icon info-icon--purple">leaderboard</mat-icon>
+        <h2>Player Prediction Score (0 – 10)</h2>
+      </div>
+      <p class="info-card__intro">
+        Every player receives a <strong>predicted score</strong> representing their expected performance in the upcoming match.
+        Five factors are combined using configurable weights (defaults shown):
+      </p>
+
+      <div class="factor-list">
+        <div class="factor">
+          <div class="factor__bar" style="width: 35%"></div>
+          <div class="factor__body">
+            <div class="factor__name">Form <span class="factor__weight">35%</span></div>
+            <div class="factor__desc">
+              The player's average match rating over recent games. Ratings run from 0 – 10; a 7.0+ average is considered solid form.
+              A player on a hot streak scores high here, while poor recent performances drag it down.
+            </div>
+          </div>
+        </div>
+
+        <div class="factor">
+          <div class="factor__bar" style="width: 25%"></div>
+          <div class="factor__body">
+            <div class="factor__name">Threat <span class="factor__weight">25%</span></div>
+            <div class="factor__desc">
+              A composite attacking threat score built from:
+              xG × 1.5 + xA × 1.2 + Goals × 0.8 + Assists × 0.6, normalised to 0 – 10.
+              Reflects both actual returns and underlying expected contributions.
+            </div>
+          </div>
+        </div>
+
+        <div class="factor">
+          <div class="factor__bar" style="width: 15%"></div>
+          <div class="factor__body">
+            <div class="factor__name">Opponent Difficulty <span class="factor__weight">15%</span></div>
+            <div class="factor__desc">
+              How difficult the next opponent is expected to be. A tough defence lowers the score; a weaker side raises it.
+            </div>
+          </div>
+        </div>
+
+        <div class="factor">
+          <div class="factor__bar" style="width: 15%"></div>
+          <div class="factor__body">
+            <div class="factor__name">Minutes Likelihood <span class="factor__weight">15%</span></div>
+            <div class="factor__desc">
+              Based on how many minutes the player has played. 90 min/game = maximum score.
+              Rotation players who rarely complete games score lower here.
+            </div>
+          </div>
+        </div>
+
+        <div class="factor">
+          <div class="factor__bar factor__bar--last" style="width: 10%"></div>
+          <div class="factor__body">
+            <div class="factor__name">Home / Away Factor <span class="factor__weight">10%</span></div>
+            <div class="factor__desc">
+              A small boost for playing at home, reflecting the well-documented home advantage in football.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="formula-box">
+        Score = Form × 0.35 + Threat × 0.25 + Opponent × 0.15 + Minutes × 0.15 + Home/Away × 0.10
+      </div>
+      <p class="info-card__note">
+        You can adjust the weighting of each factor on the Top Players, Hidden Gems, and Benchwarmers pages using the Prediction Controls.
+      </p>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Risk Levels -->
+  <mat-card class="info-card">
+    <mat-card-content>
+      <div class="info-card__heading">
+        <mat-icon class="info-icon info-icon--green">shield</mat-icon>
+        <h2>Risk Levels</h2>
+      </div>
+      <p class="info-card__intro">
+        Each player is assigned a risk level based on their predicted score. Use this as a guide when deciding who to start.
+      </p>
+      <div class="risk-table">
+        <div class="risk-row">
+          <span class="chip chip--low">Low Risk</span>
+          <span class="risk-range">Score &ge; 7.0</span>
+          <span class="risk-desc">Safe to start — strong form, regular minutes, good matchup.</span>
+        </div>
+        <div class="risk-row">
+          <span class="chip chip--medium">Medium Risk</span>
+          <span class="risk-range">Score 4.5 – 6.9</span>
+          <span class="risk-desc">Proceed with caution — decent pick but some uncertainty.</span>
+        </div>
+        <div class="risk-row">
+          <span class="chip chip--high">High Risk</span>
+          <span class="risk-range">Score &lt; 4.5</span>
+          <span class="risk-desc">Consider benching — poor form, rotation risk, or tough fixture.</span>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Hidden Gems -->
+  <mat-card class="info-card">
+    <mat-card-content>
+      <div class="info-card__heading">
+        <mat-icon class="info-icon info-icon--orange">auto_awesome</mat-icon>
+        <h2>Hidden Gems</h2>
+      </div>
+      <p class="info-card__intro">
+        Hidden Gems are undervalued players with genuine upside — typically lower-owned in fantasy leagues but projecting well.
+      </p>
+      <div class="criteria-list">
+        <div class="criterion">
+          <mat-icon>check</mat-icon>
+          <span>Predicted score between <strong>5.5 and 7.0</strong></span>
+        </div>
+        <div class="criterion">
+          <mat-icon>check</mat-icon>
+          <span>Fewer than <strong>15 combined goals + assists</strong> — not yet on everyone's radar</span>
+        </div>
+        <div class="criterion">
+          <mat-icon>check</mat-icon>
+          <span>Risk level is Medium — high enough potential, low enough profile</span>
+        </div>
+      </div>
+      <p class="info-card__note">
+        Hidden Gems appear separately from the Top Picks list so the two groups never overlap.
+      </p>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Red Flags -->
+  <mat-card class="info-card">
+    <mat-card-content>
+      <div class="info-card__heading">
+        <mat-icon class="info-icon info-icon--red">flag</mat-icon>
+        <h2>Red Flags</h2>
+      </div>
+      <p class="info-card__intro">
+        Red Flags highlight players you should consider dropping or benching — those showing alarming dips in form and output.
+        Only players with 270+ minutes played are assessed (so new signings aren't unfairly penalised).
+      </p>
+
+      <div class="formula-box formula-box--danger">
+        Danger Score = Form Decline × 55% + Output Drop × 45%
+      </div>
+
+      <div class="factor-list factor-list--compact">
+        <div class="factor">
+          <div class="factor__body">
+            <div class="factor__name factor__name--red">Form Decline</div>
+            <div class="factor__desc">
+              How far a player's average rating has fallen below 7.0 (the "acceptable" baseline).
+              A rating of 5.0 gives a decline score of ~4.3; below 4.0 gives a score of 4.3+.
+            </div>
+          </div>
+        </div>
+        <div class="factor">
+          <div class="factor__body">
+            <div class="factor__name factor__name--red">Output Drop</div>
+            <div class="factor__desc">
+              Goals + Assists per 90 minutes, compared against a positional baseline:
+            </div>
+            <div class="position-baselines">
+              <span class="baseline-chip">DEF: 0.15 G+A/90</span>
+              <span class="baseline-chip">MID: 0.25 G+A/90</span>
+              <span class="baseline-chip">FWD: 0.40 G+A/90</span>
+              <span class="baseline-chip">GK: not assessed</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="severity-list">
+        <div class="sev-row">
+          <span class="sev-badge sev-badge--critical">Critical</span>
+          <span>Danger Score &ge; 7.5 — drop immediately</span>
+        </div>
+        <div class="sev-row">
+          <span class="sev-badge sev-badge--high">High</span>
+          <span>Danger Score 5.5 – 7.4 — seriously consider alternatives</span>
+        </div>
+        <div class="sev-row">
+          <span class="sev-badge sev-badge--medium">Medium</span>
+          <span>Danger Score 5.0 – 5.4 — monitor closely</span>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Benchwarmers -->
+  <mat-card class="info-card">
+    <mat-card-content>
+      <div class="info-card__heading">
+        <mat-icon class="info-icon info-icon--blue">airline_seat_recline_normal</mat-icon>
+        <h2>Benchwarmers</h2>
+      </div>
+      <p class="info-card__intro">
+        Benchwarmers are consistent, reliable players who won't blow you away but won't hurt you either.
+        Great for filling out your squad when premium options aren't available.
+      </p>
+      <div class="formula-box">
+        Consistency Score = Form Consistency × 50% + Minutes Score × 30% + Output Score × 20%
+      </div>
+      <div class="criteria-list">
+        <div class="criterion">
+          <mat-icon>check</mat-icon>
+          <span>Predicted score between <strong>4.0 and 7.0</strong> — not elite, but not a red flag</span>
+        </div>
+        <div class="criterion">
+          <mat-icon>check</mat-icon>
+          <span>Form score &ge; 5.5 and 270+ minutes played — regular, steady contributor</span>
+        </div>
+        <div class="criterion">
+          <mat-icon>check</mat-icon>
+          <span>Not classified as a Hidden Gem or Red Flag</span>
+        </div>
+      </div>
+      <div class="label-list">
+        <div class="label-row"><span class="label-badge label-badge--solid">Rock Solid</span><span>Consistency &ge; 7.0 — trust them every week</span></div>
+        <div class="label-row"><span class="label-badge label-badge--steady">Steady Option</span><span>Consistency 5.0 – 6.9 — reliable rotation pick</span></div>
+        <div class="label-row"><span class="label-badge label-badge--rotation">Rotation Pick</span><span>Consistency &lt; 5.0 — situational use only</span></div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Match Predictions -->
+  <mat-card class="info-card">
+    <mat-card-content>
+      <div class="info-card__heading">
+        <mat-icon class="info-icon info-icon--purple">event</mat-icon>
+        <h2>Match Predictions</h2>
+      </div>
+      <p class="info-card__intro">
+        Match outcome probabilities are powered by a machine-learning model trained on historical match data across all five leagues.
+      </p>
+      <div class="match-pred-grid">
+        <div class="match-pred-item">
+          <div class="match-pred-icon match-pred-icon--home"></div>
+          <div>
+            <div class="match-pred-label">Home Win %</div>
+            <div class="match-pred-desc">Probability the home side wins in 90 minutes</div>
+          </div>
+        </div>
+        <div class="match-pred-item">
+          <div class="match-pred-icon match-pred-icon--draw"></div>
+          <div>
+            <div class="match-pred-label">Draw %</div>
+            <div class="match-pred-desc">Probability the match ends level after 90 minutes</div>
+          </div>
+        </div>
+        <div class="match-pred-item">
+          <div class="match-pred-icon match-pred-icon--away"></div>
+          <div>
+            <div class="match-pred-label">Away Win %</div>
+            <div class="match-pred-desc">Probability the away side wins in 90 minutes</div>
+          </div>
+        </div>
+        <div class="match-pred-item">
+          <div class="match-pred-icon match-pred-icon--goals"></div>
+          <div>
+            <div class="match-pred-label">Over 2.5 Goals %</div>
+            <div class="match-pred-desc">Probability the match has 3 or more goals in total</div>
+          </div>
+        </div>
+        <div class="match-pred-item">
+          <div class="match-pred-icon match-pred-icon--btts"></div>
+          <div>
+            <div class="match-pred-label">Both Teams Score %</div>
+            <div class="match-pred-desc">Probability both teams find the net at least once</div>
+          </div>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Synergy -->
+  <mat-card class="info-card">
+    <mat-card-content>
+      <div class="info-card__heading">
+        <mat-icon class="info-icon info-icon--purple">group_work</mat-icon>
+        <h2>Synergy</h2>
+      </div>
+      <p class="info-card__intro">
+        The Synergy tool lets you evaluate a group of players together rather than individually.
+        Picking players from different positions adds a diversity bonus.
+      </p>
+      <div class="formula-box">
+        Synergy Score = Sum of Individual Scores + (Number of Distinct Positions − 1) × 0.5
+      </div>
+      <p class="info-card__note">
+        A squad with all four position types (GK, DEF, MID, FWD) earns a +1.5 bonus on top of their combined scores.
+      </p>
+    </mat-card-content>
+  </mat-card>
+
+</div>

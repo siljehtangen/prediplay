@@ -1,0 +1,247 @@
+.dash-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.section-gap { margin-top: 40px; }
+
+.section-header {
+  .view-all {
+    margin-left: auto;
+    font-size: 12px;
+    color: #6c63ff;
+    border-color: rgba(108,99,255,.4);
+  }
+}
+
+// ── Per-league sections ──────────────────────────────────────────────────────
+
+.league-section {
+  margin-top: 36px;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(108,99,255,.2);
+
+    h2 { margin: 0; font-size: 18px; font-weight: 700; color: #e8e8f0; }
+    .section-icon { color: #6c63ff; }
+  }
+
+  &__columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+
+    @media (max-width: 768px) {
+      grid-template-columns: 1fr;
+    }
+  }
+}
+
+.league-col {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.col-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #aaa;
+
+  .view-all {
+    margin-left: auto;
+    font-size: 11px;
+    color: #6c63ff;
+    border-color: rgba(108,99,255,.4);
+    padding: 0 10px;
+    line-height: 26px;
+    min-height: 26px;
+
+    &--flags {
+      color: #f44336;
+      border-color: rgba(244,67,54,.4);
+    }
+  }
+}
+
+.col-icon {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+  &--picks { color: #6c63ff; }
+  &--flags { color: #f44336; }
+}
+
+// ── Mini player list ─────────────────────────────────────────────────────────
+
+.mini-player-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.mini-card {
+  cursor: pointer;
+  transition: transform 0.12s;
+
+  &:hover { transform: translateX(3px); }
+
+  mat-card-content {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px !important;
+  }
+
+  &--flag {
+    border-left: 3px solid #f44336;
+  }
+}
+
+.mini-rank {
+  font-size: 11px;
+  font-weight: 700;
+  color: #6c63ff;
+  min-width: 20px;
+
+  &--flag { color: #f44336; }
+}
+
+.score-circle--sm {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 12px;
+  border: 2px solid;
+  flex-shrink: 0;
+}
+
+.danger-score-sm {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 12px;
+  color: #f44336;
+  border: 2px solid rgba(244,67,54,.5);
+  background: rgba(244,67,54,.1);
+  flex-shrink: 0;
+}
+
+.mini-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.mini-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #e8e8f0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mini-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: #666;
+  margin-top: 2px;
+}
+
+.mini-reason {
+  font-size: 10px;
+  color: #ef9a9a;
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.empty-state-inline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 16px;
+  color: #555;
+  font-size: 13px;
+
+  mat-icon { font-size: 18px; width: 18px; height: 18px; }
+
+  &--green { color: #4caf50; }
+}
+
+// ── Fixtures ─────────────────────────────────────────────────────────────────
+
+.fixtures-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 14px;
+}
+
+.fixture-card {
+  mat-card-content { padding: 14px; }
+  &__date { font-size: 11px; color: #666; margin-bottom: 8px; }
+  &__teams {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  &__probs { margin-top: 8px; }
+}
+
+.team-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #e8e8f0;
+  flex: 1;
+  text-align: center;
+}
+
+.vs { font-size: 11px; color: #555; flex-shrink: 0; }
+
+.prob-bar {
+  height: 6px;
+  border-radius: 3px;
+  display: flex;
+  overflow: hidden;
+  background: #0d0d1a;
+
+  &__fill {
+    height: 100%;
+    transition: width 0.5s;
+    &--home { background: #81c784; }
+    &--draw { background: #ffd54f; }
+    &--away { background: #ef9a9a; }
+  }
+}
+
+.prob-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: #555;
+  margin-top: 4px;
+}

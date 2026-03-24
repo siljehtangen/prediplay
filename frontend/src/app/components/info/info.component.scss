@@ -1,0 +1,319 @@
+.info-card {
+  margin-bottom: 24px;
+
+  mat-card-content { padding: 24px; }
+
+  &__heading {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+
+    h2 { margin: 0; font-size: 20px; font-weight: 700; color: #e8e8f0; }
+  }
+
+  &__intro {
+    font-size: 14px;
+    color: #aaa;
+    line-height: 1.6;
+    margin: 0 0 20px;
+  }
+
+  &__note {
+    font-size: 12px;
+    color: #666;
+    margin: 14px 0 0;
+    font-style: italic;
+  }
+}
+
+.info-icon {
+  font-size: 26px;
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
+
+  &--purple { color: #6c63ff; }
+  &--green  { color: #4caf50; }
+  &--orange { color: #ff9800; }
+  &--red    { color: #f44336; }
+  &--blue   { color: #42a5f5; }
+}
+
+// ── Factor bars ──────────────────────────────────────────────────────────────
+
+.factor-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 20px;
+
+  &--compact { gap: 18px; }
+}
+
+.factor {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+
+  &__bar {
+    height: 6px;
+    min-width: 6px;
+    margin-top: 6px;
+    border-radius: 3px;
+    background: linear-gradient(90deg, #6c63ff, #a89cff);
+    flex-shrink: 0;
+
+    &--last { background: linear-gradient(90deg, #6c63ff80, #6c63ff40); }
+  }
+
+  &__body { flex: 1; }
+
+  &__name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #e8e8f0;
+    margin-bottom: 4px;
+
+    &--red { color: #ef9a9a; }
+  }
+
+  &__weight {
+    font-size: 12px;
+    font-weight: 700;
+    color: #6c63ff;
+    margin-left: 6px;
+  }
+
+  &__desc {
+    font-size: 13px;
+    color: #888;
+    line-height: 1.5;
+  }
+}
+
+// ── Formula box ──────────────────────────────────────────────────────────────
+
+.formula-box {
+  background: rgba(108,99,255,.08);
+  border: 1px solid rgba(108,99,255,.25);
+  border-left: 4px solid #6c63ff;
+  border-radius: 8px;
+  padding: 14px 18px;
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  color: #c4bfff;
+  margin-bottom: 14px;
+  line-height: 1.5;
+
+  &--danger {
+    background: rgba(244,67,54,.06);
+    border-color: rgba(244,67,54,.25);
+    border-left-color: #f44336;
+    color: #ef9a9a;
+  }
+}
+
+// ── Risk table ───────────────────────────────────────────────────────────────
+
+.risk-table {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.risk-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.risk-range {
+  font-size: 12px;
+  color: #888;
+  min-width: 120px;
+  font-family: monospace;
+}
+
+.risk-desc {
+  font-size: 13px;
+  color: #aaa;
+}
+
+// ── Criteria list ────────────────────────────────────────────────────────────
+
+.criteria-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.criterion {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 13px;
+  color: #aaa;
+  line-height: 1.5;
+
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    color: #4caf50;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+}
+
+// ── Severity list ────────────────────────────────────────────────────────────
+
+.severity-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.sev-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+  color: #aaa;
+}
+
+.sev-badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  min-width: 70px;
+  text-align: center;
+
+  &--critical {
+    background: rgba(244,67,54,.2);
+    color: #f44336;
+    border: 1px solid rgba(244,67,54,.4);
+  }
+  &--high {
+    background: rgba(255,152,0,.15);
+    color: #ff9800;
+    border: 1px solid rgba(255,152,0,.3);
+  }
+  &--medium {
+    background: rgba(255,213,79,.12);
+    color: #ffd54f;
+    border: 1px solid rgba(255,213,79,.25);
+  }
+}
+
+// ── Position baselines ───────────────────────────────────────────────────────
+
+.position-baselines {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.baseline-chip {
+  font-size: 11px;
+  padding: 3px 10px;
+  border-radius: 12px;
+  background: rgba(244,67,54,.08);
+  color: #ef9a9a;
+  border: 1px solid rgba(244,67,54,.2);
+  font-family: monospace;
+}
+
+// ── Benchwarmer labels ───────────────────────────────────────────────────────
+
+.label-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.label-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+  color: #aaa;
+}
+
+.label-badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 12px;
+  min-width: 100px;
+  text-align: center;
+
+  &--solid {
+    background: rgba(76,175,80,.15);
+    color: #81c784;
+    border: 1px solid rgba(76,175,80,.3);
+  }
+  &--steady {
+    background: rgba(255,193,7,.12);
+    color: #ffd54f;
+    border: 1px solid rgba(255,193,7,.25);
+  }
+  &--rotation {
+    background: rgba(158,158,158,.1);
+    color: #9e9e9e;
+    border: 1px solid rgba(158,158,158,.2);
+  }
+}
+
+// ── Match predictions grid ───────────────────────────────────────────────────
+
+.match-pred-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 14px;
+}
+
+.match-pred-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px;
+  background: rgba(255,255,255,.03);
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,.06);
+}
+
+.match-pred-icon {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-top: 4px;
+  flex-shrink: 0;
+
+  &--home  { background: #81c784; }
+  &--draw  { background: #ffd54f; }
+  &--away  { background: #ef9a9a; }
+  &--goals { background: #42a5f5; }
+  &--btts  { background: #ab47bc; }
+}
+
+.match-pred-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #e8e8f0;
+  margin-bottom: 4px;
+}
+
+.match-pred-desc {
+  font-size: 12px;
+  color: #777;
+  line-height: 1.4;
+}

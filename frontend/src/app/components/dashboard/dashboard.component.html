@@ -1,0 +1,131 @@
+<div class="page">
+  <div class="dash-header">
+    <div>
+      <h1 class="page__title">Dashboard</h1>
+      <p class="page__subtitle">This week's top picks and red flags across all five major leagues</p>
+    </div>
+  </div>
+
+  @if (loading) {
+    <div class="loading-container"><mat-icon>hourglass_empty</mat-icon><p>Loading predictions...</p></div>
+  } @else {
+
+    <!-- Per-league sections -->
+    @for (league of leagues; track league.name) {
+      <section class="league-section">
+        <div class="league-section__header">
+          <mat-icon class="section-icon">sports_soccer</mat-icon>
+          <h2>{{ league.name }}</h2>
+        </div>
+
+        <div class="league-section__columns">
+
+          <!-- Top 3 picks -->
+          <div class="league-col">
+            <div class="col-header">
+              <mat-icon class="col-icon col-icon--picks">leaderboard</mat-icon>
+              <span>Top Picks This Week</span>
+              <a mat-stroked-button routerLink="/top-players" class="view-all">View All</a>
+            </div>
+            @if (league.topPlayers.length === 0) {
+              <div class="empty-state-inline"><mat-icon>search_off</mat-icon><span>No data yet</span></div>
+            } @else {
+              <div class="mini-player-list">
+                @for (pred of league.topPlayers; track pred.player.id; let i = $index) {
+                  <mat-card class="mini-card" [routerLink]="['/player', pred.player.id]">
+                    <mat-card-content>
+                      <span class="mini-rank">#{{ i + 1 }}</span>
+                      <div class="score-circle score-circle--sm" [class]="scoreClass(pred.risk_level)">
+                        {{ pred.predicted_score | number:'1.1-1' }}
+                      </div>
+                      <div class="mini-info">
+                        <div class="mini-name">{{ pred.player.name }}</div>
+                        <div class="mini-meta">{{ pred.player.team_name }} &middot; <span class="chip chip--pos">{{ pred.player.position }}</span></div>
+                      </div>
+                    </mat-card-content>
+                  </mat-card>
+                }
+              </div>
+            }
+          </div>
+
+          <!-- Top 3 red flags -->
+          <div class="league-col">
+            <div class="col-header">
+              <mat-icon class="col-icon col-icon--flags">flag</mat-icon>
+              <span>Red Flags This Week</span>
+              <a mat-stroked-button routerLink="/red-flags" class="view-all view-all--flags">View All</a>
+            </div>
+            @if (league.redFlags.length === 0) {
+              <div class="empty-state-inline empty-state-inline--green"><mat-icon>check_circle</mat-icon><span>No red flags</span></div>
+            } @else {
+              <div class="mini-player-list">
+                @for (flag of league.redFlags; track flag.player.id; let i = $index) {
+                  <mat-card class="mini-card mini-card--flag" [routerLink]="['/player', flag.player.id]">
+                    <mat-card-content>
+                      <span class="mini-rank mini-rank--flag">#{{ i + 1 }}</span>
+                      <div class="danger-score-sm">
+                        <span>{{ flag.red_flag_score | number:'1.1-1' }}</span>
+                      </div>
+                      <div class="mini-info">
+                        <div class="mini-name">{{ flag.player.name }}</div>
+                        <div class="mini-meta">{{ flag.player.team_name }} &middot; <span class="chip chip--pos">{{ flag.player.position }}</span></div>
+                        @if (flag.reasons.length > 0) {
+                          <div class="mini-reason">{{ flag.reasons[0] }}</div>
+                        }
+                      </div>
+                    </mat-card-content>
+                  </mat-card>
+                }
+              </div>
+            }
+          </div>
+
+        </div>
+      </section>
+    }
+
+    <!-- Upcoming Fixtures -->
+    <section class="section-gap">
+      <div class="section-header">
+        <mat-icon class="section-icon">event</mat-icon>
+        <h2>Upcoming Fixtures</h2>
+        <a mat-stroked-button routerLink="/fixtures" class="view-all">View All</a>
+      </div>
+      @if (events.length === 0) {
+        <div class="empty-state" style="padding:30px">
+          <mat-icon>event_busy</mat-icon><p>No upcoming fixtures</p>
+        </div>
+      } @else {
+        <div class="fixtures-grid">
+          @for (event of events; track event.id) {
+            <mat-card class="fixture-card">
+              <mat-card-content>
+                <div class="fixture-card__date">{{ formatDate(event.date) }}</div>
+                <div class="fixture-card__teams">
+                  <span class="team-name">{{ event.home_team?.name || 'TBD' }}</span>
+                  <span class="vs">vs</span>
+                  <span class="team-name">{{ event.away_team?.name || 'TBD' }}</span>
+                </div>
+                @if (getPrediction(event.home_team?.name, event.away_team?.name); as pred) {
+                  <div class="fixture-card__probs">
+                    <div class="prob-bar">
+                      <div class="prob-bar__fill prob-bar__fill--home" [style.width.%]="pred.prob_home_win"></div>
+                      <div class="prob-bar__fill prob-bar__fill--draw" [style.width.%]="pred.prob_draw"></div>
+                      <div class="prob-bar__fill prob-bar__fill--away" [style.width.%]="pred.prob_away_win"></div>
+                    </div>
+                    <div class="prob-labels">
+                      <span>H {{ pred.prob_home_win | number:'1.0-0' }}%</span>
+                      <span>D {{ pred.prob_draw | number:'1.0-0' }}%</span>
+                      <span>A {{ pred.prob_away_win | number:'1.0-0' }}%</span>
+                    </div>
+                  </div>
+                }
+              </mat-card-content>
+            </mat-card>
+          }
+        </div>
+      }
+    </section>
+  }
+</div>

@@ -1,0 +1,132 @@
+<div class="page">
+  <h1 class="page__title">Top Players</h1>
+  <p class="page__subtitle">Best predicted performers for the upcoming matches</p>
+
+  <div class="content-layout">
+    <div class="content-layout__main">
+      <div class="filters">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>League</mat-label>
+          <mat-select [(ngModel)]="selectedLeague" (selectionChange)="load()">
+            <mat-option value="">All Leagues</mat-option>
+            @for (l of leagues; track l.id) {
+              <mat-option [value]="l.name">{{ l.name }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Position</mat-label>
+          <mat-select [(ngModel)]="selectedPosition" (selectionChange)="load()">
+            <mat-option value="">All Positions</mat-option>
+            @for (p of positions.slice(1); track p) {
+              <mat-option [value]="p">{{ p }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <div class="time-filter-toggle">
+          <button [class.active]="timeFilter === 'recent'" (click)="setTimeFilter('recent')">Recent</button>
+          <button [class.active]="timeFilter === 'overall'" (click)="setTimeFilter('overall')">Overall</button>
+        </div>
+      </div>
+
+      @if (loading) {
+        <div class="loading-container"><mat-icon>hourglass_empty</mat-icon><p>Calculating predictions...</p></div>
+      } @else if (showGroups) {
+        @if (leagueGroups.length === 0) {
+          <div class="empty-state"><mat-icon>search_off</mat-icon><p>No players found</p></div>
+        } @else {
+          @for (group of leagueGroups; track group.name) {
+            <div class="league-section">
+              <h2 class="league-section__title">{{ group.name }}</h2>
+              <div class="player-grid">
+                @for (pred of group.players; track pred.player.id) {
+                  <mat-card class="player-card" [routerLink]="['/player', pred.player.id]">
+                    <mat-card-content>
+                      <div class="player-card__header">
+                        <div class="player-card__info">
+                          <div class="player-card__name">{{ pred.player.name }}</div>
+                          <div class="player-card__meta">
+                            {{ pred.player.team_name }}
+                            <span class="chip chip--pos">{{ pred.player.position }}</span>
+                            @if (pred.hidden_gem) {
+                              <span class="chip chip--gem">🔥 Gem</span>
+                            }
+                          </div>
+                        </div>
+                        <div class="score-circle" [class]="scoreClass(pred.risk_level)">
+                          {{ pred.predicted_score | number:'1.1-1' }}
+                        </div>
+                      </div>
+                      <div class="player-card__stats">
+                        <div class="stat"><span class="stat__label">Goals</span><span class="stat__value">{{ pred.player.goals }}</span></div>
+                        <div class="stat"><span class="stat__label">Assists</span><span class="stat__value">{{ pred.player.assists }}</span></div>
+                        <div class="stat"><span class="stat__label">xG</span><span class="stat__value">{{ pred.player.xG | number:'1.1-1' }}</span></div>
+                        <div class="stat"><span class="stat__label">xA</span><span class="stat__value">{{ pred.player.xA | number:'1.1-1' }}</span></div>
+                      </div>
+                      <div class="player-card__form">
+                        <span class="form-label">Form</span>
+                        <mat-progress-bar mode="determinate" [value]="pred.player.form_score * 10" color="accent"></mat-progress-bar>
+                        <span class="form-value">{{ pred.player.form_score | number:'1.1-1' }}</span>
+                      </div>
+                      <div class="player-card__risk">
+                        <span class="chip" [class]="'chip--' + pred.risk_level">{{ pred.risk_level | titlecase }} Risk</span>
+                      </div>
+                    </mat-card-content>
+                  </mat-card>
+                }
+              </div>
+            </div>
+          }
+        }
+      } @else {
+        @if (predictions.length === 0) {
+          <div class="empty-state"><mat-icon>search_off</mat-icon><p>No players found</p></div>
+        } @else {
+          <div class="player-grid">
+            @for (pred of predictions; track pred.player.id) {
+              <mat-card class="player-card" [routerLink]="['/player', pred.player.id]">
+                <mat-card-content>
+                  <div class="player-card__header">
+                    <div class="player-card__info">
+                      <div class="player-card__name">{{ pred.player.name }}</div>
+                      <div class="player-card__meta">
+                        {{ pred.player.team_name }}
+                        <span class="chip chip--pos">{{ pred.player.position }}</span>
+                        @if (pred.hidden_gem) {
+                          <span class="chip chip--gem">🔥 Gem</span>
+                        }
+                      </div>
+                    </div>
+                    <div class="score-circle" [class]="scoreClass(pred.risk_level)">
+                      {{ pred.predicted_score | number:'1.1-1' }}
+                    </div>
+                  </div>
+                  <div class="player-card__stats">
+                    <div class="stat"><span class="stat__label">Goals</span><span class="stat__value">{{ pred.player.goals }}</span></div>
+                    <div class="stat"><span class="stat__label">Assists</span><span class="stat__value">{{ pred.player.assists }}</span></div>
+                    <div class="stat"><span class="stat__label">xG</span><span class="stat__value">{{ pred.player.xG | number:'1.1-1' }}</span></div>
+                    <div class="stat"><span class="stat__label">xA</span><span class="stat__value">{{ pred.player.xA | number:'1.1-1' }}</span></div>
+                  </div>
+                  <div class="player-card__form">
+                    <span class="form-label">Form</span>
+                    <mat-progress-bar mode="determinate" [value]="pred.player.form_score * 10" color="accent"></mat-progress-bar>
+                    <span class="form-value">{{ pred.player.form_score | number:'1.1-1' }}</span>
+                  </div>
+                  <div class="player-card__risk">
+                    <span class="chip" [class]="'chip--' + pred.risk_level">{{ pred.risk_level | titlecase }} Risk</span>
+                  </div>
+                </mat-card-content>
+              </mat-card>
+            }
+          </div>
+        }
+      }
+    </div>
+
+    <div class="content-layout__sidebar">
+      <app-prediction-controls (weightsChange)="onWeightsChange($event)"></app-prediction-controls>
+    </div>
+  </div>
+</div>

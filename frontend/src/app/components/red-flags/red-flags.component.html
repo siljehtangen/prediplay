@@ -1,0 +1,163 @@
+<div class="page">
+  <h1 class="page__title">Red Flags</h1>
+  <p class="page__subtitle">Players showing alarming form and output — consider dropping these from your team</p>
+
+  <div class="filters">
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>League</mat-label>
+      <mat-select [(ngModel)]="selectedLeague" (selectionChange)="load()">
+        <mat-option value="">All Leagues</mat-option>
+        @for (l of leagues; track l.id) {
+          <mat-option [value]="l.name">{{ l.name }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>Position</mat-label>
+      <mat-select [(ngModel)]="selectedPosition" (selectionChange)="load()">
+        <mat-option value="">All Positions</mat-option>
+        @for (p of positions; track p) {
+          <mat-option [value]="p">{{ p }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <div class="time-filter-toggle">
+      <button [class.active]="timeFilter === 'recent'" (click)="setTimeFilter('recent')">Recent</button>
+      <button [class.active]="timeFilter === 'overall'" (click)="setTimeFilter('overall')">Overall</button>
+    </div>
+  </div>
+
+  @if (loading) {
+    <div class="loading-container"><mat-icon>hourglass_empty</mat-icon><p>Analysing form data...</p></div>
+  } @else if (showGroups) {
+    @if (leagueGroups.length === 0) {
+      <div class="empty-state"><mat-icon>check_circle</mat-icon><p>No red flags found — your squad looks clean</p></div>
+    } @else {
+      @for (group of leagueGroups; track group.name) {
+        <div class="league-section">
+          <h2 class="league-section__title">{{ group.name }}</h2>
+          <div class="flags-grid">
+            @for (flag of group.players; track flag.player.id; let i = $index) {
+              <mat-card class="flag-card" [routerLink]="['/player', flag.player.id]">
+                <mat-card-content>
+                  <div class="flag-card__top">
+                    <span class="rank">#{{ i + 1 }}</span>
+                    <span class="severity-badge" [class]="severityClass(flag.red_flag_score)">{{ severityLabel(flag.red_flag_score) }}</span>
+                  </div>
+                  <div class="flag-card__header">
+                    <div>
+                      <div class="flag-card__name">{{ flag.player.name }}</div>
+                      <div class="flag-card__meta">
+                        {{ flag.player.team_name }}
+                        <span class="chip chip--pos">{{ flag.player.position }}</span>
+                      </div>
+                    </div>
+                    <div class="danger-score">
+                      <div class="danger-score__value">{{ flag.red_flag_score | number:'1.1-1' }}</div>
+                      <div class="danger-score__label">Danger</div>
+                    </div>
+                  </div>
+                  <div class="flag-card__reasons">
+                    @for (reason of flag.reasons; track reason) {
+                      <span class="reason-chip"><mat-icon>warning</mat-icon>{{ reason }}</span>
+                    }
+                  </div>
+                  <div class="flag-card__metrics">
+                    <div class="metric">
+                      <span class="metric__label">Form score</span>
+                      <div class="metric__bar-wrap"><mat-progress-bar mode="determinate" [value]="flag.player.form_score * 10" color="warn"></mat-progress-bar></div>
+                      <span class="metric__val">{{ flag.player.form_score | number:'1.1-1' }}/10</span>
+                    </div>
+                    <div class="metric">
+                      <span class="metric__label">Form decline</span>
+                      <div class="metric__bar-wrap"><mat-progress-bar mode="determinate" [value]="flag.form_decline * 10" color="warn"></mat-progress-bar></div>
+                      <span class="metric__val">{{ flag.form_decline | number:'1.1-1' }}/10</span>
+                    </div>
+                    @if (flag.player.position !== 'GK') {
+                      <div class="metric">
+                        <span class="metric__label">Output drop</span>
+                        <div class="metric__bar-wrap"><mat-progress-bar mode="determinate" [value]="flag.output_drop * 10" color="warn"></mat-progress-bar></div>
+                        <span class="metric__val">{{ flag.output_drop | number:'1.1-1' }}/10</span>
+                      </div>
+                    }
+                  </div>
+                  <div class="flag-card__stats">
+                    <div class="stat"><span class="stat__label">Goals</span><span class="stat__value">{{ flag.player.goals }}</span></div>
+                    <div class="stat"><span class="stat__label">Assists</span><span class="stat__value">{{ flag.player.assists }}</span></div>
+                    <div class="stat"><span class="stat__label">xG</span><span class="stat__value">{{ flag.player.xG | number:'1.1-1' }}</span></div>
+                    <div class="stat"><span class="stat__label">Mins</span><span class="stat__value">{{ flag.player.minutes_played }}</span></div>
+                  </div>
+                </mat-card-content>
+              </mat-card>
+            }
+          </div>
+        </div>
+      }
+    }
+  } @else {
+    @if (players.length === 0) {
+      <div class="empty-state"><mat-icon>check_circle</mat-icon><p>No red flags found — your squad looks clean</p></div>
+    } @else {
+      <div class="flags-grid">
+        @for (flag of players; track flag.player.id; let i = $index) {
+          <mat-card class="flag-card" [routerLink]="['/player', flag.player.id]">
+            <mat-card-content>
+              <div class="flag-card__top">
+                <span class="rank">#{{ i + 1 }}</span>
+                <span class="severity-badge" [class]="severityClass(flag.red_flag_score)">{{ severityLabel(flag.red_flag_score) }}</span>
+              </div>
+              <div class="flag-card__header">
+                <div>
+                  <div class="flag-card__name">{{ flag.player.name }}</div>
+                  <div class="flag-card__meta">
+                    {{ flag.player.team_name }}
+                    <span class="chip chip--pos">{{ flag.player.position }}</span>
+                    @if (flag.player.league) {
+                      <span class="chip chip--league">{{ flag.player.league }}</span>
+                    }
+                  </div>
+                </div>
+                <div class="danger-score">
+                  <div class="danger-score__value">{{ flag.red_flag_score | number:'1.1-1' }}</div>
+                  <div class="danger-score__label">Danger</div>
+                </div>
+              </div>
+              <div class="flag-card__reasons">
+                @for (reason of flag.reasons; track reason) {
+                  <span class="reason-chip"><mat-icon>warning</mat-icon>{{ reason }}</span>
+                }
+              </div>
+              <div class="flag-card__metrics">
+                <div class="metric">
+                  <span class="metric__label">Form score</span>
+                  <div class="metric__bar-wrap"><mat-progress-bar mode="determinate" [value]="flag.player.form_score * 10" color="warn"></mat-progress-bar></div>
+                  <span class="metric__val">{{ flag.player.form_score | number:'1.1-1' }}/10</span>
+                </div>
+                <div class="metric">
+                  <span class="metric__label">Form decline</span>
+                  <div class="metric__bar-wrap"><mat-progress-bar mode="determinate" [value]="flag.form_decline * 10" color="warn"></mat-progress-bar></div>
+                  <span class="metric__val">{{ flag.form_decline | number:'1.1-1' }}/10</span>
+                </div>
+                @if (flag.player.position !== 'GK') {
+                  <div class="metric">
+                    <span class="metric__label">Output drop</span>
+                    <div class="metric__bar-wrap"><mat-progress-bar mode="determinate" [value]="flag.output_drop * 10" color="warn"></mat-progress-bar></div>
+                    <span class="metric__val">{{ flag.output_drop | number:'1.1-1' }}/10</span>
+                  </div>
+                }
+              </div>
+              <div class="flag-card__stats">
+                <div class="stat"><span class="stat__label">Goals</span><span class="stat__value">{{ flag.player.goals }}</span></div>
+                <div class="stat"><span class="stat__label">Assists</span><span class="stat__value">{{ flag.player.assists }}</span></div>
+                <div class="stat"><span class="stat__label">xG</span><span class="stat__value">{{ flag.player.xG | number:'1.1-1' }}</span></div>
+                <div class="stat"><span class="stat__label">Mins</span><span class="stat__value">{{ flag.player.minutes_played }}</span></div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        }
+      </div>
+    }
+  }
+</div>

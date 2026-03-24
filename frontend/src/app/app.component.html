@@ -1,0 +1,24 @@
+<mat-sidenav-container class="sidenav-container">
+  <mat-sidenav class="sidenav" mode="side" opened>
+    <div class="sidenav__logo">
+      <mat-icon class="sidenav__logo-icon">sports_soccer</mat-icon>
+      <span class="sidenav__logo-text">Prediplay</span>
+    </div>
+
+    <mat-nav-list>
+      @for (item of navItems; track item.path) {
+        <a mat-list-item
+           [routerLink]="item.path"
+           routerLinkActive="active"
+           [routerLinkActiveOptions]="{ exact: item.path === '/' }">
+          <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
+          <span matListItemTitle>{{ item.label }}</span>
+        </a>
+      }
+    </mat-nav-list>
+  </mat-sidenav>
+
+  <mat-sidenav-content class="main-content">
+    <router-outlet />
+  </mat-sidenav-content>
+</mat-sidenav-container>

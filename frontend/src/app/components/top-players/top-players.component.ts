@@ -10,8 +10,7 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { forkJoin } from 'rxjs';
 import { SoccerService } from '../../services/soccer.service';
-import { PredictionControlsComponent } from '../prediction-controls/prediction-controls.component';
-import { League, PlayerPrediction, PredictionWeights, DEFAULT_WEIGHTS } from '../../models';
+import { League, PlayerPrediction } from '../../models';
 
 const ALL_LEAGUES = ['Premier League', 'La Liga', 'Bundesliga', 'Serie A', 'Ligue 1'];
 
@@ -24,7 +23,7 @@ interface LeagueGroup {
   selector: 'app-top-players',
   standalone: true,
   imports: [CommonModule, RouterLink, FormsModule, MatCardModule, MatSelectModule, MatButtonModule,
-    MatIconModule, MatProgressBarModule, MatFormFieldModule, PredictionControlsComponent],
+    MatIconModule, MatProgressBarModule, MatFormFieldModule],
   templateUrl: './top-players.component.html',
   styleUrl: './top-players.component.scss'
 })
@@ -37,7 +36,6 @@ export class TopPlayersComponent implements OnInit {
   selectedLeague = '';
   selectedPosition = '';
   timeFilter: 'recent' | 'overall' = 'recent';
-  weights: PredictionWeights = { ...DEFAULT_WEIGHTS };
 
   positions = ['', 'GK', 'DEF', 'MID', 'FWD'];
 
@@ -58,14 +56,14 @@ export class TopPlayersComponent implements OnInit {
   load() {
     this.loading = true;
     if (this.selectedLeague) {
-      this.soccer.getTopPredictions(this.selectedLeague, this.selectedPosition, false, this.weights, this.timeFilter)
+      this.soccer.getTopPredictions(this.selectedLeague, this.selectedPosition, false, this.timeFilter)
         .subscribe({
           next: p => { this.predictions = p; this.loading = false; },
           error: () => { this.loading = false; }
         });
     } else {
       forkJoin(
-        ALL_LEAGUES.map(l => this.soccer.getTopPredictions(l, this.selectedPosition, false, this.weights, this.timeFilter))
+        ALL_LEAGUES.map(l => this.soccer.getTopPredictions(l, this.selectedPosition, false, this.timeFilter))
       ).subscribe({
         next: results => {
           this.leagueGroups = ALL_LEAGUES.map((name, i) => ({ name, players: results[i] }))
@@ -79,11 +77,6 @@ export class TopPlayersComponent implements OnInit {
 
   setTimeFilter(f: 'recent' | 'overall') {
     this.timeFilter = f;
-    this.load();
-  }
-
-  onWeightsChange(w: PredictionWeights) {
-    this.weights = w;
     this.load();
   }
 

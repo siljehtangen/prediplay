@@ -3,7 +3,6 @@
   <p class="page__subtitle">Best predicted performers for the upcoming matches</p>
 
   <div class="content-layout">
-    <div class="content-layout__main">
       <div class="filters">
         <mat-form-field appearance="outline" subscriptSizing="dynamic">
           <mat-label>League</mat-label>
@@ -123,10 +122,5 @@
           </div>
         }
       }
-    </div>
-
-    <div class="content-layout__sidebar">
-      <app-prediction-controls (weightsChange)="onWeightsChange($event)"></app-prediction-controls>
-    </div>
   </div>
 </div>

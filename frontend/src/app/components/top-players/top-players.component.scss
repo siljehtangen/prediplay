@@ -1,12 +1,13 @@
 .content-layout {
-  display: grid;
-  grid-template-columns: 1fr 280px;
+  display: flex;
+  flex-direction: column;
   gap: 24px;
-  align-items: start;
+}
 
-  @media (max-width: 900px) {
-    grid-template-columns: 1fr;
-  }
+.player-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 16px;
 }
 
 .toggle-filter {

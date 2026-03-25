@@ -40,6 +40,7 @@ body { background-color: #0d0d1a !important; }
   &--high   { background: rgba(244,67,54,.2);  color: #ef9a9a; border: 1px solid rgba(244,67,54,.4); }
   &--gem    { background: rgba(255,152,0,.2);  color: #ffb74d; border: 1px solid rgba(255,152,0,.4); }
   &--pos    { background: rgba(108,99,255,.2); color: #a89cff; border: 1px solid rgba(108,99,255,.4); }
+  &--league { background: rgba(33,150,243,.15); color: #90caf9; border: 1px solid rgba(33,150,243,.3); }
 }
 
 /* Score circles */
@@ -86,9 +87,63 @@ body { background-color: #0d0d1a !important; }
   display: flex;
   gap: 12px;
   flex-wrap: wrap;
+  align-items: center;
   margin-bottom: 24px;
 
   .mat-mdc-form-field { min-width: 160px; }
+}
+
+/* Time filter toggle (Recent / Overall) */
+.time-filter-toggle {
+  display: inline-flex;
+  border: 1px solid rgba(108,99,255,.35);
+  border-radius: 8px;
+  overflow: hidden;
+
+  button {
+    background: transparent;
+    border: none;
+    color: #888;
+    padding: 8px 18px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    letter-spacing: 0.4px;
+    transition: background 0.15s, color 0.15s;
+
+    &:hover { background: rgba(108,99,255,.12); color: #c0bbff; }
+
+    &.active {
+      background: rgba(108,99,255,.25);
+      color: #a89cff;
+    }
+  }
+}
+
+/* League section headers on category pages */
+.league-section {
+  margin-bottom: 40px;
+
+  &__title {
+    font-size: 17px;
+    font-weight: 700;
+    color: #a89cff;
+    margin: 0 0 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(108,99,255,.2);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    &::before {
+      content: '';
+      display: inline-block;
+      width: 4px;
+      height: 18px;
+      background: #6c63ff;
+      border-radius: 2px;
+    }
+  }
 }
 
 /* Player grid */

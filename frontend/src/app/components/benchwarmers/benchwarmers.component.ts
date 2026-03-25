@@ -50,13 +50,13 @@ export class BenchwarmersComponent implements OnInit {
   load() {
     this.loading = true;
     if (this.selectedLeague) {
-      this.soccer.getBenchwarmers(this.selectedLeague, this.selectedPosition, undefined, this.timeFilter).subscribe({
+      this.soccer.getBenchwarmers(this.selectedLeague, this.selectedPosition, this.timeFilter).subscribe({
         next: p => { this.players = p; this.loading = false; },
         error: () => { this.loading = false; }
       });
     } else {
       forkJoin(
-        ALL_LEAGUES.map(l => this.soccer.getBenchwarmers(l, this.selectedPosition, undefined, this.timeFilter))
+        ALL_LEAGUES.map(l => this.soccer.getBenchwarmers(l, this.selectedPosition, this.timeFilter))
       ).subscribe({
         next: results => {
           this.leagueGroups = ALL_LEAGUES.map((name, i) => ({ name, players: results[i] }))

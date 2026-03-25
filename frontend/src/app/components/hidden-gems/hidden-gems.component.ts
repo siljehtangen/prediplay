@@ -47,13 +47,13 @@ export class HiddenGemsComponent implements OnInit {
   load() {
     this.loading = true;
     if (this.selectedLeague) {
-      this.soccer.getTopPredictions(this.selectedLeague, '', true, undefined, this.timeFilter).subscribe({
+      this.soccer.getTopPredictions(this.selectedLeague, '', true, this.timeFilter).subscribe({
         next: p => { this.gems = p; this.loading = false; },
         error: () => { this.loading = false; }
       });
     } else {
       forkJoin(
-        ALL_LEAGUES.map(l => this.soccer.getTopPredictions(l, '', true, undefined, this.timeFilter))
+        ALL_LEAGUES.map(l => this.soccer.getTopPredictions(l, '', true, this.timeFilter))
       ).subscribe({
         next: results => {
           this.leagueGroups = ALL_LEAGUES.map((name, i) => ({ name, players: results[i] }))

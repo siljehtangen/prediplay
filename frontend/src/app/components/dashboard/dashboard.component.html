@@ -2,15 +2,17 @@
   <div class="dash-header">
     <div>
       <h1 class="page__title">Dashboard</h1>
-      <p class="page__subtitle">This week's top picks and red flags across all five major leagues</p>
+      <p class="page__subtitle">Top picks and red flags across all five major leagues</p>
+    </div>
+    <div class="time-filter-toggle">
+      <button [class.active]="timeFilter === 'recent'" (click)="setTimeFilter('recent')">Recent</button>
+      <button [class.active]="timeFilter === 'overall'" (click)="setTimeFilter('overall')">Overall</button>
     </div>
   </div>
 
   @if (loading) {
-    <div class="loading-container"><mat-icon>hourglass_empty</mat-icon><p>Loading predictions...</p></div>
+    <div class="loading-container"><mat-icon>hourglass_empty</mat-icon><p>Calculating predictions...</p></div>
   } @else {
-
-    <!-- Per-league sections -->
     @for (league of leagues; track league.name) {
       <section class="league-section">
         <div class="league-section__header">
@@ -18,114 +20,189 @@
           <h2>{{ league.name }}</h2>
         </div>
 
-        <div class="league-section__columns">
+        <div class="league-cols">
 
-          <!-- Top 3 picks -->
+          <!-- ── Top Picks ────────────────────────────── -->
           <div class="league-col">
-            <div class="col-header">
-              <mat-icon class="col-icon col-icon--picks">leaderboard</mat-icon>
-              <span>Top Picks This Week</span>
-              <a mat-stroked-button routerLink="/top-players" class="view-all">View All</a>
+            <div class="col-label col-label--picks">
+              <mat-icon>leaderboard</mat-icon>
+              Top Picks
+              <a routerLink="/top-players" class="col-link">View all</a>
             </div>
+
             @if (league.topPlayers.length === 0) {
-              <div class="empty-state-inline"><mat-icon>search_off</mat-icon><span>No data yet</span></div>
+              <div class="empty-state-inline"><mat-icon>search_off</mat-icon><span>No data</span></div>
             } @else {
-              <div class="mini-player-list">
-                @for (pred of league.topPlayers; track pred.player.id; let i = $index) {
-                  <mat-card class="mini-card" [routerLink]="['/player', pred.player.id]">
-                    <mat-card-content>
-                      <span class="mini-rank">#{{ i + 1 }}</span>
-                      <div class="score-circle score-circle--sm" [class]="scoreClass(pred.risk_level)">
-                        {{ pred.predicted_score | number:'1.1-1' }}
-                      </div>
-                      <div class="mini-info">
-                        <div class="mini-name">{{ pred.player.name }}</div>
-                        <div class="mini-meta">{{ pred.player.team_name }} &middot; <span class="chip chip--pos">{{ pred.player.position }}</span></div>
-                      </div>
-                    </mat-card-content>
-                  </mat-card>
-                }
+              <!-- Featured #1 with donut chart -->
+              <div class="featured-card" [routerLink]="['/player', league.topPlayers[0].player.id]">
+                <div class="featured-card__left">
+                  <span class="featured-rank">#1</span>
+                  <div class="donut-wrap">
+                    <div class="donut" [style.background]="donutStyle(league.topPlayers[0])"></div>
+                    <div class="donut__hole">
+                      <span class="donut__score">{{ league.topPlayers[0].predicted_score | number:'1.1-1' }}</span>
+                      <span class="donut__label">score</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="featured-card__right">
+                  <div class="featured-name">{{ league.topPlayers[0].player.name }}</div>
+                  <div class="featured-meta">
+                    {{ league.topPlayers[0].player.team_name }}
+                    <span class="chip chip--pos">{{ league.topPlayers[0].player.position }}</span>
+                  </div>
+                </div>
               </div>
+
+              <!-- Form graph for #1 -->
+              @if (league.topMomentum) {
+                <div class="form-graph form-graph--pick">
+                  <div class="form-graph__header">
+                    <span class="form-graph__label">Form</span>
+                    <span class="form-graph__games">last {{ league.topMomentum.games.length > 3 ? 3 : league.topMomentum.games.length }} games</span>
+                    <span class="form-graph__trend" [style.color]="trendColor(league.topMomentum.trend)">
+                      <mat-icon>{{ trendIcon(league.topMomentum.trend) }}</mat-icon>
+                      {{ league.topMomentum.trend }}
+                    </span>
+                  </div>
+                  @if (league.topMomentum.games.length >= 2) {
+                    <svg class="form-graph__svg" viewBox="0 0 200 36" preserveAspectRatio="none">
+                      <defs>
+                        <linearGradient id="pickGrad" x1="0" y1="0" x2="1" y2="0">
+                          <stop offset="0%" stop-color="#6c63ff" stop-opacity="0.5"/>
+                          <stop offset="100%" stop-color="#a89cff"/>
+                        </linearGradient>
+                      </defs>
+                      <polyline
+                        [attr.points]="sparklinePath(league.topMomentum.games)"
+                        fill="none"
+                        stroke="url(#pickGrad)"
+                        stroke-width="2.5"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      />
+                    </svg>
+                    <div class="form-graph__dots">
+                      @for (g of league.topMomentum.games.slice(0, 3).reverse(); track g.date) {
+                        <div class="form-dot" [style.background]="trendColor(g.score >= 6 ? 'rising' : g.score >= 4 ? 'stable' : 'falling')" [title]="g.opponent + ': ' + (g.score | number:'1.1-1')"></div>
+                      }
+                    </div>
+                  }
+                </div>
+              }
+
+              <!-- #2 and #3 -->
+              @for (pred of league.topPlayers.slice(1); track pred.player.id; let i = $index) {
+                <div class="mini-row" [routerLink]="['/player', pred.player.id]">
+                  <span class="mini-row__rank">#{{ i + 2 }}</span>
+                  <div class="mini-row__info">
+                    <span class="mini-row__name">{{ pred.player.name }}</span>
+                    <span class="mini-row__team">{{ pred.player.team_name }}</span>
+                  </div>
+                  <div class="mini-row__bar-wrap">
+                    <div class="mini-row__bar mini-row__bar--pick" [style.width.%]="barWidth(pred.predicted_score)"></div>
+                  </div>
+                  <span class="mini-row__score mini-row__score--pick">{{ pred.predicted_score | number:'1.1-1' }}</span>
+                </div>
+              }
             }
           </div>
 
-          <!-- Top 3 red flags -->
+          <!-- ── Red Flags ────────────────────────────── -->
           <div class="league-col">
-            <div class="col-header">
-              <mat-icon class="col-icon col-icon--flags">flag</mat-icon>
-              <span>Red Flags This Week</span>
-              <a mat-stroked-button routerLink="/red-flags" class="view-all view-all--flags">View All</a>
+            <div class="col-label col-label--flags">
+              <mat-icon>flag</mat-icon>
+              Red Flags
+              <a routerLink="/red-flags" class="col-link col-link--flags">View all</a>
             </div>
+
             @if (league.redFlags.length === 0) {
               <div class="empty-state-inline empty-state-inline--green"><mat-icon>check_circle</mat-icon><span>No red flags</span></div>
             } @else {
-              <div class="mini-player-list">
-                @for (flag of league.redFlags; track flag.player.id; let i = $index) {
-                  <mat-card class="mini-card mini-card--flag" [routerLink]="['/player', flag.player.id]">
-                    <mat-card-content>
-                      <span class="mini-rank mini-rank--flag">#{{ i + 1 }}</span>
-                      <div class="danger-score-sm">
-                        <span>{{ flag.red_flag_score | number:'1.1-1' }}</span>
-                      </div>
-                      <div class="mini-info">
-                        <div class="mini-name">{{ flag.player.name }}</div>
-                        <div class="mini-meta">{{ flag.player.team_name }} &middot; <span class="chip chip--pos">{{ flag.player.position }}</span></div>
-                        @if (flag.reasons.length > 0) {
-                          <div class="mini-reason">{{ flag.reasons[0] }}</div>
-                        }
-                      </div>
-                    </mat-card-content>
-                  </mat-card>
-                }
+              <!-- Featured #1 with danger donut -->
+              <div class="featured-card featured-card--flag" [routerLink]="['/player', league.redFlags[0].player.id]">
+                <div class="featured-card__left">
+                  <span class="featured-rank featured-rank--flag">#1</span>
+                  <div class="donut-wrap">
+                    <div class="donut" [style.background]="dangerStyle(league.redFlags[0].red_flag_score)"></div>
+                    <div class="donut__hole donut__hole--flag">
+                      <span class="donut__score donut__score--flag">{{ league.redFlags[0].red_flag_score | number:'1.1-1' }}</span>
+                      <span class="donut__label">danger</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="featured-card__right">
+                  <div class="featured-name">{{ league.redFlags[0].player.name }}</div>
+                  <div class="featured-meta">
+                    {{ league.redFlags[0].player.team_name }}
+                    <span class="chip chip--pos">{{ league.redFlags[0].player.position }}</span>
+                  </div>
+                  @if (league.redFlags[0].reasons.length > 0) {
+                    <div class="featured-reasons">
+                      @for (r of league.redFlags[0].reasons.slice(0, 2); track r) {
+                        <span class="reason-tag">{{ r }}</span>
+                      }
+                    </div>
+                  }
+                </div>
               </div>
+
+              <!-- Form graph for #1 red flag -->
+              @if (league.flagMomentum) {
+                <div class="form-graph form-graph--flag">
+                  <div class="form-graph__header">
+                    <span class="form-graph__label">Form</span>
+                    <span class="form-graph__games">last {{ league.flagMomentum.games.length > 3 ? 3 : league.flagMomentum.games.length }} games</span>
+                    <span class="form-graph__trend" [style.color]="trendColor(league.flagMomentum.trend)">
+                      <mat-icon>{{ trendIcon(league.flagMomentum.trend) }}</mat-icon>
+                      {{ league.flagMomentum.trend }}
+                    </span>
+                  </div>
+                  @if (league.flagMomentum.games.length >= 2) {
+                    <svg class="form-graph__svg" viewBox="0 0 200 36" preserveAspectRatio="none">
+                      <defs>
+                        <linearGradient id="flagGrad" x1="0" y1="0" x2="1" y2="0">
+                          <stop offset="0%" stop-color="#c62828" stop-opacity="0.5"/>
+                          <stop offset="100%" stop-color="#f44336"/>
+                        </linearGradient>
+                      </defs>
+                      <polyline
+                        [attr.points]="sparklinePath(league.flagMomentum.games)"
+                        fill="none"
+                        stroke="url(#flagGrad)"
+                        stroke-width="2.5"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      />
+                    </svg>
+                    <div class="form-graph__dots">
+                      @for (g of league.flagMomentum.games.slice(0, 3).reverse(); track g.date) {
+                        <div class="form-dot" [style.background]="trendColor(g.score >= 6 ? 'rising' : g.score >= 4 ? 'stable' : 'falling')" [title]="g.opponent + ': ' + (g.score | number:'1.1-1')"></div>
+                      }
+                    </div>
+                  }
+                </div>
+              }
+
+              <!-- #2 and #3 -->
+              @for (flag of league.redFlags.slice(1); track flag.player.id; let i = $index) {
+                <div class="mini-row" [routerLink]="['/player', flag.player.id]">
+                  <span class="mini-row__rank mini-row__rank--flag">#{{ i + 2 }}</span>
+                  <div class="mini-row__info">
+                    <span class="mini-row__name">{{ flag.player.name }}</span>
+                    <span class="mini-row__team">{{ flag.player.team_name }}</span>
+                  </div>
+                  <div class="mini-row__bar-wrap">
+                    <div class="mini-row__bar mini-row__bar--flag" [style.width.%]="barWidth(flag.red_flag_score)"></div>
+                  </div>
+                  <span class="mini-row__score mini-row__score--flag">{{ flag.red_flag_score | number:'1.1-1' }}</span>
+                </div>
+              }
             }
           </div>
 
         </div>
       </section>
     }
-
-    <!-- Upcoming Fixtures -->
-    <section class="section-gap">
-      <div class="section-header">
-        <mat-icon class="section-icon">event</mat-icon>
-        <h2>Upcoming Fixtures</h2>
-        <a mat-stroked-button routerLink="/fixtures" class="view-all">View All</a>
-      </div>
-      @if (events.length === 0) {
-        <div class="empty-state" style="padding:30px">
-          <mat-icon>event_busy</mat-icon><p>No upcoming fixtures</p>
-        </div>
-      } @else {
-        <div class="fixtures-grid">
-          @for (event of events; track event.id) {
-            <mat-card class="fixture-card">
-              <mat-card-content>
-                <div class="fixture-card__date">{{ formatDate(event.date) }}</div>
-                <div class="fixture-card__teams">
-                  <span class="team-name">{{ event.home_team?.name || 'TBD' }}</span>
-                  <span class="vs">vs</span>
-                  <span class="team-name">{{ event.away_team?.name || 'TBD' }}</span>
-                </div>
-                @if (getPrediction(event.home_team?.name, event.away_team?.name); as pred) {
-                  <div class="fixture-card__probs">
-                    <div class="prob-bar">
-                      <div class="prob-bar__fill prob-bar__fill--home" [style.width.%]="pred.prob_home_win"></div>
-                      <div class="prob-bar__fill prob-bar__fill--draw" [style.width.%]="pred.prob_draw"></div>
-                      <div class="prob-bar__fill prob-bar__fill--away" [style.width.%]="pred.prob_away_win"></div>
-                    </div>
-                    <div class="prob-labels">
-                      <span>H {{ pred.prob_home_win | number:'1.0-0' }}%</span>
-                      <span>D {{ pred.prob_draw | number:'1.0-0' }}%</span>
-                      <span>A {{ pred.prob_away_win | number:'1.0-0' }}%</span>
-                    </div>
-                  </div>
-                }
-              </mat-card-content>
-            </mat-card>
-          }
-        </div>
-      }
-    </section>
   }
 </div>

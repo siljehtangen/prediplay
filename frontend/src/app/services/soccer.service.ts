@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import {
   League, Team, Event, Prediction, Player,
   PlayerPrediction, PlayerStat, MomentumData, SynergyResult,
-  PredictionWeights, DEFAULT_WEIGHTS, RedFlagPlayer, BenchwarmerPlayer
+  PredictionWeights, DEFAULT_WEIGHTS, RedFlagPlayer, BenchwarmerPlayer, DashboardLeague
 } from '../models';
 
 @Injectable({ providedIn: 'root' })
@@ -53,10 +53,10 @@ export class SoccerService {
     );
   }
 
-  getTopPredictions(league = '', position = '', hiddenGem = false, weights = DEFAULT_WEIGHTS, timeFilter = 'recent'): Observable<PlayerPrediction[]> {
-    const p = new URLSearchParams({ weights: this.weightsParam(weights), time_filter: timeFilter });
-    if (league)   p.set('league',     league);
-    if (position) p.set('position',   position);
+  getTopPredictions(league = '', position = '', hiddenGem = false, timeFilter = 'recent'): Observable<PlayerPrediction[]> {
+    const p = new URLSearchParams({ time_filter: timeFilter });
+    if (league)    p.set('league',     league);
+    if (position)  p.set('position',   position);
     if (hiddenGem) p.set('hidden_gem', 'true');
     return this.http.get<PlayerPrediction[]>(`/api/predict/top?${p}`);
   }
@@ -69,6 +69,10 @@ export class SoccerService {
     return `/api/players/${playerId}/photo`;
   }
 
+  getDashboard(timeFilter = 'recent'): Observable<DashboardLeague[]> {
+    return this.http.get<DashboardLeague[]>(`/api/dashboard?time_filter=${timeFilter}`);
+  }
+
   getRedFlags(league = '', position = '', timeFilter = 'recent'): Observable<RedFlagPlayer[]> {
     const p = new URLSearchParams({ time_filter: timeFilter });
     if (league)   p.set('league',   league);
@@ -76,8 +80,8 @@ export class SoccerService {
     return this.http.get<RedFlagPlayer[]>(`/api/predict/redflags?${p}`);
   }
 
-  getBenchwarmers(league = '', position = '', weights = DEFAULT_WEIGHTS, timeFilter = 'recent'): Observable<BenchwarmerPlayer[]> {
-    const p = new URLSearchParams({ weights: this.weightsParam(weights), time_filter: timeFilter });
+  getBenchwarmers(league = '', position = '', timeFilter = 'recent'): Observable<BenchwarmerPlayer[]> {
+    const p = new URLSearchParams({ time_filter: timeFilter });
     if (league)   p.set('league',   league);
     if (position) p.set('position', position);
     return this.http.get<BenchwarmerPlayer[]>(`/api/predict/benchwarmers?${p}`);

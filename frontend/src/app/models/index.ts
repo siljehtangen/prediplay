@@ -148,6 +148,12 @@ export interface BenchwarmerPlayer {
   label: 'Rock Solid' | 'Steady Option' | 'Rotation Pick';
 }
 
+export interface DashboardLeague {
+  name: string;
+  top_players: PlayerPrediction[];
+  red_flags: RedFlagPlayer[];
+}
+
 export const DEFAULT_WEIGHTS: PredictionWeights = {
   form: 0.35,
   threat: 0.25,

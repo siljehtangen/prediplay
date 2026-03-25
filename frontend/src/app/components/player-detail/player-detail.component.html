@@ -61,9 +61,9 @@
 
               <div class="player-header__score">
                 <div class="score-circle score-circle--lg" [class]="scoreClass(prediction.risk_level)">
-                  {{ prediction.predicted_score | number:'1.1-1' }}
+                  {{ prediction.predicted_score | number:'1.1-2' }}
                 </div>
-                <div class="score-label">Predicted Score</div>
+                <div class="score-label">Overall Score</div>
                 <span class="chip" [class]="'chip--' + prediction.risk_level">{{ prediction.risk_level | titlecase }} Risk</span>
               </div>
             </div>
@@ -209,7 +209,7 @@
       </div>
 
       <div class="detail-layout__sidebar">
-        <app-prediction-controls (weightsChange)="onWeightsChange($event)"></app-prediction-controls>
+        <!-- Prediction controls removed (no weight tuning). -->
       </div>
     </div>
   }

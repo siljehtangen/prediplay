@@ -148,6 +148,7 @@ type PlayerPrediction struct {
 	PredictedScore     float64 `json:"predicted_score"`
 	RiskLevel          string  `json:"risk_level"` // low, medium, high
 	HiddenGem          bool    `json:"hidden_gem"`
+	HiddenGemReasons  []string `json:"hidden_gem_reasons,omitempty"`
 	FormContribution   float64 `json:"form_contribution"`    // form component (0-10)
 	ThreatContribution float64 `json:"threat_contribution"`  // attack component (0-10)
 	OpponentDifficulty float64 `json:"opponent_difficulty"`  // opponent component (0-10)
@@ -201,20 +202,5 @@ type SynergyResult struct {
 	SynergyScore   float64  `json:"synergy_score"`
 }
 
-type PredictionWeights struct {
-	Form     float64
-	Threat   float64
-	Opponent float64
-	Minutes  float64
-	HomeAway float64
-}
-
-func DefaultWeights() PredictionWeights {
-	return PredictionWeights{
-		Form:     0.35,
-		Threat:   0.25,
-		Opponent: 0.15,
-		Minutes:  0.15,
-		HomeAway: 0.10,
-	}
-}
+// NOTE: prediction weights/tuning removed. Prediction scoring uses fixed,
+// built-in position weights.

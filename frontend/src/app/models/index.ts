@@ -27,11 +27,46 @@ export interface Player {
   nationality: string;
   market_value: number;
   minutes_played: number;
+  games_played: number;
   goals: number;
   assists: number;
   xG: number;
   xA: number;
   form_score: number;
+  total_shots: number;
+  shots_on_target: number;
+  key_passes: number;
+  total_passes: number;
+  accurate_passes: number;
+  duels_won: number;
+  duels_total: number;
+  tackles_won: number;
+  tackles_total: number;
+  yellow_cards: number;
+  red_cards: number;
+  saves: number;
+  goals_conceded: number;
+
+  recent_games_played: number;
+  recent_minutes: number;
+  recent_goals: number;
+  recent_assists: number;
+  recent_xg: number;
+  recent_xa: number;
+  recent_total_shots: number;
+  recent_shots_on_target: number;
+  recent_key_passes: number;
+  recent_total_passes: number;
+  recent_accurate_passes: number;
+  recent_duels_won: number;
+  recent_duels_total: number;
+  recent_tackles_won: number;
+  recent_tackles_total: number;
+  recent_yellow_cards: number;
+  recent_red_cards: number;
+  recent_saves: number;
+  recent_goals_conceded: number;
+  recent_form_score: number;
 }
 
 export interface Event {
@@ -96,6 +131,7 @@ export interface PlayerPrediction {
   predicted_score: number;
   risk_level: 'low' | 'medium' | 'high';
   hidden_gem: boolean;
+  hidden_gem_reasons?: string[];
   form_contribution: number;
   threat_contribution: number;
   opponent_difficulty: number;
@@ -126,14 +162,6 @@ export interface SynergyResult {
   synergy_score: number;
 }
 
-export interface PredictionWeights {
-  form: number;
-  threat: number;
-  opponent: number;
-  minutes: number;
-  home_away: number;
-}
-
 export interface RedFlagPlayer {
   player: Player;
   red_flag_score: number;
@@ -154,10 +182,5 @@ export interface DashboardLeague {
   red_flags: RedFlagPlayer[];
 }
 
-export const DEFAULT_WEIGHTS: PredictionWeights = {
-  form: 0.35,
-  threat: 0.25,
-  opponent: 0.15,
-  minutes: 0.15,
-  home_away: 0.10,
-};
+// NOTE: prediction weights/tuning removed. Prediction scoring uses fixed,
+// built-in position weights.

@@ -12,8 +12,7 @@ import { catchError, timeout } from 'rxjs/operators';
 import { Chart, BarController, BarElement, LinearScale, CategoryScale, Tooltip } from 'chart.js';
 import { SoccerService } from '../../services/soccer.service';
 import { MomentumChartComponent } from '../momentum-chart/momentum-chart.component';
-import { PredictionControlsComponent } from '../prediction-controls/prediction-controls.component';
-import { PlayerPrediction, PlayerStat, PredictionWeights, DEFAULT_WEIGHTS } from '../../models';
+import { PlayerPrediction, PlayerStat } from '../../models';
 
 Chart.register(BarController, BarElement, LinearScale, CategoryScale, Tooltip);
 
@@ -22,7 +21,7 @@ Chart.register(BarController, BarElement, LinearScale, CategoryScale, Tooltip);
   standalone: true,
   imports: [CommonModule, RouterLink, MatCardModule, MatButtonModule, MatIconModule,
     MatProgressBarModule, MatTableModule, MatChipsModule,
-    MomentumChartComponent, PredictionControlsComponent],
+    MomentumChartComponent],
   templateUrl: './player-detail.component.html',
   styleUrl: './player-detail.component.scss'
 })
@@ -35,7 +34,6 @@ export class PlayerDetailComponent implements OnInit, OnDestroy {
   photoUrl = '';
   photoError = false;
   loading = false;
-  weights: PredictionWeights = { ...DEFAULT_WEIGHTS };
   private chart: Chart | null = null;
   private paramSub?: Subscription;
 
@@ -60,7 +58,7 @@ export class PlayerDetailComponent implements OnInit, OnDestroy {
   load() {
     this.loading = true;
     forkJoin({
-      prediction: this.soccer.getPlayerPrediction(this.playerId, this.weights).pipe(
+      prediction: this.soccer.getPlayerPrediction(this.playerId).pipe(
         timeout(20000),
         catchError(() => of(null))
       ),
@@ -77,11 +75,6 @@ export class PlayerDetailComponent implements OnInit, OnDestroy {
       },
       error: () => { this.loading = false; }
     });
-  }
-
-  onWeightsChange(w: PredictionWeights) {
-    this.weights = w;
-    this.load();
   }
 
   scoreClass(risk: string) {
@@ -139,7 +132,8 @@ export class PlayerDetailComponent implements OnInit, OnDestroy {
           tooltip: { backgroundColor: '#1a1a2e', titleColor: '#e8e8f0', bodyColor: '#aaa' }
         },
         scales: {
-          x: { grid: { color: 'rgba(255,255,255,.05)' }, ticks: { color: '#666' }, max: 4 },
+          // Contributions are 0–10, so the x-axis must scale accordingly.
+          x: { grid: { color: 'rgba(255,255,255,.05)' }, ticks: { color: '#666' }, min: 0, max: 10, },
           y: { grid: { display: false }, ticks: { color: '#aaa' } }
         }
       }

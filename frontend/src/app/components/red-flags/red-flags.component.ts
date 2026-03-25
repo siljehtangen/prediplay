@@ -10,7 +10,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { forkJoin } from 'rxjs';
 import { SoccerService } from '../../services/soccer.service';
-import { League, RedFlagPlayer } from '../../models';
+import { League, Player, RedFlagPlayer } from '../../models';
 
 const ALL_LEAGUES = ['Premier League', 'La Liga', 'Bundesliga', 'Serie A', 'Ligue 1'];
 
@@ -51,7 +51,7 @@ export class RedFlagsComponent implements OnInit {
     this.loading = true;
     if (this.selectedLeague) {
       this.soccer.getRedFlags(this.selectedLeague, this.selectedPosition, this.timeFilter).subscribe({
-        next: p => { this.players = p; this.loading = false; },
+        next: p => { this.players = this.sortByRedFlag(p); this.loading = false; },
         error: () => { this.loading = false; }
       });
     } else {
@@ -59,7 +59,7 @@ export class RedFlagsComponent implements OnInit {
         ALL_LEAGUES.map(l => this.soccer.getRedFlags(l, this.selectedPosition, this.timeFilter))
       ).subscribe({
         next: results => {
-          this.leagueGroups = ALL_LEAGUES.map((name, i) => ({ name, players: results[i] }))
+          this.leagueGroups = ALL_LEAGUES.map((name, i) => ({ name, players: this.sortByRedFlag(results[i]) }))
             .filter(g => g.players.length > 0);
           this.loading = false;
         },
@@ -83,5 +83,66 @@ export class RedFlagsComponent implements OnInit {
     if (score >= 7.5) return 'Critical';
     if (score >= 5.5) return 'High';
     return 'Medium';
+  }
+
+  private sortByRedFlag(players: RedFlagPlayer[]): RedFlagPlayer[] {
+    return [...players].sort((a, b) => b.red_flag_score - a.red_flag_score);
+  }
+
+  statsFor(player: Player): Array<{ label: string; value: string }> {
+    const pos = player.position;
+    const fmt1 = (v: number | undefined | null) => (v ?? 0).toFixed(1);
+    const fmtInt = (v: number | undefined | null) => (v ?? 0).toString();
+    const ratio = (won: number | undefined | null, total: number | undefined | null) => {
+      if (!total || (total as number) === 0) return '—';
+      return `${won ?? 0}/${total}`;
+    };
+    const passAcc = (accurate: number | undefined | null, total: number | undefined | null) => {
+      if (!total || (total as number) === 0) return '—';
+      return `${accurate ?? 0}/${total}`;
+    };
+
+    if (pos === 'GK') {
+      return [
+        { label: 'Recent saves', value: fmtInt(player.recent_saves) },
+        { label: 'Recent conceded', value: fmtInt(player.recent_goals_conceded) },
+        { label: 'Recent SoT', value: fmtInt(player.recent_shots_on_target) },
+        { label: 'Acc. passes', value: passAcc(player.recent_accurate_passes, player.recent_total_passes) },
+        { label: 'Recent key passes', value: fmtInt(player.recent_key_passes) },
+        { label: 'Recent mins', value: fmtInt(player.recent_minutes) },
+      ];
+    }
+
+    if (pos === 'DEF') {
+      return [
+        { label: 'Recent duels', value: ratio(player.recent_duels_won, player.recent_duels_total) },
+        { label: 'Recent tackles', value: ratio(player.recent_tackles_won, player.recent_tackles_total) },
+        { label: 'Recent key passes', value: fmtInt(player.recent_key_passes) },
+        { label: 'Recent xA', value: fmt1(player.recent_xa) },
+        { label: 'Recent pass acc.', value: passAcc(player.recent_accurate_passes, player.recent_total_passes) },
+        { label: 'Recent mins', value: fmtInt(player.recent_minutes) },
+      ];
+    }
+
+    if (pos === 'MID') {
+      return [
+        { label: 'Recent key passes', value: fmtInt(player.recent_key_passes) },
+        { label: 'Recent pass acc.', value: passAcc(player.recent_accurate_passes, player.recent_total_passes) },
+        { label: 'Recent xG', value: fmt1(player.recent_xg) },
+        { label: 'Recent xA', value: fmt1(player.recent_xa) },
+        { label: 'Recent duels', value: ratio(player.recent_duels_won, player.recent_duels_total) },
+        { label: 'Recent mins', value: fmtInt(player.recent_minutes) },
+      ];
+    }
+
+    // FWD fallback
+    return [
+      { label: 'Recent goals', value: fmtInt(player.recent_goals) },
+      { label: 'Recent assists', value: fmtInt(player.recent_assists) },
+      { label: 'Recent xG', value: fmt1(player.recent_xg) },
+      { label: 'Recent xA', value: fmt1(player.recent_xa) },
+      { label: 'Recent SoT', value: fmtInt(player.recent_shots_on_target) },
+      { label: 'Recent mins', value: fmtInt(player.recent_minutes) },
+    ];
   }
 }

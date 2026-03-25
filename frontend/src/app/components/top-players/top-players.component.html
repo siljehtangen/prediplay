@@ -54,8 +54,11 @@
                             }
                           </div>
                         </div>
-                        <div class="score-circle" [class]="scoreClass(pred.risk_level)">
-                          {{ pred.predicted_score | number:'1.1-1' }}
+                        <div class="score-stack">
+                          <div class="list-score__value" [ngClass]="scoreClass(pred.risk_level)">
+                            {{ pred.predicted_score | number:'1.1-2' }}
+                          </div>
+                          <div class="score-caption">Top player score</div>
                         </div>
                       </div>
                       <div class="player-card__stats">
@@ -98,8 +101,11 @@
                         }
                       </div>
                     </div>
-                    <div class="score-circle" [class]="scoreClass(pred.risk_level)">
-                      {{ pred.predicted_score | number:'1.1-1' }}
+                    <div class="score-stack">
+                      <div class="list-score__value" [ngClass]="scoreClass(pred.risk_level)">
+                        {{ pred.predicted_score | number:'1.1-2' }}
+                      </div>
+                      <div class="score-caption">Top player score</div>
                     </div>
                   </div>
                   <div class="player-card__stats">

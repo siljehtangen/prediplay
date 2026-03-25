@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import {
   League, Team, Event, Prediction, Player,
   PlayerPrediction, PlayerStat, MomentumData, SynergyResult,
-  PredictionWeights, DEFAULT_WEIGHTS, RedFlagPlayer, BenchwarmerPlayer, DashboardLeague
+  RedFlagPlayer, BenchwarmerPlayer, DashboardLeague
 } from '../models';
 
 @Injectable({ providedIn: 'root' })
@@ -47,10 +47,8 @@ export class SoccerService {
     return this.http.get<Player[]>(`/api/players${qs}`);
   }
 
-  getPlayerPrediction(playerId: number, weights = DEFAULT_WEIGHTS): Observable<PlayerPrediction> {
-    return this.http.get<PlayerPrediction>(
-      `/api/predict/player/${playerId}?weights=${this.weightsParam(weights)}`
-    );
+  getPlayerPrediction(playerId: number): Observable<PlayerPrediction> {
+    return this.http.get<PlayerPrediction>(`/api/predict/player/${playerId}`);
   }
 
   getTopPredictions(league = '', position = '', hiddenGem = false, timeFilter = 'recent'): Observable<PlayerPrediction[]> {
@@ -91,13 +89,9 @@ export class SoccerService {
     return this.http.get<MomentumData>(`/api/predict/momentum?player=${playerId}`);
   }
 
-  getSynergy(playerIds: number[], weights = DEFAULT_WEIGHTS): Observable<SynergyResult> {
+  getSynergy(playerIds: number[]): Observable<SynergyResult> {
     return this.http.get<SynergyResult>(
-      `/api/predict/synergy?players=${playerIds.join(',')}&weights=${this.weightsParam(weights)}`
+      `/api/predict/synergy?players=${playerIds.join(',')}`
     );
-  }
-
-  private weightsParam(w: PredictionWeights): string {
-    return `form:${w.form},threat:${w.threat},opponent:${w.opponent},minutes:${w.minutes},home_away:${w.home_away}`;
   }
 }

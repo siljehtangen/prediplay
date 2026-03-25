@@ -58,7 +58,10 @@ export class TopPlayersComponent implements OnInit {
     if (this.selectedLeague) {
       this.soccer.getTopPredictions(this.selectedLeague, this.selectedPosition, false, this.timeFilter)
         .subscribe({
-          next: p => { this.predictions = p; this.loading = false; },
+          next: p => {
+            this.predictions = [...p].sort((a, b) => b.predicted_score - a.predicted_score);
+            this.loading = false;
+          },
           error: () => { this.loading = false; }
         });
     } else {
@@ -66,7 +69,10 @@ export class TopPlayersComponent implements OnInit {
         ALL_LEAGUES.map(l => this.soccer.getTopPredictions(l, this.selectedPosition, false, this.timeFilter))
       ).subscribe({
         next: results => {
-          this.leagueGroups = ALL_LEAGUES.map((name, i) => ({ name, players: results[i] }))
+          this.leagueGroups = ALL_LEAGUES.map((name, i) => ({
+            name,
+            players: [...results[i]].sort((a, b) => b.predicted_score - a.predicted_score),
+          }))
             .filter(g => g.players.length > 0);
           this.loading = false;
         },
@@ -81,6 +87,7 @@ export class TopPlayersComponent implements OnInit {
   }
 
   scoreClass(risk: string) {
-    return risk === 'low' ? 'score-circle--high' : risk === 'medium' ? 'score-circle--medium' : 'score-circle--low';
+    // Map risk to color for the plain text score value (no ring/circle styling).
+    return risk === 'low' ? 'list-score--high' : risk === 'medium' ? 'list-score--medium' : 'list-score--low';
   }
 }

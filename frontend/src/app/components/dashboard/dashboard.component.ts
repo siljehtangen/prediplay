@@ -13,7 +13,7 @@ const LEAGUES = ['Premier League', 'La Liga', 'Bundesliga', 'Serie A', 'Ligue 1'
 
 interface LeagueData {
   name: string;
-  topPlayers: PlayerPrediction[];
+  hiddenGems: PlayerPrediction[];
   redFlags: RedFlagPlayer[];
   topMomentum?: MomentumData;
   flagMomentum?: MomentumData;
@@ -30,6 +30,7 @@ export class DashboardComponent implements OnInit {
   leagues: LeagueData[] = [];
   loading = true;
   timeFilter: 'recent' | 'overall' = 'recent';
+  readonly slots = [0, 1, 2] as const;
 
   constructor(private soccer: SoccerService) {}
 
@@ -37,19 +38,19 @@ export class DashboardComponent implements OnInit {
 
   loadData() {
     this.loading = true;
-    const top$ = LEAGUES.map(l =>
-      this.soccer.getTopPredictions(l, '', false, this.timeFilter).pipe(catchError(() => of([])))
+    const gems$ = LEAGUES.map(l =>
+      this.soccer.getTopPredictions(l, '', true, this.timeFilter).pipe(catchError(() => of([])))
     );
     const flags$ = LEAGUES.map(l =>
       this.soccer.getRedFlags(l, '', this.timeFilter).pipe(catchError(() => of([])))
     );
-    forkJoin([...top$, ...flags$]).subscribe(results => {
-      const topPlayers = LEAGUES.map((_, i) => (results[i] as PlayerPrediction[]).slice(0, 3));
+    forkJoin([...gems$, ...flags$]).subscribe(results => {
+      const hiddenGems = LEAGUES.map((_, i) => (results[i] as PlayerPrediction[]).slice(0, 3));
       const redFlags = LEAGUES.map((_, i) => (results[i + LEAGUES.length] as RedFlagPlayer[]).slice(0, 3));
 
       const momentum$ = LEAGUES.map((_, i) => forkJoin({
-        top: topPlayers[i].length > 0
-          ? this.soccer.getMomentum(topPlayers[i][0].player.id).pipe(catchError(() => of(null)))
+        top: hiddenGems[i].length > 0
+          ? this.soccer.getMomentum(hiddenGems[i][0].player.id).pipe(catchError(() => of(null)))
           : of(null),
         flag: redFlags[i].length > 0
           ? this.soccer.getMomentum(redFlags[i][0].player.id).pipe(catchError(() => of(null)))
@@ -59,14 +60,22 @@ export class DashboardComponent implements OnInit {
       forkJoin(momentum$).subscribe(momentumResults => {
         this.leagues = LEAGUES.map((name, i) => ({
           name,
-          topPlayers: topPlayers[i],
+          hiddenGems: hiddenGems[i],
           redFlags: redFlags[i],
           topMomentum: momentumResults[i].top ?? undefined,
           flagMomentum: momentumResults[i].flag ?? undefined,
-        })).filter(l => l.topPlayers.length > 0 || l.redFlags.length > 0);
+        })).filter(l => l.hiddenGems.length > 0 || l.redFlags.length > 0);
         this.loading = false;
       });
     });
+  }
+
+  hiddenGemAt(league: LeagueData, idx: number): PlayerPrediction | null {
+    return league.hiddenGems[idx] ?? null;
+  }
+
+  redFlagAt(league: LeagueData, idx: number): RedFlagPlayer | null {
+    return league.redFlags[idx] ?? null;
   }
 
   setTimeFilter(f: 'recent' | 'overall') {

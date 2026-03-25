@@ -135,6 +135,7 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
+  min-height: 34px; // reserve space so featured blocks align
 }
 
 .reason-tag {
@@ -145,6 +146,18 @@
   border-radius: 4px;
   padding: 2px 7px;
   display: inline-block;
+
+  &--placeholder {
+    opacity: 0.35;
+    background: rgba(255,255,255,.02);
+    border-color: rgba(255,255,255,.05);
+  }
+}
+
+.reason-tag--gem {
+  color: #81c784;
+  background: rgba(129,199,132,.10);
+  border-color: rgba(129,199,132,.20);
 }
 
 // ── Donut chart ───────────────────────────────────────────────────────────────
@@ -302,6 +315,17 @@
   }
 }
 
+.mini-row--placeholder {
+  cursor: default;
+  opacity: 0.45;
+  background: rgba(255,255,255,.015);
+  &:hover { background: rgba(255,255,255,.015); }
+
+  .mini-row__bar-wrap {
+    background: rgba(255,255,255,.03);
+  }
+}
+
 // ── Form graph ────────────────────────────────────────────────────────────────
 
 .form-graph {
@@ -354,6 +378,12 @@
     display: flex;
     gap: 4px;
   }
+}
+
+.form-graph--placeholder {
+  min-height: 96px; // keeps dashboard columns aligned
+  border-style: dashed;
+  opacity: 0.25;
 }
 
 .form-dot {

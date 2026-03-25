@@ -100,3 +100,40 @@
 }
 
 .form-label { font-size: 11px; color: #666; white-space: nowrap; }
+
+// Stack the score circle and the label under it.
+.score-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.score-caption {
+  font-size: 10px;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  line-height: 1.1;
+}
+
+.list-score {
+}
+
+.list-score__value {
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+// Risk colors (same as former score-circle variants, but without borders/backgrounds).
+.list-score--high {
+  color: #81c784;
+}
+.list-score--medium {
+  color: #ffd54f;
+}
+.list-score--low {
+  color: #ef9a9a;
+}

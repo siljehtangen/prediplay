@@ -11,17 +11,17 @@
       </div>
       <p class="info-card__intro">
         Every player receives a <strong>predicted score</strong> representing their expected performance in the upcoming match.
-        Five factors are combined using configurable weights (defaults shown):
+        Internally we calculate <strong>7 component scores</strong> (0–10) and then combine them using <strong>position-specific weights</strong> (GK/DEF/MID/FWD).
+        In the player profile, the Prediction Controls scale the macro groups (Form/Threat/Opponent/Minutes/Home-Away) while preserving the per-position structure.
       </p>
 
       <div class="factor-list">
         <div class="factor">
           <div class="factor__bar" style="width: 35%"></div>
           <div class="factor__body">
-            <div class="factor__name">Form <span class="factor__weight">35%</span></div>
+            <div class="factor__name">Form <span class="factor__weight">(scaled)</span></div>
             <div class="factor__desc">
-              The player's average match rating over recent games. Ratings run from 0 – 10; a 7.0+ average is considered solid form.
-              A player on a hot streak scores high here, while poor recent performances drag it down.
+              Uses the player's match rating (<strong>FormScore</strong>, 1–10). If missing, we fall back to ~6.0 as a neutral baseline.
             </div>
           </div>
         </div>
@@ -29,11 +29,11 @@
         <div class="factor">
           <div class="factor__bar" style="width: 25%"></div>
           <div class="factor__body">
-            <div class="factor__name">Threat <span class="factor__weight">25%</span></div>
+            <div class="factor__name">Threat <span class="factor__weight">(scaled)</span></div>
             <div class="factor__desc">
-              A composite attacking threat score built from:
-              xG × 1.5 + xA × 1.2 + Goals × 0.8 + Assists × 0.6, normalised to 0 – 10.
-              Reflects both actual returns and underlying expected contributions.
+              Combines two attacking sub-components:
+              <br/>• <strong>Attack</strong> (xG/90 with conversion bonus, plus shots-on-target volume)
+              <br/>• <strong>Creativity</strong> (xA/90 with assist bonus, plus key-pass quality)
             </div>
           </div>
         </div>
@@ -41,9 +41,9 @@
         <div class="factor">
           <div class="factor__bar" style="width: 15%"></div>
           <div class="factor__body">
-            <div class="factor__name">Opponent Difficulty <span class="factor__weight">15%</span></div>
+            <div class="factor__name">Opponent Difficulty <span class="factor__weight">(scaled)</span></div>
             <div class="factor__desc">
-              How difficult the next opponent is expected to be. A tough defence lowers the score; a weaker side raises it.
+              Uses the matchup difficulty (<strong>OpponentScore</strong>, 0–10). If missing we default to ~5.
             </div>
           </div>
         </div>
@@ -51,10 +51,9 @@
         <div class="factor">
           <div class="factor__bar" style="width: 15%"></div>
           <div class="factor__body">
-            <div class="factor__name">Minutes Likelihood <span class="factor__weight">15%</span></div>
+            <div class="factor__name">Minutes Likelihood <span class="factor__weight">(scaled)</span></div>
             <div class="factor__desc">
-              Based on how many minutes the player has played. 90 min/game = maximum score.
-              Rotation players who rarely complete games score lower here.
+              Uses an <strong>availability</strong> score based on minutes played, blended across season + recent matches.
             </div>
           </div>
         </div>
@@ -62,19 +61,24 @@
         <div class="factor">
           <div class="factor__bar factor__bar--last" style="width: 10%"></div>
           <div class="factor__body">
-            <div class="factor__name">Home / Away Factor <span class="factor__weight">10%</span></div>
+            <div class="factor__name">Home / Away Factor <span class="factor__weight">(scaled)</span></div>
             <div class="factor__desc">
-              A small boost for playing at home, reflecting the well-documented home advantage in football.
+              This is the <strong>defensive component</strong> (GK save strength / DEF duels+duels volume / MID duel work / reduced FWD defensive impact).
             </div>
           </div>
         </div>
       </div>
 
       <div class="formula-box">
-        Score = Form × 0.35 + Threat × 0.25 + Opponent × 0.15 + Minutes × 0.15 + Home/Away × 0.10
+        <strong>Position-weighted</strong> PredictedScore (raw 0–10) is computed from:
+        <br/>GK: 0.22·Form + 0.60·Defensive + 0.06·Availability + 0.04·Discipline + 0.08·Opponent
+        <br/>DEF: 0.22·Form + 0.08·Attack + 0.07·Creativity + 0.30·Defensive + 0.13·Availability + 0.10·Discipline + 0.10·Opponent
+        <br/>MID: 0.20·Form + 0.17·Attack + 0.24·Creativity + 0.12·Defensive + 0.10·Availability + 0.09·Discipline + 0.08·Opponent
+        <br/>FWD: 0.18·Form + 0.33·Attack + 0.17·Creativity + 0.02·Defensive + 0.10·Availability + 0.08·Discipline + 0.12·Opponent
       </div>
       <p class="info-card__note">
-        You can adjust the weighting of each factor on the Top Players, Hidden Gems, and Benchwarmers pages using the Prediction Controls.
+        On the player profile page, Prediction Controls scale Form/Threat/Opponent/Minutes/Home-Away (then we renormalize).
+        The league grids use the default controls.
       </p>
     </mat-card-content>
   </mat-card>
@@ -122,15 +126,21 @@
       <div class="criteria-list">
         <div class="criterion">
           <mat-icon>check</mat-icon>
-          <span>Predicted score between <strong>5.5 and 7.0</strong></span>
+          <span>Predicted score between <strong>4.5 and 8.0</strong></span>
         </div>
         <div class="criterion">
           <mat-icon>check</mat-icon>
-          <span>Fewer than <strong>15 combined goals + assists</strong> — not yet on everyone's radar</span>
+          <span>
+            Goals+Assists below a <strong>position-typical cap</strong> (GK/DEF/MID/FWD thresholds)
+          </span>
         </div>
         <div class="criterion">
           <mat-icon>check</mat-icon>
-          <span>Risk level is Medium — high enough potential, low enough profile</span>
+          <span>
+            And <strong>at least one</strong> of 6 upside signals is true
+            (xG+xA outperforming returns, shots+conversion mismatch, creativity without assists,
+            high threat but low output, high xG/shot, or improving underlying trajectory).
+          </span>
         </div>
       </div>
       <p class="info-card__note">
@@ -152,7 +162,13 @@
       </p>
 
       <div class="formula-box formula-box--danger">
-        Danger Score = Form Decline × 55% + Output Drop × 45%
+        <strong>RedFlagScore</strong> is a position-weighted composite (0–10) built from:
+        FormDecline, OutputDrop, xThreatDecline, ShotAccuracyDecline, InvolvementDecline, DisciplineRisk
+        (GK additionally uses gkDecline from save rate + goals conceded trends).
+        <br/>GK: 0.25·FormDecline + 0.45·gkDecline + 0.10·DisciplineRisk + 0.20·InvolvementDecline
+        <br/>DEF: 0.25·FormDecline + 0.18·OutputDrop + 0.12·xThreatDecline + 0.22·InvolvementDecline + 0.23·DisciplineRisk
+        <br/>MID: 0.25·FormDecline + 0.20·OutputDrop + 0.18·xThreatDecline + 0.10·ShotAccDecline + 0.17·InvolvementDecline + 0.10·DisciplineRisk
+        <br/>FWD: 0.25·FormDecline + 0.28·OutputDrop + 0.20·xThreatDecline + 0.15·ShotAccDecline + 0.08·InvolvementDecline + 0.04·DisciplineRisk
       </div>
 
       <div class="factor-list factor-list--compact">
@@ -160,8 +176,7 @@
           <div class="factor__body">
             <div class="factor__name factor__name--red">Form Decline</div>
             <div class="factor__desc">
-              How far a player's average rating has fallen below 7.0 (the "acceptable" baseline).
-              A rating of 5.0 gives a decline score of ~4.3; below 4.0 gives a score of 4.3+.
+              Combines an absolute drop below 7.0 (recent vs baseline) with a relative drop (overall vs recent).
             </div>
           </div>
         </div>
@@ -169,12 +184,12 @@
           <div class="factor__body">
             <div class="factor__name factor__name--red">Output Drop</div>
             <div class="factor__desc">
-              Goals + Assists per 90 minutes, compared against a positional baseline:
+              Goals+Assists per 90 minutes, compared against a positional output baseline:
             </div>
             <div class="position-baselines">
-              <span class="baseline-chip">DEF: 0.15 G+A/90</span>
-              <span class="baseline-chip">MID: 0.25 G+A/90</span>
-              <span class="baseline-chip">FWD: 0.40 G+A/90</span>
+              <span class="baseline-chip">DEF: 0.10 G+A/90</span>
+              <span class="baseline-chip">MID: 0.22 G+A/90</span>
+              <span class="baseline-chip">FWD: 0.35 G+A/90</span>
               <span class="baseline-chip">GK: not assessed</span>
             </div>
           </div>
@@ -210,26 +225,30 @@
         Great for filling out your squad when premium options aren't available.
       </p>
       <div class="formula-box">
-        Consistency Score = Form Consistency × 50% + Minutes Score × 30% + Output Score × 20%
+        <strong>Consistency Score</strong> is computed from position-weighted reliability components:
+        <br/>GK: 0.30·Availability + 0.25·FormConsistency + 0.30·OutputReliability + 0.15·Discipline
+        <br/>DEF: 0.25·Availability + 0.25·FormConsistency + 0.18·OutputReliability + 0.17·PassingReliability + 0.15·Discipline
+        <br/>MID: 0.20·Availability + 0.25·FormConsistency + 0.23·OutputReliability + 0.22·PassingReliability + 0.10·Discipline
+        <br/>FWD: 0.20·Availability + 0.25·FormConsistency + 0.30·OutputReliability + 0.15·PassingReliability + 0.10·Discipline
       </div>
       <div class="criteria-list">
         <div class="criterion">
           <mat-icon>check</mat-icon>
-          <span>Predicted score between <strong>4.0 and 7.0</strong> — not elite, but not a red flag</span>
+          <span>Not a <strong>Hidden Gem</strong> and not a <strong>Red Flag</strong> (red-flag score below the cut-off)</span>
         </div>
         <div class="criterion">
           <mat-icon>check</mat-icon>
-          <span>Form score &ge; 5.5 and 270+ minutes played — regular, steady contributor</span>
+          <span>270+ minutes (overall) or 45+ minutes (recent), with recent-view requiring enough recent games</span>
         </div>
         <div class="criterion">
           <mat-icon>check</mat-icon>
-          <span>Not classified as a Hidden Gem or Red Flag</span>
+          <span>Consistency score must be at least <strong>4.0</strong> to produce a label</span>
         </div>
       </div>
       <div class="label-list">
-        <div class="label-row"><span class="label-badge label-badge--solid">Rock Solid</span><span>Consistency &ge; 7.0 — trust them every week</span></div>
-        <div class="label-row"><span class="label-badge label-badge--steady">Steady Option</span><span>Consistency 5.0 – 6.9 — reliable rotation pick</span></div>
-        <div class="label-row"><span class="label-badge label-badge--rotation">Rotation Pick</span><span>Consistency &lt; 5.0 — situational use only</span></div>
+        <div class="label-row"><span class="label-badge label-badge--solid">Rock Solid</span><span>Consistency ≥ 7.5</span></div>
+        <div class="label-row"><span class="label-badge label-badge--steady">Steady Option</span><span>Consistency 5.5 – 7.4</span></div>
+        <div class="label-row"><span class="label-badge label-badge--rotation">Rotation Pick</span><span>Consistency 4.0 – 5.4</span></div>
       </div>
     </mat-card-content>
   </mat-card>

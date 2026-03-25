@@ -35,37 +35,6 @@ func writeError(w http.ResponseWriter, status int, msg string) {
 	writeJSON(w, status, map[string]string{"error": msg})
 }
 
-func parseWeights(r *http.Request) models.PredictionWeights {
-	w := models.DefaultWeights()
-	raw := r.URL.Query().Get("weights")
-	if raw == "" {
-		return w
-	}
-	for _, part := range strings.Split(raw, ",") {
-		kv := strings.SplitN(part, ":", 2)
-		if len(kv) != 2 {
-			continue
-		}
-		v, err := strconv.ParseFloat(strings.TrimSpace(kv[1]), 64)
-		if err != nil {
-			continue
-		}
-		switch strings.TrimSpace(kv[0]) {
-		case "form":
-			w.Form = v
-		case "threat":
-			w.Threat = v
-		case "opponent":
-			w.Opponent = v
-		case "minutes":
-			w.Minutes = v
-		case "home_away":
-			w.HomeAway = v
-		}
-	}
-	return w
-}
-
 // Leagues ─────────────────────────────────────────────────────────────────────
 
 // normalizeLeagueName maps an API league name to the canonical name used
@@ -223,7 +192,7 @@ func (h *Handler) GetPlayerPrediction(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusBadRequest, "invalid player id")
 		return
 	}
-	pred, err := h.prediction.GetPlayerPrediction(uint(id), parseWeights(r))
+	pred, err := h.prediction.GetPlayerPrediction(uint(id))
 	if err != nil {
 		writeError(w, http.StatusNotFound, err.Error())
 		return
@@ -315,7 +284,7 @@ func (h *Handler) GetSynergy(w http.ResponseWriter, r *http.Request) {
 			ids = append(ids, uint(id))
 		}
 	}
-	result, err := h.prediction.GetSynergy(ids, parseWeights(r))
+	result, err := h.prediction.GetSynergy(ids)
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, err.Error())
 		return

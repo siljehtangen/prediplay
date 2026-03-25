@@ -48,7 +48,10 @@ export class HiddenGemsComponent implements OnInit {
     this.loading = true;
     if (this.selectedLeague) {
       this.soccer.getTopPredictions(this.selectedLeague, '', true, this.timeFilter).subscribe({
-        next: p => { this.gems = p; this.loading = false; },
+        next: p => {
+          this.gems = [...p].sort((a, b) => b.predicted_score - a.predicted_score);
+          this.loading = false;
+        },
         error: () => { this.loading = false; }
       });
     } else {
@@ -56,7 +59,10 @@ export class HiddenGemsComponent implements OnInit {
         ALL_LEAGUES.map(l => this.soccer.getTopPredictions(l, '', true, this.timeFilter))
       ).subscribe({
         next: results => {
-          this.leagueGroups = ALL_LEAGUES.map((name, i) => ({ name, players: results[i] }))
+          this.leagueGroups = ALL_LEAGUES.map((name, i) => ({
+            name,
+            players: [...results[i]].sort((a, b) => b.predicted_score - a.predicted_score),
+          }))
             .filter(g => g.players.length > 0);
           this.loading = false;
         },
@@ -71,6 +77,7 @@ export class HiddenGemsComponent implements OnInit {
   }
 
   scoreClass(risk: string) {
-    return risk === 'low' ? 'score-circle--high' : risk === 'medium' ? 'score-circle--medium' : 'score-circle--low';
+    // Map risk to color for the plain text score value (no ring/circle styling).
+    return risk === 'low' ? 'list-score--high' : risk === 'medium' ? 'list-score--medium' : 'list-score--low';
   }
 }

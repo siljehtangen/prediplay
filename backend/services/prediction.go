@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type PredictionService struct {
@@ -220,6 +221,11 @@ func withRecentStats(p models.Player) models.Player {
 // Players who haven't played in each of the last 3 games are excluded from recent view.
 func scoringView(p models.Player, timeFilter string) (models.Player, bool) {
 	if timeFilter == "overall" {
+		// Prevent bench/inactive players (0–2 matches) from scoring high due to
+		// small-sample noise in per-90 components.
+		if p.GamesPlayed < 3 {
+			return p, false
+		}
 		return p, true
 	}
 	if p.RecentGamesPlayed < 3 {
@@ -284,18 +290,32 @@ func (s *PredictionService) SyncPlayers() {
 	const maxConcurrent = 10
 	sem := make(chan struct{}, maxConcurrent)
 	var wg sync.WaitGroup
+	// Compute all updated player rows in-memory, then batch persist.
+	updates := make([]models.Player, len(players))
 
 	for i := range players {
 		wg.Add(1)
-		go func(p models.Player) {
+		go func(i int) {
 			defer wg.Done()
 			sem <- struct{}{}
 			defer func() { <-sem }()
-			s.enrichAndSave(&p, nextOpponentByTeam[p.TeamID])
-		}(players[i])
+			p := players[i]
+			updates[i] = s.enrichAndCompute(p, nextOpponentByTeam[p.TeamID])
+		}(i)
 	}
 
 	wg.Wait()
+
+	// Batch persist to drastically reduce "SLOW SQL" spam from per-player UPDATEs.
+	if len(updates) > 0 {
+		if err := s.db.Clauses(clause.OnConflict{
+			Columns:   []clause.Column{{Name: "id"}},
+			UpdateAll: true,
+		}).CreateInBatches(&updates, 200).Error; err != nil {
+			fmt.Printf("[sync] Error during batch upsert: %v\n", err)
+		}
+	}
+
 	fmt.Println("[sync] Player sync complete")
 }
 
@@ -352,6 +372,31 @@ func (s *PredictionService) enrichAndSave(p *models.Player, nextOpponent string)
 	s.db.Save(p)
 }
 
+// enrichAndCompute fetches all stats for a player and computes the aggregate fields
+// in-memory. It does not write to the DB; the caller can batch persist the result.
+func (s *PredictionService) enrichAndCompute(p models.Player, nextOpponent string) models.Player {
+	stats, err := s.client.GetPlayerStats(p.ID)
+	if err != nil || len(stats) == 0 {
+		return p
+	}
+
+	aggregateOverall(&p, stats)
+
+	played := playedGames(stats)
+	sortByDateDesc(played)
+	if len(played) > 3 {
+		played = played[:3]
+	}
+
+	p.RecentGamesPlayed = len(played)
+	aggregateRecent(&p, played)
+
+	p.NextOpponent = nextOpponent
+	p.OpponentScore = playerVsOpponentScore(stats, nextOpponent)
+
+	return p
+}
+
 // ─── Queries ──────────────────────────────────────────────────────────────────
 
 func (s *PredictionService) GetPlayer(playerID uint) (models.Player, error) {
@@ -374,7 +419,7 @@ func (s *PredictionService) GetAllPlayers(league, position, team string) ([]mode
 	return players, query.Find(&players).Error
 }
 
-func (s *PredictionService) GetPlayerPrediction(playerID uint, w models.PredictionWeights) (*models.PlayerPrediction, error) {
+func (s *PredictionService) GetPlayerPrediction(playerID uint) (*models.PlayerPrediction, error) {
 	var player models.Player
 	if err := s.db.First(&player, playerID).Error; err != nil {
 		return nil, fmt.Errorf("player not found: %w", err)
@@ -384,7 +429,7 @@ func (s *PredictionService) GetPlayerPrediction(playerID uint, w models.Predicti
 		aggregateOverall(&player, stats)
 		s.db.Save(&player)
 	}
-	return s.calcPrediction(player, w), nil
+	return s.calcPrediction(player), nil
 }
 
 // ─── Top predictions ──────────────────────────────────────────────────────────
@@ -430,20 +475,143 @@ func pickTopWithPositionQuota(preds []models.PlayerPrediction) []models.PlayerPr
 	return result
 }
 
+func riskLevelFromPredictedScore(predictedScore float64) string {
+	if predictedScore >= 7.0 {
+		return "low"
+	}
+	if predictedScore >= 4.5 {
+		return "medium"
+	}
+	return "high"
+}
+
+func canonicalPosition(pos string) string {
+	switch pos {
+	case "GK", "DEF", "MID", "FWD":
+		return pos
+	default:
+		return "FWD"
+	}
+}
+
+// percentile returns a value at fraction frac (0..1) from a sorted ascending slice.
+// Example: frac=0.05 => 5th percentile.
+func percentile(sortedAsc []float64, frac float64) float64 {
+	if len(sortedAsc) == 0 {
+		return 0
+	}
+	if frac <= 0 {
+		return sortedAsc[0]
+	}
+	if frac >= 1 {
+		return sortedAsc[len(sortedAsc)-1]
+	}
+	// Use floor (not round) so percentiles close to 1.0 don't frequently select
+	// the absolute max when the sample size is small.
+	idx := int(math.Floor(frac * float64(len(sortedAsc)-1)))
+	if idx < 0 {
+		idx = 0
+	}
+	if idx >= len(sortedAsc) {
+		idx = len(sortedAsc) - 1
+	}
+	return sortedAsc[idx]
+}
+
+func normalizeScoreTo0_10AllowTen(score, low, high float64, allowTen bool) float64 {
+	if high <= low {
+		return 5.0
+	}
+	n := (score - low) / (high - low) * 10.0
+	if n < 0 {
+		n = 0
+	}
+	// Clamp to the intended output range.
+	if n > 10 {
+		n = 10
+	}
+	// Keep full precision; the frontend formats to 1-2 decimals.
+	return n
+}
+
+func normalizePlayerPredictedScoresByPosition(preds []models.PlayerPrediction) {
+	byPos := map[string][]int{}
+	for i := range preds {
+		pos := canonicalPosition(preds[i].Player.Position)
+		byPos[pos] = append(byPos[pos], i)
+	}
+
+	for pos := range byPos {
+		indices := byPos[pos]
+		scoresAsc := make([]float64, 0, len(indices))
+		for _, idx := range indices {
+			scoresAsc = append(scoresAsc, preds[idx].PredictedScore)
+		}
+		sort.Float64s(scoresAsc)
+
+		// Use robust scaling so the top doesn't get flattened into lots of 10s.
+		// Only the upper tail should approach 10.
+		// Use robust tail bounds so only the very top tail approaches 10.
+		low := percentile(scoresAsc, 0.005)
+		high := percentile(scoresAsc, 0.995)
+
+		// Sort descending so we know which player is "rank #1" inside this position group.
+		sort.Slice(indices, func(a, b int) bool {
+			return preds[indices[a]].PredictedScore > preds[indices[b]].PredictedScore
+		})
+		for rank, idx := range indices {
+			allowTen := rank == 0
+			norm := normalizeScoreTo0_10AllowTen(preds[idx].PredictedScore, low, high, allowTen)
+			preds[idx].PredictedScore = norm
+			preds[idx].RiskLevel = riskLevelFromPredictedScore(norm)
+		}
+	}
+}
+
+func normalizeRedFlagScoresByPosition(flags []models.RedFlagPlayer) {
+	byPos := map[string][]int{}
+	for i := range flags {
+		pos := canonicalPosition(flags[i].Player.Position)
+		byPos[pos] = append(byPos[pos], i)
+	}
+
+	for pos := range byPos {
+		indices := byPos[pos]
+		scoresAsc := make([]float64, 0, len(indices))
+		for _, idx := range indices {
+			scoresAsc = append(scoresAsc, flags[idx].RedFlagScore)
+		}
+		sort.Float64s(scoresAsc)
+
+		// Use a slightly higher low tail to avoid extreme outliers,
+		// but use the true max for the high bound so the top end doesn't
+		// collapse into the hard cap.
+		low := percentile(scoresAsc, 0.01)
+		high := scoresAsc[len(scoresAsc)-1]
+
+		// Sort descending so we know which player is "rank #1" inside this position group.
+		sort.Slice(indices, func(a, b int) bool {
+			return flags[indices[a]].RedFlagScore > flags[indices[b]].RedFlagScore
+		})
+		for rank, idx := range indices {
+			allowTen := rank == 0
+			flags[idx].RedFlagScore = normalizeScoreTo0_10AllowTen(flags[idx].RedFlagScore, low, high, allowTen)
+		}
+	}
+}
+
 func (s *PredictionService) GetTopPredictions(league, position, gemFilter, timeFilter string) ([]models.PlayerPrediction, error) {
 	players, err := s.loadPlayers(league, position)
 	if err != nil {
 		return nil, err
 	}
-
-	w := models.DefaultWeights()
 	preds := make([]models.PlayerPrediction, 0, len(players))
 	for _, p := range players {
 		scoring, ok := scoringView(p, timeFilter)
 		if !ok {
 			continue
 		}
-		pred := s.calcPrediction(scoring, w)
+		pred := s.calcPrediction(scoring)
 		switch gemFilter {
 		case "gems":
 			if !pred.HiddenGem {
@@ -457,10 +625,47 @@ func (s *PredictionService) GetTopPredictions(league, position, gemFilter, timeF
 		preds = append(preds, *pred)
 	}
 
-	// When no position filter is set, use a per-position quota so one position
-	// can't dominate the list (e.g. GKs whose availability/discipline is always ~10).
+	// When "All Positions" are requested, we normalize for ranking fairness
+	// but we MUST return the raw predicted score so it matches the player
+	// profile endpoint (/api/predict/player/{id}), which uses calcPrediction.
 	if position == "" {
-		return pickTopWithPositionQuota(preds), nil
+		type rawInfo struct {
+			score float64
+			risk  string
+		}
+		rawByID := make(map[uint]rawInfo, len(preds))
+		for _, pr := range preds {
+			rawByID[pr.Player.ID] = rawInfo{score: pr.PredictedScore, risk: pr.RiskLevel}
+		}
+
+		// Copy for ordering only.
+		ordering := make([]models.PlayerPrediction, len(preds))
+		copy(ordering, preds)
+		normalizePlayerPredictedScoresByPosition(ordering)
+
+		sort.Slice(ordering, func(i, j int) bool {
+			return ordering[i].PredictedScore > ordering[j].PredictedScore
+		})
+		if len(ordering) > 9 {
+			ordering = ordering[:9]
+		}
+
+		// Restore raw score + raw risk level for UI consistency.
+		for i := range ordering {
+			if raw, ok := rawByID[ordering[i].Player.ID]; ok {
+				ordering[i].PredictedScore = raw.score
+				ordering[i].RiskLevel = raw.risk
+			}
+		}
+
+		// Order the returned list by the same score we display in the UI.
+		// Without this, the list order is based on position-normalized score
+		// while the displayed predicted_score is raw, which can look "unsorted".
+		sort.Slice(ordering, func(i, j int) bool {
+			return ordering[i].PredictedScore > ordering[j].PredictedScore
+		})
+
+		return ordering, nil
 	}
 
 	sort.Slice(preds, func(i, j int) bool {
@@ -493,7 +698,13 @@ func (s *PredictionService) GetRedFlags(league, position, timeFilter string) ([]
 			continue
 		}
 		score, formDecline, outputDrop, reasons := calcRedFlag(p)
-		if score < 4.0 || len(reasons) == 0 {
+		// Keep the "reasons" gating always (empty reasons = not a meaningful red flag),
+		// but defer the numeric ">= 4.0" threshold when showing all positions so
+		// position groups are comparable.
+		if len(reasons) == 0 {
+			continue
+		}
+		if position != "" && score < 4.0 {
 			continue
 		}
 		result = append(result, models.RedFlagPlayer{
@@ -503,6 +714,19 @@ func (s *PredictionService) GetRedFlags(league, position, timeFilter string) ([]
 			OutputDrop:   math.Round(outputDrop*100) / 100,
 			Reasons:      reasons,
 		})
+	}
+
+	// Cross-position fairness: normalize by position when "all positions" are requested.
+	if position == "" {
+		// Keep the raw RedFlagScore (computed by calcRedFlag) so the UI reflects
+		// the actual underlying decline severity.
+		filtered := make([]models.RedFlagPlayer, 0, len(result))
+		for _, rf := range result {
+			if rf.RedFlagScore >= 4.0 {
+				filtered = append(filtered, rf)
+			}
+		}
+		result = filtered
 	}
 
 	sort.Slice(result, func(i, j int) bool {
@@ -526,31 +750,65 @@ func (s *PredictionService) GetBenchwarmers(league, position, timeFilter string)
 		return nil, err
 	}
 
-	w := models.DefaultWeights()
 	result := make([]models.BenchwarmerPlayer, 0)
-	for _, p := range players {
-		scoring, ok := scoringView(p, timeFilter)
-		if !ok {
-			continue
+
+	if position == "" {
+		// Keep raw ConsistencyScore so it doesn't get renormalized into a 0–10
+		// per-position scale (which can make multiple players land on the cap).
+		for _, p := range players {
+			scoring, ok := scoringView(p, timeFilter)
+			if !ok {
+				continue
+			}
+
+			pred := s.calcPrediction(scoring)
+			if pred.HiddenGem {
+				continue
+			}
+
+			// Exclude players already showing meaningful red-flag reasons.
+			rfScore, _, _, reasons := calcRedFlag(p)
+			if rfScore >= 4.0 && len(reasons) > 0 {
+				continue
+			}
+
+			consistency, label := calcBenchwarmer(scoring)
+			if label == "" {
+				continue
+			}
+
+			result = append(result, models.BenchwarmerPlayer{
+				Player:           scoring,
+				ConsistencyScore: consistency,
+				Label:            label,
+			})
 		}
-		pred := s.calcPrediction(scoring, w)
-		if pred.PredictedScore >= 7.0 || pred.HiddenGem {
-			continue
+	} else {
+		// Position-specific view: keep the existing absolute thresholds.
+		for _, p := range players {
+			scoring, ok := scoringView(p, timeFilter)
+			if !ok {
+				continue
+			}
+			pred := s.calcPrediction(scoring)
+			if pred.HiddenGem {
+				continue
+			}
+			// Exclude players already flagged as red flags (pass original for decline analysis)
+			rfScore, _, _, _ := calcRedFlag(p)
+			if rfScore >= 4.0 {
+				continue
+			}
+			score, label := calcBenchwarmer(scoring)
+			if score < 4.0 || label == "" {
+				continue
+			}
+			result = append(result, models.BenchwarmerPlayer{
+				Player:           scoring,
+				ConsistencyScore: score,
+				Label:            label,
+			})
 		}
-		// Exclude players already flagged as red flags (pass original for decline analysis)
-		rfScore, _, _, _ := calcRedFlag(p)
-		if rfScore >= 4.0 {
-			continue
-		}
-		score, label := calcBenchwarmer(scoring)
-		if score < 4.0 || label == "" {
-			continue
-		}
-		result = append(result, models.BenchwarmerPlayer{
-			Player:           scoring,
-			ConsistencyScore: score,
-			Label:            label,
-		})
 	}
 
 	sort.Slice(result, func(i, j int) bool {
@@ -667,7 +925,7 @@ func (s *PredictionService) GetMomentum(playerID uint) (*models.MomentumData, er
 
 // ─── Synergy ──────────────────────────────────────────────────────────────────
 
-func (s *PredictionService) GetSynergy(playerIDs []uint, w models.PredictionWeights) (*models.SynergyResult, error) {
+func (s *PredictionService) GetSynergy(playerIDs []uint) (*models.SynergyResult, error) {
 	players := make([]models.Player, 0, len(playerIDs))
 	for _, id := range playerIDs {
 		var p models.Player
@@ -678,7 +936,7 @@ func (s *PredictionService) GetSynergy(playerIDs []uint, w models.PredictionWeig
 	total := 0.0
 	positions := map[string]bool{}
 	for _, p := range players {
-		total += s.calcPrediction(p, w).PredictedScore
+		total += s.calcPrediction(p).PredictedScore
 		positions[p.Position] = true
 	}
 	diversityBonus := float64(len(positions)-1) * 0.5
@@ -861,18 +1119,45 @@ func defensiveComponent(p models.Player) float64 {
 // availabilityComponent scores average minutes per game vs a full 90.
 // A player averaging 90 min/game scores 10; 45 min/game scores 5.
 func availabilityComponent(p models.Player) float64 {
-	games := math.Max(1, float64(p.GamesPlayed))
-	avgMins := float64(p.MinutesPlayed) / games
-	return math.Min(10, avgMins/90.0*10)
+	// Blend season availability with recent availability:
+	// Using recent minutes reduces the "all-constants" problem where
+	// availability/disc stays near a single value for many players.
+	gamesSeason := math.Max(1, float64(p.GamesPlayed))
+	avgMinsSeason := float64(p.MinutesPlayed) / gamesSeason
+	availSeason := avgMinsSeason/90.0*10.0
+
+	recentGames := math.Max(1, float64(p.RecentGamesPlayed))
+	avgMinsRecent := float64(p.RecentMinutes) / recentGames
+	availRecent := avgMinsRecent/90.0*10.0
+
+	avail := availSeason*0.7 + availRecent*0.3
+	if avail < 0 {
+		avail = 0
+	}
+	return math.Min(10, avail)
 }
 
 // disciplineComponent penalises cards. Starting at 10:
 // each yellow card per game costs 5 points; each red costs 15.
 func disciplineComponent(p models.Player) float64 {
-	games := math.Max(1, float64(p.GamesPlayed))
-	yellowPerGame := float64(p.YellowCards) / games
-	redPerGame := float64(p.RedCards) / games
-	return math.Max(0, 10-yellowPerGame*5-redPerGame*15)
+	// Blend season discipline with recent discipline:
+	// recent cards are a better proxy for current suspension risk.
+	gamesSeason := math.Max(1, float64(p.GamesPlayed))
+	yellowPerGameSeason := float64(p.YellowCards) / gamesSeason
+	redPerGameSeason := float64(p.RedCards) / gamesSeason
+
+	recentGames := math.Max(1, float64(p.RecentGamesPlayed))
+	yellowPerGameRecent := float64(p.RecentYellowCards) / recentGames
+	redPerGameRecent := float64(p.RecentRedCards) / recentGames
+
+	yellowPerGame := yellowPerGameSeason*0.7 + yellowPerGameRecent*0.3
+	redPerGame := redPerGameSeason*0.7 + redPerGameRecent*0.3
+
+	disc := 10 - yellowPerGame*5 - redPerGame*15
+	if disc < 0 {
+		disc = 0
+	}
+	return disc
 }
 
 // ─── Prediction ───────────────────────────────────────────────────────────────
@@ -901,7 +1186,7 @@ func disciplineComponent(p models.Player) float64 {
 //	     quality: facing a top-4 defence vs a relegation candidate is huge.
 //	     Defensive contribution minimal (0.02): hold-up play, not tracked well by stats.
 //	     Weights: form=0.18, atk=0.33, cre=0.17, def=0.02, avail=0.10, disc=0.08, opp=0.12 → 1.00
-func (s *PredictionService) calcPrediction(player models.Player, _ models.PredictionWeights) *models.PlayerPrediction {
+func (s *PredictionService) calcPrediction(player models.Player) *models.PlayerPrediction {
 	form := formComponent(player)
 	attack := attackComponent(player)
 	creativity := creativityComponent(player)
@@ -914,22 +1199,55 @@ func (s *PredictionService) calcPrediction(player models.Player, _ models.Predic
 	}
 
 	var predicted float64
+	var numerator float64
+	var denom float64
 	switch player.Position {
 	case "GK":
-		// avail and disc weights deliberately low: GKs almost always play 90 mins
-		// and rarely get cards — high-weight near-constants inflate all GK scores.
-		predicted = form*0.22 + defensive*0.60 + availability*0.06 + discipline*0.04 + opponent*0.08
+		// Base structure: form=0.22, defensive=0.60, availability=0.06, discipline=0.04, opponent=0.08
+		numerator = form*0.22 +
+			defensive*0.60 +
+			availability*0.06 +
+			discipline*0.04 +
+			opponent*0.08
+		denom = 0.22 + 0.60 + 0.06 + 0.04 + 0.08
 	case "DEF":
-		predicted = form*0.22 + attack*0.08 + creativity*0.07 + defensive*0.30 +
-			availability*0.13 + discipline*0.10 + opponent*0.10
+		numerator = form*0.22 +
+			attack*0.08 +
+			creativity*0.07 +
+			defensive*0.30 +
+			availability*0.13 +
+			discipline*0.10 +
+			opponent*0.10
+		denom = 0.22 + 0.08 + 0.07 + 0.30 +
+			0.13 + 0.10 + 0.10
 	case "MID":
-		predicted = form*0.20 + attack*0.17 + creativity*0.24 + defensive*0.12 +
-			availability*0.10 + discipline*0.09 + opponent*0.08
+		numerator = form*0.20 +
+			attack*0.17 +
+			creativity*0.24 +
+			defensive*0.12 +
+			availability*0.10 +
+			discipline*0.09 +
+			opponent*0.08
+		denom = 0.20 + 0.17 + 0.24 + 0.12 +
+			0.10 + 0.09 + 0.08
 	default: // FWD
-		predicted = form*0.18 + attack*0.33 + creativity*0.17 + defensive*0.02 +
-			availability*0.10 + discipline*0.08 + opponent*0.12
+		numerator = form*0.18 +
+			attack*0.33 +
+			creativity*0.17 +
+			defensive*0.02 +
+			availability*0.10 +
+			discipline*0.08 +
+			opponent*0.12
+		denom = 0.18 + 0.33 + 0.17 + 0.02 +
+			0.10 + 0.08 + 0.12
 	}
-	predicted = math.Round(predicted*100) / 100
+	if denom <= 0 {
+		predicted = 6.0
+	} else {
+		predicted = numerator / denom
+	}
+	// Keep more precision to reduce artificial ties after normalization.
+	predicted = math.Round(predicted*1000) / 1000
 
 	risk := "high"
 	if predicted >= 7.0 {
@@ -938,13 +1256,14 @@ func (s *PredictionService) calcPrediction(player models.Player, _ models.Predic
 		risk = "medium"
 	}
 
-	hiddenGem := isHiddenGem(player, predicted, attack, creativity)
+	hiddenGem, gemReasons := isHiddenGem(player, predicted, attack, creativity)
 
 	return &models.PlayerPrediction{
 		Player:             player,
 		PredictedScore:     predicted,
 		RiskLevel:          risk,
 		HiddenGem:          hiddenGem,
+		HiddenGemReasons:  gemReasons,
 		FormContribution:   math.Round(form*100) / 100,
 		ThreatContribution: math.Round(attack*100) / 100,
 		OpponentDifficulty: math.Round(opponent*100) / 100,
@@ -957,7 +1276,7 @@ func (s *PredictionService) calcPrediction(player models.Player, _ models.Predic
 // their visible returns — suggesting untapped potential or a breakout incoming.
 //
 // Requirements: predicted score in the 4.5-8.0 band (not too weak, not already elite)
-// AND fewer than 12 combined G+A (not yet well-known or expensively priced in).
+// AND fewer than a position-typical G+A/goal output (not yet well-known or expensively priced in).
 //
 // Six independent signals — any single one qualifies the player:
 //
@@ -970,7 +1289,7 @@ func (s *PredictionService) calcPrediction(player models.Player, _ models.Predic
 //  3. High creativity score but very few assists relative to key passes:
 //     team-mates are spurning the chances, not the player. Assists due.
 //
-//  4. Strong attack component but fewer than 6 total returns:
+//  4. Strong attack component but low returns for the player's position:
 //     quality threat not yet visible in the stat line (new team, early season etc).
 //
 //  5. High xG per shot (≥0.12): the player takes shots from premium positions
@@ -978,12 +1297,39 @@ func (s *PredictionService) calcPrediction(player models.Player, _ models.Predic
 //
 //  6. Improving trajectory: recent xG+xA/90 is ≥30% above the season average,
 //     meaning underlying form is genuinely trending up right now.
-func isHiddenGem(p models.Player, predicted, attackScore, creativityScore float64) bool {
+func isHiddenGem(p models.Player, predicted, attackScore, creativityScore float64) (bool, []string) {
 	if predicted < 4.5 || predicted >= 8.0 {
-		return false
+		return false, nil
 	}
-	if p.Goals+p.Assists >= 12 {
-		return false // already well-known / priced in
+
+	// Position-aware thresholds:
+	// - defenders naturally have fewer goals/assists than mids/forwards
+	// - forwards can still be "hidden gems" with slightly higher totals
+	//   if they are underperforming their underlying xG/xA signals.
+	maxGATotal := 12
+	lowReturns := 6
+	lowGoals := 3
+	switch p.Position {
+	case "GK":
+		maxGATotal = 6
+		lowReturns = 1
+		lowGoals = 1
+	case "DEF":
+		maxGATotal = 10
+		lowReturns = 4
+		lowGoals = 2
+	case "MID":
+		maxGATotal = 12
+		lowReturns = 6
+		lowGoals = 3
+	default: // FWD
+		maxGATotal = 14
+		lowReturns = 8
+		lowGoals = 5
+	}
+
+	if p.Goals+p.Assists >= maxGATotal {
+		return false, nil // already well-known / priced in
 	}
 	mins90 := math.Max(1, float64(p.MinutesPlayed)/90.0)
 	xgXaPer90 := (p.XG + p.XA) / mins90
@@ -1001,13 +1347,13 @@ func isHiddenGem(p models.Player, predicted, attackScore, creativityScore float6
 		float64(p.Assists) < float64(p.KeyPasses)*0.15
 
 	// Signal 4: genuine attack threat, returns not there yet
-	highThreatLowReturns := attackScore >= 5.0 && p.Goals+p.Assists < 6
+	highThreatLowReturns := attackScore >= 5.0 && p.Goals+p.Assists < lowReturns
 
 	// Signal 5: taking high-quality shots but not converting yet
 	highQualityPositions := false
 	if p.TotalShots >= 6 {
 		xgPerShot := p.XG / float64(p.TotalShots)
-		highQualityPositions = xgPerShot >= 0.12 && p.Goals < 3
+		highQualityPositions = xgPerShot >= 0.12 && p.Goals < lowGoals
 	}
 
 	// Signal 6: recent underlying stats trending clearly upward
@@ -1017,8 +1363,30 @@ func isHiddenGem(p models.Player, predicted, attackScore, creativityScore float6
 		improvingTrajectory = recentXT90 > xgXaPer90*1.30
 	}
 
-	return underperformingExpected || prolificShooter || creativeButUnrewarded ||
-		highThreatLowReturns || highQualityPositions || improvingTrajectory
+	reasons := make([]string, 0, 3)
+	if underperformingExpected {
+		reasons = append(reasons, "Expected threat is real (xG+xA > G+A)")
+	}
+	if prolificShooter {
+		reasons = append(reasons, "High chances, low conversion")
+	}
+	if creativeButUnrewarded {
+		reasons = append(reasons, "Creating well, assists lag")
+	}
+	if highThreatLowReturns {
+		reasons = append(reasons, "Strong threat, few returns")
+	}
+	if highQualityPositions {
+		reasons = append(reasons, "Quality shots, not finishing yet")
+	}
+	if improvingTrajectory {
+		reasons = append(reasons, "Underlying trend is improving")
+	}
+
+	if len(reasons) == 0 {
+		return false, nil
+	}
+	return true, reasons
 }
 
 // ─── Red flags ────────────────────────────────────────────────────────────────
@@ -1149,7 +1517,8 @@ func calcRedFlag(p models.Player) (score, formDecline, outputDrop float64, reaso
 		score = formDecline*0.25 + outputDrop*0.28 + xThreatDecline*0.20 +
 			shotAccDecline*0.15 + involvementDecline*0.08 + disciplineRisk*0.04
 	}
-	score = math.Round(math.Min(10, score)*100) / 100
+	// Keep more precision to reduce artificial ties after normalization.
+	score = math.Round(math.Min(10, score)*1000) / 1000
 
 	// ── Reason strings ────────────────────────────────────────────────────────
 	// Thresholds are lower than the old version to surface real concerns earlier.
@@ -1296,7 +1665,8 @@ func calcBenchwarmer(p models.Player) (score float64, label string) {
 		score = availScore*0.20 + formConsistency*0.25 + outputReliability*0.30 +
 			passReliability*0.15 + discipline*0.10
 	}
-	score = math.Round(score*100) / 100
+	// Keep more precision to reduce artificial ties after normalization.
+	score = math.Round(score*1000) / 1000
 
 	switch {
 	case score >= 7.5:

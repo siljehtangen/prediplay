@@ -42,8 +42,11 @@
                       <div class="gem-card__name">{{ gem.player.name }}</div>
                       <div class="gem-card__team">{{ gem.player.team_name }}</div>
                     </div>
-                    <div class="score-circle" [class]="scoreClass(gem.risk_level)">
-                      {{ gem.predicted_score | number:'1.1-1' }}
+                    <div class="score-stack">
+                      <div class="list-score__value" [ngClass]="scoreClass(gem.risk_level)">
+                        {{ gem.predicted_score | number:'1.1-2' }}
+                      </div>
+                      <div class="score-caption">Hidden gem score</div>
                     </div>
                   </div>
                   <div class="gem-card__badges">
@@ -84,8 +87,11 @@
                   <div class="gem-card__name">{{ gem.player.name }}</div>
                   <div class="gem-card__team">{{ gem.player.team_name }}</div>
                 </div>
-                <div class="score-circle" [class]="scoreClass(gem.risk_level)">
-                  {{ gem.predicted_score | number:'1.1-1' }}
+                <div class="score-stack">
+                  <div class="list-score__value" [ngClass]="scoreClass(gem.risk_level)">
+                    {{ gem.predicted_score | number:'1.1-2' }}
+                  </div>
+                  <div class="score-caption">Hidden gem score</div>
                 </div>
               </div>
               <div class="gem-card__badges">

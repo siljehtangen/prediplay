@@ -2,7 +2,7 @@
   <div class="dash-header">
     <div>
       <h1 class="page__title">Dashboard</h1>
-      <p class="page__subtitle">Top picks and red flags across all five major leagues</p>
+      <p class="page__subtitle">Hidden gems and red flags across all five major leagues</p>
     </div>
     <div class="time-filter-toggle">
       <button [class.active]="timeFilter === 'recent'" (click)="setTimeFilter('recent')">Recent</button>
@@ -22,34 +22,43 @@
 
         <div class="league-cols">
 
-          <!-- ── Top Picks ────────────────────────────── -->
+          <!-- ── Hidden Gems ────────────────────────────── -->
           <div class="league-col">
             <div class="col-label col-label--picks">
               <mat-icon>leaderboard</mat-icon>
-              Top Picks
-              <a routerLink="/top-players" class="col-link">View all</a>
+              Hidden Gems
+              <a routerLink="/hidden-gems" class="col-link">View all</a>
             </div>
 
-            @if (league.topPlayers.length === 0) {
+            @if (league.hiddenGems.length === 0) {
               <div class="empty-state-inline"><mat-icon>search_off</mat-icon><span>No data</span></div>
             } @else {
               <!-- Featured #1 with donut chart -->
-              <div class="featured-card" [routerLink]="['/player', league.topPlayers[0].player.id]">
+              <div class="featured-card" [routerLink]="['/player', league.hiddenGems[0].player.id]">
                 <div class="featured-card__left">
                   <span class="featured-rank">#1</span>
                   <div class="donut-wrap">
-                    <div class="donut" [style.background]="donutStyle(league.topPlayers[0])"></div>
+                    <div class="donut" [style.background]="donutStyle(league.hiddenGems[0])"></div>
                     <div class="donut__hole">
-                      <span class="donut__score">{{ league.topPlayers[0].predicted_score | number:'1.1-1' }}</span>
+                      <span class="donut__score">{{ league.hiddenGems[0].predicted_score | number:'1.1-2' }}</span>
                       <span class="donut__label">score</span>
                     </div>
                   </div>
                 </div>
                 <div class="featured-card__right">
-                  <div class="featured-name">{{ league.topPlayers[0].player.name }}</div>
+                  <div class="featured-name">{{ league.hiddenGems[0].player.name }}</div>
                   <div class="featured-meta">
-                    {{ league.topPlayers[0].player.team_name }}
-                    <span class="chip chip--pos">{{ league.topPlayers[0].player.position }}</span>
+                    {{ league.hiddenGems[0].player.team_name }}
+                    <span class="chip chip--pos">{{ league.hiddenGems[0].player.position }}</span>
+                  </div>
+                  <div class="featured-reasons">
+                    @if ((league.hiddenGems[0].hidden_gem_reasons ?? []).length > 0) {
+                      @for (r of (league.hiddenGems[0].hidden_gem_reasons ?? []).slice(0, 2); track r) {
+                        <span class="reason-tag reason-tag--gem">{{ r }}</span>
+                      }
+                    } @else {
+                      <span class="reason-tag reason-tag--placeholder reason-tag--gem">—</span>
+                    }
                   </div>
                 </div>
               </div>
@@ -89,21 +98,38 @@
                     </div>
                   }
                 </div>
+              } @else {
+                <!-- Keep the same vertical size when momentum is missing -->
+                <div class="form-graph form-graph--pick form-graph--placeholder"></div>
               }
 
-              <!-- #2 and #3 -->
-              @for (pred of league.topPlayers.slice(1); track pred.player.id; let i = $index) {
-                <div class="mini-row" [routerLink]="['/player', pred.player.id]">
-                  <span class="mini-row__rank">#{{ i + 2 }}</span>
-                  <div class="mini-row__info">
-                    <span class="mini-row__name">{{ pred.player.name }}</span>
-                    <span class="mini-row__team">{{ pred.player.team_name }}</span>
+              <!-- #2 and #3 (always render same count for alignment) -->
+              @for (slot of slots.slice(1); track slot) {
+                @if (hiddenGemAt(league, slot)) {
+                  <div class="mini-row" [routerLink]="['/player', hiddenGemAt(league, slot)!.player.id]">
+                    <span class="mini-row__rank">#{{ slot + 1 }}</span>
+                    <div class="mini-row__info">
+                      <span class="mini-row__name">{{ hiddenGemAt(league, slot)!.player.name }}</span>
+                      <span class="mini-row__team">{{ hiddenGemAt(league, slot)!.player.team_name }}</span>
+                    </div>
+                    <div class="mini-row__bar-wrap">
+                      <div class="mini-row__bar mini-row__bar--pick" [style.width.%]="barWidth(hiddenGemAt(league, slot)!.predicted_score)"></div>
+                    </div>
+                    <span class="mini-row__score mini-row__score--pick">{{ hiddenGemAt(league, slot)!.predicted_score | number:'1.1-2' }}</span>
                   </div>
-                  <div class="mini-row__bar-wrap">
-                    <div class="mini-row__bar mini-row__bar--pick" [style.width.%]="barWidth(pred.predicted_score)"></div>
+                } @else {
+                  <div class="mini-row mini-row--placeholder">
+                    <span class="mini-row__rank">#{{ slot + 1 }}</span>
+                    <div class="mini-row__info">
+                      <span class="mini-row__name">—</span>
+                      <span class="mini-row__team">—</span>
+                    </div>
+                    <div class="mini-row__bar-wrap">
+                      <div class="mini-row__bar mini-row__bar--pick" style="width: 0%"></div>
+                    </div>
+                    <span class="mini-row__score mini-row__score--pick">—</span>
                   </div>
-                  <span class="mini-row__score mini-row__score--pick">{{ pred.predicted_score | number:'1.1-1' }}</span>
-                </div>
+                }
               }
             }
           </div>
@@ -126,7 +152,7 @@
                   <div class="donut-wrap">
                     <div class="donut" [style.background]="dangerStyle(league.redFlags[0].red_flag_score)"></div>
                     <div class="donut__hole donut__hole--flag">
-                      <span class="donut__score donut__score--flag">{{ league.redFlags[0].red_flag_score | number:'1.1-1' }}</span>
+                  <span class="donut__score donut__score--flag">{{ league.redFlags[0].red_flag_score | number:'1.1-2' }}</span>
                       <span class="donut__label">danger</span>
                     </div>
                   </div>
@@ -137,13 +163,15 @@
                     {{ league.redFlags[0].player.team_name }}
                     <span class="chip chip--pos">{{ league.redFlags[0].player.position }}</span>
                   </div>
-                  @if (league.redFlags[0].reasons.length > 0) {
-                    <div class="featured-reasons">
+                  <div class="featured-reasons">
+                    @if (league.redFlags[0].reasons.length > 0) {
                       @for (r of league.redFlags[0].reasons.slice(0, 2); track r) {
                         <span class="reason-tag">{{ r }}</span>
                       }
-                    </div>
-                  }
+                    } @else {
+                      <span class="reason-tag reason-tag--placeholder">—</span>
+                    }
+                  </div>
                 </div>
               </div>
 
@@ -182,21 +210,37 @@
                     </div>
                   }
                 </div>
+              } @else {
+                <div class="form-graph form-graph--flag form-graph--placeholder"></div>
               }
 
               <!-- #2 and #3 -->
-              @for (flag of league.redFlags.slice(1); track flag.player.id; let i = $index) {
-                <div class="mini-row" [routerLink]="['/player', flag.player.id]">
-                  <span class="mini-row__rank mini-row__rank--flag">#{{ i + 2 }}</span>
-                  <div class="mini-row__info">
-                    <span class="mini-row__name">{{ flag.player.name }}</span>
-                    <span class="mini-row__team">{{ flag.player.team_name }}</span>
+              @for (slot of slots.slice(1); track slot) {
+                @if (redFlagAt(league, slot)) {
+                  <div class="mini-row" [routerLink]="['/player', redFlagAt(league, slot)!.player.id]">
+                    <span class="mini-row__rank mini-row__rank--flag">#{{ slot + 1 }}</span>
+                    <div class="mini-row__info">
+                      <span class="mini-row__name">{{ redFlagAt(league, slot)!.player.name }}</span>
+                      <span class="mini-row__team">{{ redFlagAt(league, slot)!.player.team_name }}</span>
+                    </div>
+                    <div class="mini-row__bar-wrap">
+                      <div class="mini-row__bar mini-row__bar--flag" [style.width.%]="barWidth(redFlagAt(league, slot)!.red_flag_score)"></div>
+                    </div>
+                      <span class="mini-row__score mini-row__score--flag">{{ redFlagAt(league, slot)!.red_flag_score | number:'1.1-2' }}</span>
                   </div>
-                  <div class="mini-row__bar-wrap">
-                    <div class="mini-row__bar mini-row__bar--flag" [style.width.%]="barWidth(flag.red_flag_score)"></div>
+                } @else {
+                  <div class="mini-row mini-row--placeholder">
+                    <span class="mini-row__rank mini-row__rank--flag">#{{ slot + 1 }}</span>
+                    <div class="mini-row__info">
+                      <span class="mini-row__name">—</span>
+                      <span class="mini-row__team">—</span>
+                    </div>
+                    <div class="mini-row__bar-wrap">
+                      <div class="mini-row__bar mini-row__bar--flag" style="width: 0%"></div>
+                    </div>
+                      <span class="mini-row__score mini-row__score--flag">—</span>
                   </div>
-                  <span class="mini-row__score mini-row__score--flag">{{ flag.red_flag_score | number:'1.1-1' }}</span>
-                </div>
+                }
               }
             }
           </div>

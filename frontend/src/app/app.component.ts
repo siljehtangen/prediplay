@@ -20,7 +20,6 @@ export class AppComponent {
     { path: '/red-flags',    icon: 'flag',            label: 'Red Flags'    },
     { path: '/benchwarmers', icon: 'airline_seat_recline_normal', label: 'Benchwarmers' },
     { path: '/synergy',     icon: 'group_work',      label: 'Synergy'      },
-    { path: '/fixtures',      icon: 'event',           label: 'Fixtures'     },
     { path: '/how-it-works',  icon: 'info',            label: 'How It Works' },
   ];
 }

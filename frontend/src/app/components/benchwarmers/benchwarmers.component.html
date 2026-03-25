@@ -57,7 +57,7 @@
                       </div>
                     </div>
                     <div class="consistency-score">
-                      <div class="consistency-score__value">{{ bw.consistency_score | number:'1.1-1' }}</div>
+                      <div class="consistency-score__value">{{ bw.consistency_score | number:'1.1-2' }}</div>
                       <div class="consistency-score__label">Consistency</div>
                     </div>
                   </div>
@@ -66,12 +66,9 @@
                     <mat-progress-bar mode="determinate" [value]="bw.consistency_score * 10" color="accent"></mat-progress-bar>
                   </div>
                   <div class="bench-card__stats">
-                    <div class="stat"><span class="stat__label">Form</span><span class="stat__value">{{ bw.player.form_score | number:'1.1-1' }}</span></div>
-                    <div class="stat"><span class="stat__label">Goals</span><span class="stat__value">{{ bw.player.goals }}</span></div>
-                    <div class="stat"><span class="stat__label">Assists</span><span class="stat__value">{{ bw.player.assists }}</span></div>
-                    <div class="stat"><span class="stat__label">xG</span><span class="stat__value">{{ bw.player.xG | number:'1.1-1' }}</span></div>
-                    <div class="stat"><span class="stat__label">xA</span><span class="stat__value">{{ bw.player.xA | number:'1.1-1' }}</span></div>
-                    <div class="stat"><span class="stat__label">Mins</span><span class="stat__value">{{ bw.player.minutes_played }}</span></div>
+                    @for (s of statsFor(bw.player); track $index) {
+                      <div class="stat"><span class="stat__label">{{ s.label }}</span><span class="stat__value">{{ s.value }}</span></div>
+                    }
                   </div>
                 </mat-card-content>
               </mat-card>
@@ -106,7 +103,7 @@
                   </div>
                 </div>
                 <div class="consistency-score">
-                  <div class="consistency-score__value">{{ bw.consistency_score | number:'1.1-1' }}</div>
+                  <div class="consistency-score__value">{{ bw.consistency_score | number:'1.1-2' }}</div>
                   <div class="consistency-score__label">Consistency</div>
                 </div>
               </div>
@@ -115,12 +112,9 @@
                 <mat-progress-bar mode="determinate" [value]="bw.consistency_score * 10" color="accent"></mat-progress-bar>
               </div>
               <div class="bench-card__stats">
-                <div class="stat"><span class="stat__label">Form</span><span class="stat__value">{{ bw.player.form_score | number:'1.1-1' }}</span></div>
-                <div class="stat"><span class="stat__label">Goals</span><span class="stat__value">{{ bw.player.goals }}</span></div>
-                <div class="stat"><span class="stat__label">Assists</span><span class="stat__value">{{ bw.player.assists }}</span></div>
-                <div class="stat"><span class="stat__label">xG</span><span class="stat__value">{{ bw.player.xG | number:'1.1-1' }}</span></div>
-                <div class="stat"><span class="stat__label">xA</span><span class="stat__value">{{ bw.player.xA | number:'1.1-1' }}</span></div>
-                <div class="stat"><span class="stat__label">Mins</span><span class="stat__value">{{ bw.player.minutes_played }}</span></div>
+                @for (s of statsFor(bw.player); track $index) {
+                  <div class="stat"><span class="stat__label">{{ s.label }}</span><span class="stat__value">{{ s.value }}</span></div>
+                }
               </div>
             </mat-card-content>
           </mat-card>

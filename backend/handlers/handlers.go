@@ -235,13 +235,16 @@ func (h *Handler) GetPlayerPrediction(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) GetTopPredictions(w http.ResponseWriter, r *http.Request) {
 	q := r.URL.Query()
-	hiddenGem := q.Get("hidden_gem") == "true"
+	gemFilter := "non-gems"
+	if q.Get("hidden_gem") == "true" {
+		gemFilter = "gems"
+	}
 	timeFilter := q.Get("time_filter")
 	if timeFilter == "" {
 		timeFilter = "recent"
 	}
 	preds, err := h.prediction.GetTopPredictions(
-		q.Get("league"), q.Get("position"), hiddenGem, parseWeights(r), timeFilter,
+		q.Get("league"), q.Get("position"), gemFilter, timeFilter,
 	)
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, err.Error())
@@ -266,6 +269,21 @@ func (h *Handler) GetRedFlags(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, result)
 }
 
+// Dashboard ───────────────────────────────────────────────────────────────────
+
+func (h *Handler) GetDashboard(w http.ResponseWriter, r *http.Request) {
+	timeFilter := r.URL.Query().Get("time_filter")
+	if timeFilter == "" {
+		timeFilter = "recent"
+	}
+	result, err := h.prediction.GetDashboard(timeFilter)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	writeJSON(w, http.StatusOK, result)
+}
+
 // Benchwarmers ─────────────────────────────────────────────────────────────────
 
 func (h *Handler) GetBenchwarmers(w http.ResponseWriter, r *http.Request) {
@@ -274,7 +292,7 @@ func (h *Handler) GetBenchwarmers(w http.ResponseWriter, r *http.Request) {
 	if timeFilter == "" {
 		timeFilter = "recent"
 	}
-	result, err := h.prediction.GetBenchwarmers(q.Get("league"), q.Get("position"), timeFilter, parseWeights(r))
+	result, err := h.prediction.GetBenchwarmers(q.Get("league"), q.Get("position"), timeFilter)
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, err.Error())
 		return

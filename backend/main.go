@@ -51,6 +51,7 @@ func main() {
 		r.Get("/players/{id}/stats", h.GetPlayerStats)
 
 		r.Get("/predict/player/{id}", h.GetPlayerPrediction)
+		r.Get("/dashboard", h.GetDashboard)
 		r.Get("/predict/top", h.GetTopPredictions)
 		r.Get("/predict/redflags", h.GetRedFlags)
 		r.Get("/predict/benchwarmers", h.GetBenchwarmers)

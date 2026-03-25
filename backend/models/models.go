@@ -17,25 +17,67 @@ type Team struct {
 }
 
 type Player struct {
-	ID            uint    `gorm:"primaryKey" json:"id"`
-	ApiID         uint    `json:"api_id"`
-	Name          string  `json:"name"`
-	ShortName     string  `json:"short_name"`
-	TeamID        uint    `json:"team_id"`
-	TeamName      string  `json:"team_name"`
-	League        string  `json:"league"`
-	Position      string  `json:"position"` // GK, DEF, MID, FWD
-	JerseyNumber  uint    `json:"jersey_number"`
-	Height        uint    `json:"height"`
-	DateOfBirth   string  `json:"date_of_birth"`
-	Nationality   string  `json:"nationality"`
-	MarketValue   uint    `json:"market_value"`
-	MinutesPlayed int     `json:"minutes_played"`
+	ID           uint   `gorm:"primaryKey" json:"id"`
+	ApiID        uint   `json:"api_id"`
+	Name         string `json:"name"`
+	ShortName    string `json:"short_name"`
+	TeamID       uint   `json:"team_id"`
+	TeamName     string `json:"team_name"`
+	League       string `gorm:"index" json:"league"`
+	Position     string `gorm:"index" json:"position"` // GK, DEF, MID, FWD
+	JerseyNumber uint   `json:"jersey_number"`
+	Height       uint   `json:"height"`
+	DateOfBirth  string `json:"date_of_birth"`
+	Nationality  string `json:"nationality"`
+	MarketValue  uint   `json:"market_value"`
+
+	// ── Season totals ──────────────────────────────────────────────────────────
+	GamesPlayed   int     `json:"games_played"`
+	MinutesPlayed int     `gorm:"index" json:"minutes_played"`
 	Goals         int     `json:"goals"`
 	Assists       int     `json:"assists"`
 	XG            float64 `json:"xG"`
 	XA            float64 `json:"xA"`
-	FormScore     float64 `json:"form_score"` // 0-10
+	TotalShots    int     `json:"total_shots"`
+	ShotsOnTarget int     `json:"shots_on_target"`
+	KeyPasses     int     `json:"key_passes"`
+	TotalPasses   int     `json:"total_passes"`
+	AccuratePasses int    `json:"accurate_passes"`
+	DuelsWon      int     `json:"duels_won"`
+	DuelsTotal    int     `json:"duels_total"`
+	TacklesWon    int     `json:"tackles_won"`
+	TacklesTotal  int     `json:"tackles_total"`
+	YellowCards   int     `json:"yellow_cards"`
+	RedCards      int     `json:"red_cards"`
+	Saves         int     `json:"saves"`          // GK
+	GoalsConceded int     `json:"goals_conceded"` // GK
+	FormScore     float64 `json:"form_score"`     // average match rating (1-10)
+
+	// ── Recent stats (last 3 played games) ────────────────────────────────────
+	RecentGamesPlayed   int     `json:"recent_games_played"`
+	RecentMinutes       int     `json:"recent_minutes"`
+	RecentGoals         int     `json:"recent_goals"`
+	RecentAssists       int     `json:"recent_assists"`
+	RecentXG            float64 `json:"recent_xg"`
+	RecentXA            float64 `json:"recent_xa"`
+	RecentTotalShots    int     `json:"recent_total_shots"`
+	RecentShotsOnTarget int     `json:"recent_shots_on_target"`
+	RecentKeyPasses     int     `json:"recent_key_passes"`
+	RecentTotalPasses   int     `json:"recent_total_passes"`
+	RecentAccuratePasses int    `json:"recent_accurate_passes"`
+	RecentDuelsWon      int     `json:"recent_duels_won"`
+	RecentDuelsTotal    int     `json:"recent_duels_total"`
+	RecentTacklesWon    int     `json:"recent_tackles_won"`
+	RecentTacklesTotal  int     `json:"recent_tackles_total"`
+	RecentYellowCards   int     `json:"recent_yellow_cards"`
+	RecentRedCards      int     `json:"recent_red_cards"`
+	RecentSaves         int     `json:"recent_saves"`
+	RecentGoalsConceded int     `json:"recent_goals_conceded"`
+	RecentFormScore     float64 `json:"recent_form_score"`
+
+	// ── Opponent context ───────────────────────────────────────────────────────
+	NextOpponent  string  `json:"next_opponent"`  // team name of next scheduled opponent
+	OpponentScore float64 `json:"opponent_score"` // 0-10: historical performance vs that opponent
 }
 
 type Event struct {
@@ -99,17 +141,18 @@ type PlayerStat struct {
 	GoalsConceded   uint      `json:"goals_conceded"`
 }
 
-// PlayerPrediction is not stored in DB, computed on the fly
+// PlayerPrediction is not stored in DB, computed on the fly.
+// Contribution fields carry the raw component scores (0-10) for the frontend.
 type PlayerPrediction struct {
 	Player             Player  `json:"player"`
 	PredictedScore     float64 `json:"predicted_score"`
 	RiskLevel          string  `json:"risk_level"` // low, medium, high
 	HiddenGem          bool    `json:"hidden_gem"`
-	FormContribution   float64 `json:"form_contribution"`
-	ThreatContribution float64 `json:"threat_contribution"`
-	OpponentDifficulty float64 `json:"opponent_difficulty"`
-	MinutesLikelihood  float64 `json:"minutes_likelihood"`
-	HomeAwayFactor     float64 `json:"home_away_factor"`
+	FormContribution   float64 `json:"form_contribution"`    // form component (0-10)
+	ThreatContribution float64 `json:"threat_contribution"`  // attack component (0-10)
+	OpponentDifficulty float64 `json:"opponent_difficulty"`  // opponent component (0-10)
+	MinutesLikelihood  float64 `json:"minutes_likelihood"`   // availability component (0-10)
+	HomeAwayFactor     float64 `json:"home_away_factor"`     // defensive component (0-10)
 	NextEvent          *Event  `json:"next_event,omitempty"`
 }
 
@@ -127,6 +170,13 @@ type BenchwarmerPlayer struct {
 	Player           Player  `json:"player"`
 	ConsistencyScore float64 `json:"consistency_score"` // 0-10
 	Label            string  `json:"label"`             // "Rock Solid", "Steady Option", "Rotation Pick"
+}
+
+// DashboardLeague is the per-league summary returned by /api/dashboard.
+type DashboardLeague struct {
+	Name       string             `json:"name"`
+	TopPlayers []PlayerPrediction `json:"top_players"`
+	RedFlags   []RedFlagPlayer    `json:"red_flags"`
 }
 
 type MomentumGame struct {

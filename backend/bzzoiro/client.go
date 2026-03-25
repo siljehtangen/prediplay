@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 	"prediplay/backend/models"
+	"strings"
 	"time"
 
 	"github.com/go-resty/resty/v2"
@@ -188,10 +189,13 @@ func (c *Client) GetLeagues() ([]models.League, error) {
 	return out, nil
 }
 
-func (c *Client) GetTeams(country string) ([]models.Team, error) {
+func (c *Client) GetTeams(country string, leagueID ...uint) ([]models.Team, error) {
 	params := map[string]string{}
 	if country != "" {
 		params["country"] = country
+	}
+	if len(leagueID) > 0 && leagueID[0] != 0 {
+		params["league"] = fmt.Sprintf("%d", leagueID[0])
 	}
 	raw, err := fetchAll[rawTeam](c, "/api/teams/", params)
 	if err != nil {
@@ -305,6 +309,20 @@ func (c *Client) GetPlayers(position, nationality, team string) ([]models.Player
 	return out, nil
 }
 
+func normalizePosition(p string) string {
+	switch strings.ToUpper(strings.TrimSpace(p)) {
+	case "G", "GK", "GOALKEEPER":
+		return "GK"
+	case "D", "DEF", "DEFENDER", "CB", "LB", "RB", "LWB", "RWB":
+		return "DEF"
+	case "M", "MID", "MIDFIELDER", "CM", "CAM", "CDM", "LM", "RM", "DM", "AM":
+		return "MID"
+	case "F", "FWD", "FORWARD", "ST", "CF", "LW", "RW", "SS", "A", "ATT", "ATTACKER":
+		return "FWD"
+	}
+	return p
+}
+
 func mapRawPlayer(r rawPlayer) models.Player {
 	return models.Player{
 		ID:           r.ID,
@@ -313,7 +331,7 @@ func mapRawPlayer(r rawPlayer) models.Player {
 		ShortName:    r.ShortName,
 		TeamID:       r.CurrentTeam.ID,
 		TeamName:     r.CurrentTeam.Name,
-		Position:     r.Position,
+		Position:     normalizePosition(r.Position),
 		JerseyNumber: r.JerseyNumber,
 		Height:       r.Height,
 		DateOfBirth:  r.DateOfBirth,
@@ -355,7 +373,7 @@ func mapRawStat(r rawPlayerStat) models.PlayerStat {
 	}
 }
 
-// GetPlayerStats fetches all historical stats for a player.
+// GetPlayerStats fetches all historical stats for a player (full season).
 func (c *Client) GetPlayerStats(playerID uint) ([]models.PlayerStat, error) {
 	params := map[string]string{"player": fmt.Sprintf("%d", playerID)}
 	raw, err := fetchAll[rawPlayerStat](c, "/api/player-stats/", params)
@@ -369,7 +387,33 @@ func (c *Client) GetPlayerStats(playerID uint) ([]models.PlayerStat, error) {
 	return out, nil
 }
 
+// GetPlayerStatsSince fetches stats for a player from dateFrom onwards (YYYY-MM-DD).
+// Passes date_from to the API if supported; always filters client-side as a fallback.
+func (c *Client) GetPlayerStatsSince(playerID uint, dateFrom string) ([]models.PlayerStat, error) {
+	params := map[string]string{
+		"player":    fmt.Sprintf("%d", playerID),
+		"date_from": dateFrom,
+	}
+	raw, err := fetchAll[rawPlayerStat](c, "/api/player-stats/", params)
+	if err != nil {
+		return nil, err
+	}
+	out := make([]models.PlayerStat, 0, len(raw))
+	for _, r := range raw {
+		// Client-side fallback: keep only stats on or after dateFrom
+		eventDate := r.Event.EventDate
+		if len(eventDate) >= 10 {
+			eventDate = eventDate[:10] // trim to YYYY-MM-DD
+		}
+		if eventDate >= dateFrom {
+			out = append(out, mapRawStat(r))
+		}
+	}
+	return out, nil
+}
+
 // GetPlayerStatsRecent fetches only the first page of stats (most recent games).
+// Used during SyncPlayers to populate the DB cache quickly.
 func (c *Client) GetPlayerStatsRecent(playerID uint) ([]models.PlayerStat, error) {
 	var resp paginated[rawPlayerStat]
 	url := c.baseURL + "/api/player-stats/"

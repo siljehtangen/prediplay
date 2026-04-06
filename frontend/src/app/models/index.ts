@@ -184,3 +184,9 @@ export interface DashboardLeague {
 
 // NOTE: prediction weights/tuning removed. Prediction scoring uses fixed,
 // built-in position weights.
+
+export const ALL_LEAGUES = ['Premier League', 'La Liga', 'Bundesliga', 'Serie A', 'Ligue 1'] as const;
+
+export function scoreClass(risk: string): string {
+  return risk === 'low' ? 'list-score--high' : risk === 'medium' ? 'list-score--medium' : 'list-score--low';
+}

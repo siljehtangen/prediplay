@@ -10,9 +10,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { forkJoin } from 'rxjs';
 import { SoccerService } from '../../services/soccer.service';
-import { League, PlayerPrediction } from '../../models';
-
-const ALL_LEAGUES = ['Premier League', 'La Liga', 'Bundesliga', 'Serie A', 'Ligue 1'];
+import { ALL_LEAGUES, League, PlayerPrediction, scoreClass } from '../../models';
 
 interface LeagueGroup {
   name: string;
@@ -76,8 +74,5 @@ export class HiddenGemsComponent implements OnInit {
     this.load();
   }
 
-  scoreClass(risk: string) {
-    // Map risk to color for the plain text score value (no ring/circle styling).
-    return risk === 'low' ? 'list-score--high' : risk === 'medium' ? 'list-score--medium' : 'list-score--low';
-  }
+  scoreClass = scoreClass;
 }

@@ -10,9 +10,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { forkJoin } from 'rxjs';
 import { SoccerService } from '../../services/soccer.service';
-import { BenchwarmerPlayer, League, Player } from '../../models';
-
-const ALL_LEAGUES = ['Premier League', 'La Liga', 'Bundesliga', 'Serie A', 'Ligue 1'];
+import { ALL_LEAGUES, BenchwarmerPlayer, League, Player } from '../../models';
 
 interface LeagueGroup {
   name: string;

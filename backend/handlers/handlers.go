@@ -35,6 +35,23 @@ func writeError(w http.ResponseWriter, status int, msg string) {
 	writeJSON(w, status, map[string]string{"error": msg})
 }
 
+// timeFilterParam returns the time_filter query param, defaulting to "recent".
+func timeFilterParam(r *http.Request) string {
+	if f := r.URL.Query().Get("time_filter"); f != "" {
+		return f
+	}
+	return "recent"
+}
+
+// parsePlayerID parses the "id" URL param as a uint. Returns 0 and false on failure.
+func parsePlayerID(r *http.Request) (uint, bool) {
+	id, err := strconv.ParseUint(chi.URLParam(r, "id"), 10, 64)
+	if err != nil {
+		return 0, false
+	}
+	return uint(id), true
+}
+
 // Leagues ─────────────────────────────────────────────────────────────────────
 
 // normalizeLeagueName maps an API league name to the canonical name used
@@ -186,13 +203,12 @@ func (h *Handler) GetPlayers(w http.ResponseWriter, r *http.Request) {
 // Player prediction ───────────────────────────────────────────────────────────
 
 func (h *Handler) GetPlayerPrediction(w http.ResponseWriter, r *http.Request) {
-	idStr := chi.URLParam(r, "id")
-	id, err := strconv.ParseUint(idStr, 10, 64)
-	if err != nil {
+	id, ok := parsePlayerID(r)
+	if !ok {
 		writeError(w, http.StatusBadRequest, "invalid player id")
 		return
 	}
-	pred, err := h.prediction.GetPlayerPrediction(uint(id))
+	pred, err := h.prediction.GetPlayerPrediction(id)
 	if err != nil {
 		writeError(w, http.StatusNotFound, err.Error())
 		return
@@ -208,12 +224,8 @@ func (h *Handler) GetTopPredictions(w http.ResponseWriter, r *http.Request) {
 	if q.Get("hidden_gem") == "true" {
 		gemFilter = "gems"
 	}
-	timeFilter := q.Get("time_filter")
-	if timeFilter == "" {
-		timeFilter = "recent"
-	}
 	preds, err := h.prediction.GetTopPredictions(
-		q.Get("league"), q.Get("position"), gemFilter, timeFilter,
+		q.Get("league"), q.Get("position"), gemFilter, timeFilterParam(r),
 	)
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, err.Error())
@@ -226,11 +238,7 @@ func (h *Handler) GetTopPredictions(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) GetRedFlags(w http.ResponseWriter, r *http.Request) {
 	q := r.URL.Query()
-	timeFilter := q.Get("time_filter")
-	if timeFilter == "" {
-		timeFilter = "recent"
-	}
-	result, err := h.prediction.GetRedFlags(q.Get("league"), q.Get("position"), timeFilter)
+	result, err := h.prediction.GetRedFlags(q.Get("league"), q.Get("position"), timeFilterParam(r))
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, err.Error())
 		return
@@ -241,11 +249,7 @@ func (h *Handler) GetRedFlags(w http.ResponseWriter, r *http.Request) {
 // Dashboard ───────────────────────────────────────────────────────────────────
 
 func (h *Handler) GetDashboard(w http.ResponseWriter, r *http.Request) {
-	timeFilter := r.URL.Query().Get("time_filter")
-	if timeFilter == "" {
-		timeFilter = "recent"
-	}
-	result, err := h.prediction.GetDashboard(timeFilter)
+	result, err := h.prediction.GetDashboard(timeFilterParam(r))
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, err.Error())
 		return
@@ -257,11 +261,7 @@ func (h *Handler) GetDashboard(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) GetBenchwarmers(w http.ResponseWriter, r *http.Request) {
 	q := r.URL.Query()
-	timeFilter := q.Get("time_filter")
-	if timeFilter == "" {
-		timeFilter = "recent"
-	}
-	result, err := h.prediction.GetBenchwarmers(q.Get("league"), q.Get("position"), timeFilter)
+	result, err := h.prediction.GetBenchwarmers(q.Get("league"), q.Get("position"), timeFilterParam(r))
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, err.Error())
 		return
@@ -312,13 +312,12 @@ func (h *Handler) GetMomentum(w http.ResponseWriter, r *http.Request) {
 // Player photo proxy ───────────────────────────────────────────────────────────
 
 func (h *Handler) GetPlayerPhoto(w http.ResponseWriter, r *http.Request) {
-	idStr := chi.URLParam(r, "id")
-	id, err := strconv.ParseUint(idStr, 10, 64)
-	if err != nil {
+	id, ok := parsePlayerID(r)
+	if !ok {
 		http.NotFound(w, r)
 		return
 	}
-	player, err := h.prediction.GetPlayer(uint(id))
+	player, err := h.prediction.GetPlayer(id)
 	if err != nil || player.ApiID == 0 {
 		http.NotFound(w, r)
 		return
@@ -337,13 +336,12 @@ func (h *Handler) GetPlayerPhoto(w http.ResponseWriter, r *http.Request) {
 // Player stats ─────────────────────────────────────────────────────────────────
 
 func (h *Handler) GetPlayerStats(w http.ResponseWriter, r *http.Request) {
-	idStr := chi.URLParam(r, "id")
-	id, err := strconv.ParseUint(idStr, 10, 64)
-	if err != nil {
+	id, ok := parsePlayerID(r)
+	if !ok {
 		writeError(w, http.StatusBadRequest, "invalid player id")
 		return
 	}
-	stats, err := h.bzzoiro.GetPlayerStatsRecent(uint(id))
+	stats, err := h.bzzoiro.GetPlayerStatsRecent(id)
 	if err != nil {
 		// External API unavailable — return empty array so player detail still renders
 		writeJSON(w, http.StatusOK, []models.PlayerStat{})

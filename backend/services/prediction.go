@@ -67,64 +67,72 @@ func sortByDateDesc(stats []models.PlayerStat) {
 	})
 }
 
-// aggregateOverall computes full-season totals into the Player's main stat fields.
-func aggregateOverall(p *models.Player, stats []models.PlayerStat) {
-	var mins, goals, assists, shots, shotsOT, keyPasses uint
-	var totalPasses, accPasses, duelsWon, duelsTotal uint
-	var tacklesWon, tacklesTotal, yellowCards, redCards, saves, gconceded uint
-	var xg, xa, rating float64
-	var ratedGames, games int
+// statTotals holds accumulated raw stat values from a slice of PlayerStat.
+type statTotals struct {
+	mins, goals, assists, shots, shotsOT, keyPasses uint
+	totalPasses, accPasses, duelsWon, duelsTotal     uint
+	tacklesWon, tacklesTotal                         uint
+	yellowCards, redCards, saves, gconceded          uint
+	xg, xa, rating                                   float64
+	ratedGames, gamesPlayed                          int
+}
 
+func accumulateStats(stats []models.PlayerStat) statTotals {
+	var t statTotals
 	for _, st := range stats {
 		if st.MinutesPlayed > 0 {
-			games++
+			t.gamesPlayed++
 		}
-		mins += st.MinutesPlayed
-		goals += st.Goals
-		assists += st.GoalAssist
-		xg += st.ExpectedGoals
-		xa += st.ExpectedAssists
-		shots += st.TotalShots
-		shotsOT += st.ShotsOnTarget
-		keyPasses += st.KeyPass
-		totalPasses += st.TotalPass
-		accPasses += st.AccuratePass
-		duelsWon += st.DuelWon
-		duelsTotal += st.DuelWon + st.DuelLost
-		tacklesWon += st.WonTackle
-		tacklesTotal += st.TotalTackle
-		yellowCards += st.YellowCard
-		redCards += st.RedCard
-		saves += st.Saves
-		gconceded += st.GoalsConceded
+		t.mins += st.MinutesPlayed
+		t.goals += st.Goals
+		t.assists += st.GoalAssist
+		t.xg += st.ExpectedGoals
+		t.xa += st.ExpectedAssists
+		t.shots += st.TotalShots
+		t.shotsOT += st.ShotsOnTarget
+		t.keyPasses += st.KeyPass
+		t.totalPasses += st.TotalPass
+		t.accPasses += st.AccuratePass
+		t.duelsWon += st.DuelWon
+		t.duelsTotal += st.DuelWon + st.DuelLost
+		t.tacklesWon += st.WonTackle
+		t.tacklesTotal += st.TotalTackle
+		t.yellowCards += st.YellowCard
+		t.redCards += st.RedCard
+		t.saves += st.Saves
+		t.gconceded += st.GoalsConceded
 		if st.Rating > 0 {
-			rating += st.Rating
-			ratedGames++
+			t.rating += st.Rating
+			t.ratedGames++
 		}
 	}
+	return t
+}
 
-	p.GamesPlayed = games
-	p.MinutesPlayed = int(mins)
-	p.Goals = int(goals)
-	p.Assists = int(assists)
-	p.XG = xg
-	p.XA = xa
-	p.TotalShots = int(shots)
-	p.ShotsOnTarget = int(shotsOT)
-	p.KeyPasses = int(keyPasses)
-	p.TotalPasses = int(totalPasses)
-	p.AccuratePasses = int(accPasses)
-	p.DuelsWon = int(duelsWon)
-	p.DuelsTotal = int(duelsTotal)
-	p.TacklesWon = int(tacklesWon)
-	p.TacklesTotal = int(tacklesTotal)
-	p.YellowCards = int(yellowCards)
-	p.RedCards = int(redCards)
-	p.Saves = int(saves)
-	p.GoalsConceded = int(gconceded)
-
-	if ratedGames > 0 {
-		p.FormScore = rating / float64(ratedGames)
+// aggregateOverall computes full-season totals into the Player's main stat fields.
+func aggregateOverall(p *models.Player, stats []models.PlayerStat) {
+	t := accumulateStats(stats)
+	p.GamesPlayed = t.gamesPlayed
+	p.MinutesPlayed = int(t.mins)
+	p.Goals = int(t.goals)
+	p.Assists = int(t.assists)
+	p.XG = t.xg
+	p.XA = t.xa
+	p.TotalShots = int(t.shots)
+	p.ShotsOnTarget = int(t.shotsOT)
+	p.KeyPasses = int(t.keyPasses)
+	p.TotalPasses = int(t.totalPasses)
+	p.AccuratePasses = int(t.accPasses)
+	p.DuelsWon = int(t.duelsWon)
+	p.DuelsTotal = int(t.duelsTotal)
+	p.TacklesWon = int(t.tacklesWon)
+	p.TacklesTotal = int(t.tacklesTotal)
+	p.YellowCards = int(t.yellowCards)
+	p.RedCards = int(t.redCards)
+	p.Saves = int(t.saves)
+	p.GoalsConceded = int(t.gconceded)
+	if t.ratedGames > 0 {
+		p.FormScore = t.rating / float64(t.ratedGames)
 	} else if p.FormScore == 0 {
 		p.FormScore = 6.0
 	}
@@ -132,58 +140,27 @@ func aggregateOverall(p *models.Player, stats []models.PlayerStat) {
 
 // aggregateRecent computes stats from the last 3 played games into the Player's Recent* fields.
 func aggregateRecent(p *models.Player, stats []models.PlayerStat) {
-	var mins, goals, assists, shots, shotsOT, keyPasses uint
-	var totalPasses, accPasses, duelsWon, duelsTotal uint
-	var tacklesWon, tacklesTotal, yellowCards, redCards, saves, gconceded uint
-	var xg, xa, rating float64
-	var ratedGames int
-
-	for _, st := range stats {
-		mins += st.MinutesPlayed
-		goals += st.Goals
-		assists += st.GoalAssist
-		xg += st.ExpectedGoals
-		xa += st.ExpectedAssists
-		shots += st.TotalShots
-		shotsOT += st.ShotsOnTarget
-		keyPasses += st.KeyPass
-		totalPasses += st.TotalPass
-		accPasses += st.AccuratePass
-		duelsWon += st.DuelWon
-		duelsTotal += st.DuelWon + st.DuelLost
-		tacklesWon += st.WonTackle
-		tacklesTotal += st.TotalTackle
-		yellowCards += st.YellowCard
-		redCards += st.RedCard
-		saves += st.Saves
-		gconceded += st.GoalsConceded
-		if st.Rating > 0 {
-			rating += st.Rating
-			ratedGames++
-		}
-	}
-
-	p.RecentMinutes = int(mins)
-	p.RecentGoals = int(goals)
-	p.RecentAssists = int(assists)
-	p.RecentXG = xg
-	p.RecentXA = xa
-	p.RecentTotalShots = int(shots)
-	p.RecentShotsOnTarget = int(shotsOT)
-	p.RecentKeyPasses = int(keyPasses)
-	p.RecentTotalPasses = int(totalPasses)
-	p.RecentAccuratePasses = int(accPasses)
-	p.RecentDuelsWon = int(duelsWon)
-	p.RecentDuelsTotal = int(duelsTotal)
-	p.RecentTacklesWon = int(tacklesWon)
-	p.RecentTacklesTotal = int(tacklesTotal)
-	p.RecentYellowCards = int(yellowCards)
-	p.RecentRedCards = int(redCards)
-	p.RecentSaves = int(saves)
-	p.RecentGoalsConceded = int(gconceded)
-
-	if ratedGames > 0 {
-		p.RecentFormScore = rating / float64(ratedGames)
+	t := accumulateStats(stats)
+	p.RecentMinutes = int(t.mins)
+	p.RecentGoals = int(t.goals)
+	p.RecentAssists = int(t.assists)
+	p.RecentXG = t.xg
+	p.RecentXA = t.xa
+	p.RecentTotalShots = int(t.shots)
+	p.RecentShotsOnTarget = int(t.shotsOT)
+	p.RecentKeyPasses = int(t.keyPasses)
+	p.RecentTotalPasses = int(t.totalPasses)
+	p.RecentAccuratePasses = int(t.accPasses)
+	p.RecentDuelsWon = int(t.duelsWon)
+	p.RecentDuelsTotal = int(t.duelsTotal)
+	p.RecentTacklesWon = int(t.tacklesWon)
+	p.RecentTacklesTotal = int(t.tacklesTotal)
+	p.RecentYellowCards = int(t.yellowCards)
+	p.RecentRedCards = int(t.redCards)
+	p.RecentSaves = int(t.saves)
+	p.RecentGoalsConceded = int(t.gconceded)
+	if t.ratedGames > 0 {
+		p.RecentFormScore = t.rating / float64(t.ratedGames)
 	} else {
 		p.RecentFormScore = 6.0
 	}
@@ -348,30 +325,6 @@ func playerVsOpponentScore(stats []models.PlayerStat, opponentTeamName string) f
 	return math.Min(10, math.Max(1, 5.0+(avg-6.5)*5.0))
 }
 
-// enrichAndSave fetches all stats for a player, computes overall + recent aggregates, and upserts to DB.
-func (s *PredictionService) enrichAndSave(p *models.Player, nextOpponent string) {
-	stats, err := s.client.GetPlayerStats(p.ID)
-	if err != nil || len(stats) == 0 {
-		s.db.Save(p)
-		return
-	}
-
-	aggregateOverall(p, stats)
-
-	played := playedGames(stats)
-	sortByDateDesc(played)
-	if len(played) > 3 {
-		played = played[:3]
-	}
-	p.RecentGamesPlayed = len(played)
-	aggregateRecent(p, played)
-
-	p.NextOpponent = nextOpponent
-	p.OpponentScore = playerVsOpponentScore(stats, nextOpponent)
-
-	s.db.Save(p)
-}
-
 // enrichAndCompute fetches all stats for a player and computes the aggregate fields
 // in-memory. It does not write to the DB; the caller can batch persist the result.
 func (s *PredictionService) enrichAndCompute(p models.Player, nextOpponent string) models.Player {
@@ -443,35 +396,28 @@ var positionQuota = map[string]int{
 	"FWD": 3,
 }
 
-// pickTopWithPositionQuota selects the best players using per-position quotas so
-// no single position can flood the top-N list. Each position competes within itself.
-func pickTopWithPositionQuota(preds []models.PlayerPrediction) []models.PlayerPrediction {
-	byPos := map[string][]models.PlayerPrediction{
-		"GK": {}, "DEF": {}, "MID": {}, "FWD": {},
-	}
-	for _, p := range preds {
-		pos := p.Player.Position
+// pickByPositionQuota selects items using per-position quotas (GK=1 DEF=2 MID=3 FWD=3)
+// so no single position can flood the top-N list.
+// getPos extracts the canonical position; less returns true when a should rank before b.
+func pickByPositionQuota[T any](items []T, getPos func(T) string, less func(a, b T) bool) []T {
+	byPos := map[string][]T{"GK": {}, "DEF": {}, "MID": {}, "FWD": {}}
+	for _, item := range items {
+		pos := getPos(item)
 		if _, ok := byPos[pos]; !ok {
-			pos = "FWD" // fallback for unexpected position values
+			pos = "FWD"
 		}
-		byPos[pos] = append(byPos[pos], p)
+		byPos[pos] = append(byPos[pos], item)
 	}
-	for pos := range byPos {
-		sort.Slice(byPos[pos], func(i, j int) bool {
-			return byPos[pos][i].PredictedScore > byPos[pos][j].PredictedScore
-		})
-	}
-	result := make([]models.PlayerPrediction, 0, 9)
+	result := make([]T, 0, 9)
 	for pos, quota := range positionQuota {
 		group := byPos[pos]
+		sort.Slice(group, func(i, j int) bool { return less(group[i], group[j]) })
 		if len(group) > quota {
 			group = group[:quota]
 		}
 		result = append(result, group...)
 	}
-	sort.Slice(result, func(i, j int) bool {
-		return result[i].PredictedScore > result[j].PredictedScore
-	})
+	sort.Slice(result, func(i, j int) bool { return less(result[i], result[j]) })
 	return result
 }
 
@@ -483,57 +429,6 @@ func riskLevelFromPredictedScore(predictedScore float64) string {
 		return "medium"
 	}
 	return "high"
-}
-
-// pickRedFlagsByPositionQuota applies the same GK=1/DEF=2/MID=3/FWD=3 quota to
-// a sorted (descending RedFlagScore) red-flag list and returns at most 9 players.
-// This prevents one position from flooding the list when a tactical or seasonal
-// trend affects an entire role (e.g., all strikers in poor form simultaneously).
-func pickRedFlagsByPositionQuota(flags []models.RedFlagPlayer) []models.RedFlagPlayer {
-	byPos := map[string][]models.RedFlagPlayer{
-		"GK": {}, "DEF": {}, "MID": {}, "FWD": {},
-	}
-	for _, f := range flags {
-		pos := canonicalPosition(f.Player.Position)
-		byPos[pos] = append(byPos[pos], f)
-	}
-	// Each group is already sorted descending (caller sorts before invoking).
-	result := make([]models.RedFlagPlayer, 0, 9)
-	for pos, quota := range positionQuota {
-		group := byPos[pos]
-		if len(group) > quota {
-			group = group[:quota]
-		}
-		result = append(result, group...)
-	}
-	sort.Slice(result, func(i, j int) bool {
-		return result[i].RedFlagScore > result[j].RedFlagScore
-	})
-	return result
-}
-
-// pickBenchwarmersByPositionQuota applies the same GK=1/DEF=2/MID=3/FWD=3 quota
-// to a sorted (descending ConsistencyScore) benchwarmer list.
-func pickBenchwarmersByPositionQuota(players []models.BenchwarmerPlayer) []models.BenchwarmerPlayer {
-	byPos := map[string][]models.BenchwarmerPlayer{
-		"GK": {}, "DEF": {}, "MID": {}, "FWD": {},
-	}
-	for _, bw := range players {
-		pos := canonicalPosition(bw.Player.Position)
-		byPos[pos] = append(byPos[pos], bw)
-	}
-	result := make([]models.BenchwarmerPlayer, 0, 9)
-	for pos, quota := range positionQuota {
-		group := byPos[pos]
-		if len(group) > quota {
-			group = group[:quota]
-		}
-		result = append(result, group...)
-	}
-	sort.Slice(result, func(i, j int) bool {
-		return result[i].ConsistencyScore > result[j].ConsistencyScore
-	})
-	return result
 }
 
 func canonicalPosition(pos string) string {
@@ -559,17 +454,11 @@ func percentile(sortedAsc []float64, frac float64) float64 {
 	}
 	// Use floor (not round) so percentiles close to 1.0 don't frequently select
 	// the absolute max when the sample size is small.
-	idx := int(math.Floor(frac * float64(len(sortedAsc)-1)))
-	if idx < 0 {
-		idx = 0
-	}
-	if idx >= len(sortedAsc) {
-		idx = len(sortedAsc) - 1
-	}
+	idx := max(0, min(len(sortedAsc)-1, int(math.Floor(frac*float64(len(sortedAsc)-1)))))
 	return sortedAsc[idx]
 }
 
-func normalizeScoreTo0_10AllowTen(score, low, high float64, allowTen bool) float64 {
+func normalizeScore(score, low, high float64) float64 {
 	if high <= low {
 		return 5.0
 	}
@@ -577,11 +466,9 @@ func normalizeScoreTo0_10AllowTen(score, low, high float64, allowTen bool) float
 	if n < 0 {
 		n = 0
 	}
-	// Clamp to the intended output range.
 	if n > 10 {
 		n = 10
 	}
-	// Keep full precision; the frontend formats to 1-2 decimals.
 	return n
 }
 
@@ -600,19 +487,12 @@ func normalizePlayerPredictedScoresByPosition(preds []models.PlayerPrediction) {
 		}
 		sort.Float64s(scoresAsc)
 
-		// Use robust scaling so the top doesn't get flattened into lots of 10s.
-		// Only the upper tail should approach 10.
-		// Use robust tail bounds so only the very top tail approaches 10.
+		// Use robust tail bounds so the top doesn't get flattened into lots of 10s.
 		low := percentile(scoresAsc, 0.005)
 		high := percentile(scoresAsc, 0.995)
 
-		// Sort descending so we know which player is "rank #1" inside this position group.
-		sort.Slice(indices, func(a, b int) bool {
-			return preds[indices[a]].PredictedScore > preds[indices[b]].PredictedScore
-		})
-		for rank, idx := range indices {
-			allowTen := rank == 0
-			norm := normalizeScoreTo0_10AllowTen(preds[idx].PredictedScore, low, high, allowTen)
+		for _, idx := range indices {
+			norm := normalizeScore(preds[idx].PredictedScore, low, high)
 			preds[idx].PredictedScore = norm
 			preds[idx].RiskLevel = riskLevelFromPredictedScore(norm)
 		}
@@ -640,13 +520,8 @@ func normalizeRedFlagScoresByPosition(flags []models.RedFlagPlayer) {
 		low := percentile(scoresAsc, 0.01)
 		high := scoresAsc[len(scoresAsc)-1]
 
-		// Sort descending so we know which player is "rank #1" inside this position group.
-		sort.Slice(indices, func(a, b int) bool {
-			return flags[indices[a]].RedFlagScore > flags[indices[b]].RedFlagScore
-		})
-		for rank, idx := range indices {
-			allowTen := rank == 0
-			flags[idx].RedFlagScore = normalizeScoreTo0_10AllowTen(flags[idx].RedFlagScore, low, high, allowTen)
+		for _, idx := range indices {
+			flags[idx].RedFlagScore = normalizeScore(flags[idx].RedFlagScore, low, high)
 		}
 	}
 }
@@ -697,7 +572,10 @@ func (s *PredictionService) GetTopPredictions(league, position, gemFilter, timeF
 		// Apply position quota (GK=1 DEF=2 MID=3 FWD=3) using normalized scores so
 		// each position competes fairly within itself before the cross-position cut.
 		// This is what prevents one position from flooding the top-9 list.
-		ordering = pickTopWithPositionQuota(ordering)
+		ordering = pickByPositionQuota(ordering,
+			func(p models.PlayerPrediction) string { return canonicalPosition(p.Player.Position) },
+			func(a, b models.PlayerPrediction) bool { return a.PredictedScore > b.PredictedScore },
+		)
 
 		// Restore raw score + raw risk level for UI consistency.
 		for i := range ordering {
@@ -736,12 +614,12 @@ func (s *PredictionService) GetRedFlags(league, position, timeFilter string) ([]
 	if timeFilter != "overall" {
 		minMinutes = 45
 	}
-	players, err := s.loadPlayersMinMinutes(league, position, minMinutes)
+	players, err := s.loadPlayers(league, position, minMinutes)
 	if err != nil {
 		return nil, err
 	}
 
-	result := make([]models.RedFlagPlayer, 0)
+	var result []models.RedFlagPlayer
 	for _, p := range players {
 		if timeFilter != "overall" && p.RecentGamesPlayed < 3 {
 			continue
@@ -782,7 +660,10 @@ func (s *PredictionService) GetRedFlags(league, position, timeFilter string) ([]
 		return result[i].RedFlagScore > result[j].RedFlagScore
 	})
 	if position == "" {
-		result = pickRedFlagsByPositionQuota(result)
+		result = pickByPositionQuota(result,
+			func(f models.RedFlagPlayer) string { return canonicalPosition(f.Player.Position) },
+			func(a, b models.RedFlagPlayer) bool { return a.RedFlagScore > b.RedFlagScore },
+		)
 	} else if len(result) > 9 {
 		result = result[:9]
 	}
@@ -796,12 +677,12 @@ func (s *PredictionService) GetBenchwarmers(league, position, timeFilter string)
 	if timeFilter != "overall" {
 		minMinutes = 45
 	}
-	players, err := s.loadPlayersMinMinutes(league, position, minMinutes)
+	players, err := s.loadPlayers(league, position, minMinutes)
 	if err != nil {
 		return nil, err
 	}
 
-	result := make([]models.BenchwarmerPlayer, 0)
+	var result []models.BenchwarmerPlayer
 
 	if position == "" {
 		// Keep raw ConsistencyScore so it doesn't get renormalized into a 0–10
@@ -866,7 +747,10 @@ func (s *PredictionService) GetBenchwarmers(league, position, timeFilter string)
 		return result[i].ConsistencyScore > result[j].ConsistencyScore
 	})
 	if position == "" {
-		result = pickBenchwarmersByPositionQuota(result)
+		result = pickByPositionQuota(result,
+			func(bw models.BenchwarmerPlayer) string { return canonicalPosition(bw.Player.Position) },
+			func(a, b models.BenchwarmerPlayer) bool { return a.ConsistencyScore > b.ConsistencyScore },
+		)
 	} else if len(result) > 9 {
 		result = result[:9]
 	}
@@ -1004,22 +888,11 @@ func (s *PredictionService) GetSynergy(playerIDs []uint) (*models.SynergyResult,
 
 // ─── DB helpers ───────────────────────────────────────────────────────────────
 
-func (s *PredictionService) loadPlayers(league, position string) ([]models.Player, error) {
+func (s *PredictionService) loadPlayers(league, position string, minMinutes ...int) ([]models.Player, error) {
 	query := s.db.Model(&models.Player{})
-	if league != "" {
-		query = query.Where("league = ?", league)
-	} else {
-		query = query.Where("league IN ?", supportedLeagueNames())
+	if len(minMinutes) > 0 && minMinutes[0] > 0 {
+		query = query.Where("minutes_played >= ?", minMinutes[0])
 	}
-	if position != "" {
-		query = query.Where("position = ?", position)
-	}
-	var players []models.Player
-	return players, query.Find(&players).Error
-}
-
-func (s *PredictionService) loadPlayersMinMinutes(league, position string, minMinutes int) ([]models.Player, error) {
-	query := s.db.Model(&models.Player{}).Where("minutes_played >= ?", minMinutes)
 	if league != "" {
 		query = query.Where("league = ?", league)
 	} else {
@@ -1527,12 +1400,7 @@ func (s *PredictionService) calcPrediction(player models.Player) *models.PlayerP
 	// Keep more precision to reduce artificial ties after normalization.
 	predicted = math.Round(predicted*1000) / 1000
 
-	risk := "high"
-	if predicted >= 7.0 {
-		risk = "low"
-	} else if predicted >= 4.5 {
-		risk = "medium"
-	}
+	risk := riskLevelFromPredictedScore(predicted)
 
 	hiddenGem, gemReasons := isHiddenGem(player, predicted, attack, creativity)
 

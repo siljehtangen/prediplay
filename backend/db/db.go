@@ -9,18 +9,15 @@ import (
 	"gorm.io/gorm/logger"
 )
 
-var DB *gorm.DB
-
 func Init(path string) *gorm.DB {
-	var err error
-	DB, err = gorm.Open(sqlite.Open(path), &gorm.Config{
+	db, err := gorm.Open(sqlite.Open(path), &gorm.Config{
 		Logger: logger.Default.LogMode(logger.Warn),
 	})
 	if err != nil {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}
 
-	if err := DB.AutoMigrate(
+	if err := db.AutoMigrate(
 		&models.League{},
 		&models.Team{},
 		&models.Player{},
@@ -29,5 +26,5 @@ func Init(path string) *gorm.DB {
 	}
 
 	log.Println("Database initialized")
-	return DB
+	return db
 }

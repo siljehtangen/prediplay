@@ -102,45 +102,45 @@ export class BenchwarmersComponent implements OnInit {
 
     if (pos === 'GK') {
       return [
+        { label: 'Mins', value: fmtInt(player.minutes_played) },
         { label: 'Form', value: fmt1(player.form_score) },
         { label: 'Saves', value: fmtInt(player.saves) },
         { label: 'Conceded', value: fmtInt(player.goals_conceded) },
-        { label: 'Acc. passes', value: passAcc(player.accurate_passes, player.total_passes) },
-        { label: 'Key passes', value: fmtInt(player.key_passes) },
-        { label: 'Mins', value: fmtInt(player.minutes_played) },
+        { label: 'Pass acc.', value: passAcc(player.accurate_passes, player.total_passes) },
+        { label: 'Games', value: fmtInt(player.games_played) },
       ];
     }
 
     if (pos === 'DEF') {
       return [
+        { label: 'Mins', value: fmtInt(player.minutes_played) },
         { label: 'Form', value: fmt1(player.form_score) },
         { label: 'Duels', value: ratio(player.duels_won, player.duels_total) },
         { label: 'Tackles', value: ratio(player.tackles_won, player.tackles_total) },
-        { label: 'Key passes', value: fmtInt(player.key_passes) },
-        { label: 'xA', value: fmt1(player.xA) },
-        { label: 'Mins', value: fmtInt(player.minutes_played) },
+        { label: 'Pass acc.', value: passAcc(player.accurate_passes, player.total_passes) },
+        { label: 'Games', value: fmtInt(player.games_played) },
       ];
     }
 
     if (pos === 'MID') {
       return [
+        { label: 'Mins', value: fmtInt(player.minutes_played) },
         { label: 'Form', value: fmt1(player.form_score) },
         { label: 'Key passes', value: fmtInt(player.key_passes) },
         { label: 'Pass acc.', value: passAcc(player.accurate_passes, player.total_passes) },
         { label: 'xG', value: fmt1(player.xG) },
-        { label: 'xA', value: fmt1(player.xA) },
-        { label: 'Mins', value: fmtInt(player.minutes_played) },
+        { label: 'Games', value: fmtInt(player.games_played) },
       ];
     }
 
     // FWD fallback
     return [
+      { label: 'Mins', value: fmtInt(player.minutes_played) },
       { label: 'Form', value: fmt1(player.form_score) },
       { label: 'Goals', value: fmtInt(player.goals) },
       { label: 'Assists', value: fmtInt(player.assists) },
       { label: 'xG', value: fmt1(player.xG) },
-      { label: 'xA', value: fmt1(player.xA) },
-      { label: 'Mins', value: fmtInt(player.minutes_played) },
+      { label: 'Games', value: fmtInt(player.games_played) },
     ];
   }
 }

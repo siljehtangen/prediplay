@@ -10,7 +10,7 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { forkJoin } from 'rxjs';
 import { SoccerService } from '../../services/soccer.service';
-import { ALL_LEAGUES, League, PlayerPrediction, scoreClass } from '../../models';
+import { ALL_LEAGUES, League, Player, PlayerPrediction, scoreClass } from '../../models';
 
 interface LeagueGroup {
   name: string;
@@ -85,4 +85,48 @@ export class TopPlayersComponent implements OnInit {
   }
 
   scoreClass = scoreClass;
+
+  statsFor(player: Player): Array<{ label: string; value: string }> {
+    const fmt1 = (v: number | undefined | null) => (v ?? 0).toFixed(1);
+    const fmtInt = (v: number | undefined | null) => String(v ?? 0);
+    const ratio = (won: number | undefined | null, total: number | undefined | null) => {
+      if (!total) return '—';
+      return `${won ?? 0}/${total}`;
+    };
+
+    if (player.position === 'GK') {
+      return [
+        { label: 'Saves', value: fmtInt(player.saves) },
+        { label: 'Conceded', value: fmtInt(player.goals_conceded) },
+        { label: 'Pass acc.', value: ratio(player.accurate_passes, player.total_passes) },
+        { label: 'Minutes', value: fmtInt(player.minutes_played) },
+      ];
+    }
+
+    if (player.position === 'DEF') {
+      return [
+        { label: 'Duels', value: ratio(player.duels_won, player.duels_total) },
+        { label: 'Tackles', value: ratio(player.tackles_won, player.tackles_total) },
+        { label: 'Key passes', value: fmtInt(player.key_passes) },
+        { label: 'xA', value: fmt1(player.xA) },
+      ];
+    }
+
+    if (player.position === 'MID') {
+      return [
+        { label: 'Key passes', value: fmtInt(player.key_passes) },
+        { label: 'xG', value: fmt1(player.xG) },
+        { label: 'xA', value: fmt1(player.xA) },
+        { label: 'Pass acc.', value: ratio(player.accurate_passes, player.total_passes) },
+      ];
+    }
+
+    // FWD
+    return [
+      { label: 'Goals', value: fmtInt(player.goals) },
+      { label: 'Assists', value: fmtInt(player.assists) },
+      { label: 'xG', value: fmt1(player.xG) },
+      { label: 'xA', value: fmt1(player.xA) },
+    ];
+  }
 }

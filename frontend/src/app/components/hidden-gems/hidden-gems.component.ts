@@ -10,7 +10,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { forkJoin } from 'rxjs';
 import { SoccerService } from '../../services/soccer.service';
-import { ALL_LEAGUES, League, PlayerPrediction, scoreClass } from '../../models';
+import { ALL_LEAGUES, League, Player, PlayerPrediction, scoreClass } from '../../models';
 
 interface LeagueGroup {
   name: string;
@@ -75,4 +75,46 @@ export class HiddenGemsComponent implements OnInit {
   }
 
   scoreClass = scoreClass;
+
+  gemWhyFor(player: Player): Array<{ icon: string; text: string }> {
+    const fmt1 = (v: number | undefined | null) => (v ?? 0).toFixed(1);
+    const fmtInt = (v: number | undefined | null) => String(v ?? 0);
+    const ratio = (won: number | undefined | null, total: number | undefined | null) => {
+      if (!total) return '—';
+      return `${won ?? 0}/${total}`;
+    };
+
+    const form = { icon: 'trending_up', text: `Form: ${fmt1(player.form_score)}/10` };
+
+    if (player.position === 'GK') {
+      return [
+        form,
+        { icon: 'shield', text: `Saves: ${fmtInt(player.saves)} / Conceded: ${fmtInt(player.goals_conceded)}` },
+        { icon: 'swap_horiz', text: `Pass acc. ${ratio(player.accurate_passes, player.total_passes)} (low ownership)` },
+      ];
+    }
+
+    if (player.position === 'DEF') {
+      return [
+        form,
+        { icon: 'shield', text: `Duels: ${ratio(player.duels_won, player.duels_total)} · Tackles: ${ratio(player.tackles_won, player.tackles_total)}` },
+        { icon: 'gps_fixed', text: `xA: ${fmt1(player.xA)} (low ownership)` },
+      ];
+    }
+
+    if (player.position === 'MID') {
+      return [
+        form,
+        { icon: 'gps_fixed', text: `xG ${fmt1(player.xG)} / xA ${fmt1(player.xA)}` },
+        { icon: 'key', text: `Key passes: ${fmtInt(player.key_passes)} (low ownership)` },
+      ];
+    }
+
+    // FWD
+    return [
+      form,
+      { icon: 'gps_fixed', text: `xG ${fmt1(player.xG)} / xA ${fmt1(player.xA)}` },
+      { icon: 'sports_soccer', text: `${fmtInt(player.goals)}G ${fmtInt(player.assists)}A (low ownership)` },
+    ];
+  }
 }

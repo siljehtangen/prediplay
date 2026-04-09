@@ -40,8 +40,6 @@ func supportedLeagueNames() []string {
 	return names
 }
 
-// ─── Stat aggregation ─────────────────────────────────────────────────────────
-
 // playedGames returns only entries where the player actually took the pitch.
 func playedGames(stats []models.PlayerStat) []models.PlayerStat {
 	out := make([]models.PlayerStat, 0, len(stats))
@@ -211,8 +209,6 @@ func scoringView(p models.Player, timeFilter string) (models.Player, bool) {
 	return withRecentStats(p), true
 }
 
-// ─── Sync ─────────────────────────────────────────────────────────────────────
-
 // SyncPlayers refreshes player and stats data for all 5 supported leagues.
 func (s *PredictionService) SyncPlayers() {
 	fmt.Println("[sync] Starting player sync…")
@@ -350,8 +346,6 @@ func (s *PredictionService) enrichAndCompute(p models.Player, nextOpponent strin
 	return p
 }
 
-// ─── Queries ──────────────────────────────────────────────────────────────────
-
 func (s *PredictionService) GetPlayer(playerID uint) (models.Player, error) {
 	var p models.Player
 	return p, s.db.First(&p, playerID).Error
@@ -384,8 +378,6 @@ func (s *PredictionService) GetPlayerPrediction(playerID uint) (*models.PlayerPr
 	}
 	return s.calcPrediction(player), nil
 }
-
-// ─── Top predictions ──────────────────────────────────────────────────────────
 
 // positionQuota defines how many top players to pick per position when no
 // position filter is active. Matches a typical attacking lineup shape (4-3-3 / 4-2-3-1).
@@ -564,7 +556,6 @@ func (s *PredictionService) GetTopPredictions(league, position, gemFilter, timeF
 			rawByID[pr.Player.ID] = rawInfo{score: pr.PredictedScore, risk: pr.RiskLevel}
 		}
 
-		// Copy for ordering only.
 		ordering := make([]models.PlayerPrediction, len(preds))
 		copy(ordering, preds)
 		normalizePlayerPredictedScoresByPosition(ordering)
@@ -603,8 +594,6 @@ func (s *PredictionService) GetTopPredictions(league, position, gemFilter, timeF
 	}
 	return preds, nil
 }
-
-// ─── Red flags ────────────────────────────────────────────────────────────────
 
 // GetRedFlags passes the original (full-stat) player to calcRedFlag so it can
 // compare recent vs overall as a true decline signal. The scoringView eligibility
@@ -669,8 +658,6 @@ func (s *PredictionService) GetRedFlags(league, position, timeFilter string) ([]
 	}
 	return result, nil
 }
-
-// ─── Benchwarmers ─────────────────────────────────────────────────────────────
 
 func (s *PredictionService) GetBenchwarmers(league, position, timeFilter string) ([]models.BenchwarmerPlayer, error) {
 	minMinutes := 270
@@ -757,8 +744,6 @@ func (s *PredictionService) GetBenchwarmers(league, position, timeFilter string)
 	return result, nil
 }
 
-// ─── Dashboard ────────────────────────────────────────────────────────────────
-
 var dashboardLeagueList = []string{"Premier League", "La Liga", "Bundesliga", "Serie A", "Ligue 1"}
 
 func (s *PredictionService) GetDashboard(timeFilter string) ([]models.DashboardLeague, error) {
@@ -792,8 +777,6 @@ func (s *PredictionService) GetDashboard(timeFilter string) ([]models.DashboardL
 	}
 	return results, nil
 }
-
-// ─── Momentum ─────────────────────────────────────────────────────────────────
 
 func (s *PredictionService) GetMomentum(playerID uint) (*models.MomentumData, error) {
 	var player models.Player
@@ -860,8 +843,6 @@ func (s *PredictionService) GetMomentum(playerID uint) (*models.MomentumData, er
 	return &models.MomentumData{Player: player, Games: games, Trend: trend}, nil
 }
 
-// ─── Synergy ──────────────────────────────────────────────────────────────────
-
 func (s *PredictionService) GetSynergy(playerIDs []uint) (*models.SynergyResult, error) {
 	players := make([]models.Player, 0, len(playerIDs))
 	for _, id := range playerIDs {
@@ -886,8 +867,6 @@ func (s *PredictionService) GetSynergy(playerIDs []uint) (*models.SynergyResult,
 	}, nil
 }
 
-// ─── DB helpers ───────────────────────────────────────────────────────────────
-
 func (s *PredictionService) loadPlayers(league, position string, minMinutes ...int) ([]models.Player, error) {
 	query := s.db.Model(&models.Player{})
 	if len(minMinutes) > 0 && minMinutes[0] > 0 {
@@ -905,8 +884,6 @@ func (s *PredictionService) loadPlayers(league, position string, minMinutes ...i
 	return players, query.Find(&players).Error
 }
 
-// ─── Scoring components (all return 0-10) ─────────────────────────────────────
-//
 // Every component is calibrated so that a genuinely elite player scores ~8-10,
 // a solid average player scores ~5-6, and a poor player scores ~2-3.
 // This spread prevents scores from clustering in the 5.5-6.5 band.
@@ -1213,8 +1190,6 @@ func disciplineComponent(p models.Player) float64 {
 	}
 	return disc
 }
-
-// ─── Prediction ───────────────────────────────────────────────────────────────
 
 // calcPrediction combines seven independent components with position-specific weights.
 //
@@ -1599,8 +1574,6 @@ func isHiddenGem(p models.Player, predicted, attackScore, creativityScore float6
 	return true, reasons
 }
 
-// ─── Red flags ────────────────────────────────────────────────────────────────
-
 // calcRedFlag always receives the full player (both overall and recent stats intact)
 // so it can detect true decline rather than just absolute badness.
 //
@@ -1825,8 +1798,6 @@ func calcRedFlag(p models.Player) (score, formDecline, outputDrop float64, reaso
 
 	return
 }
-
-// ─── Benchwarmers scoring ─────────────────────────────────────────────────────
 
 // calcBenchwarmer rewards consistency over brilliance. Five components:
 //

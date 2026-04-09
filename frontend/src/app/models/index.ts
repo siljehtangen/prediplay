@@ -182,9 +182,6 @@ export interface DashboardLeague {
   red_flags: RedFlagPlayer[];
 }
 
-// NOTE: prediction weights/tuning removed. Prediction scoring uses fixed,
-// built-in position weights.
-
 export const ALL_LEAGUES = ['Premier League', 'La Liga', 'Bundesliga', 'Serie A', 'Ligue 1'] as const;
 
 export function scoreClass(risk: string): string {

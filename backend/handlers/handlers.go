@@ -52,8 +52,6 @@ func parsePlayerID(r *http.Request) (uint, bool) {
 	return uint(id), true
 }
 
-// Leagues ─────────────────────────────────────────────────────────────────────
-
 // normalizeLeagueName maps an API league name to the canonical name used
 // throughout Prediplay. Returns "" if the league is not one of the 5 supported.
 func normalizeLeagueName(name string) string {
@@ -79,7 +77,6 @@ func (h *Handler) GetLeagues(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusBadGateway, err.Error())
 		return
 	}
-	// Return only the 5 supported leagues with normalized names.
 	filtered := make([]models.League, 0, 5)
 	for _, l := range all {
 		if canonical := normalizeLeagueName(l.Name); canonical != "" {
@@ -90,8 +87,6 @@ func (h *Handler) GetLeagues(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, filtered)
 }
 
-// Teams ───────────────────────────────────────────────────────────────────────
-
 func (h *Handler) GetTeams(w http.ResponseWriter, r *http.Request) {
 	country := r.URL.Query().Get("country")
 	teams, err := h.bzzoiro.GetTeams(country)
@@ -101,8 +96,6 @@ func (h *Handler) GetTeams(w http.ResponseWriter, r *http.Request) {
 	}
 	writeJSON(w, http.StatusOK, teams)
 }
-
-// Events ──────────────────────────────────────────────────────────────────────
 
 func (h *Handler) GetEvents(w http.ResponseWriter, r *http.Request) {
 	q := r.URL.Query()
@@ -165,8 +158,6 @@ func (h *Handler) GetEvents(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, combined)
 }
 
-// Live ────────────────────────────────────────────────────────────────────────
-
 func (h *Handler) GetLive(w http.ResponseWriter, r *http.Request) {
 	events, err := h.bzzoiro.GetLive()
 	if err != nil {
@@ -175,8 +166,6 @@ func (h *Handler) GetLive(w http.ResponseWriter, r *http.Request) {
 	}
 	writeJSON(w, http.StatusOK, events)
 }
-
-// Predictions (Bzzoiro ML) ────────────────────────────────────────────────────
 
 func (h *Handler) GetPredictions(w http.ResponseWriter, r *http.Request) {
 	upcoming := r.URL.Query().Get("upcoming") == "true"
@@ -188,8 +177,6 @@ func (h *Handler) GetPredictions(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, preds)
 }
 
-// Players (local DB) ──────────────────────────────────────────────────────────
-
 func (h *Handler) GetPlayers(w http.ResponseWriter, r *http.Request) {
 	q := r.URL.Query()
 	players, err := h.prediction.GetAllPlayers(q.Get("league"), q.Get("position"), q.Get("team"))
@@ -199,8 +186,6 @@ func (h *Handler) GetPlayers(w http.ResponseWriter, r *http.Request) {
 	}
 	writeJSON(w, http.StatusOK, players)
 }
-
-// Player prediction ───────────────────────────────────────────────────────────
 
 func (h *Handler) GetPlayerPrediction(w http.ResponseWriter, r *http.Request) {
 	id, ok := parsePlayerID(r)
@@ -215,8 +200,6 @@ func (h *Handler) GetPlayerPrediction(w http.ResponseWriter, r *http.Request) {
 	}
 	writeJSON(w, http.StatusOK, pred)
 }
-
-// Top predictions ─────────────────────────────────────────────────────────────
 
 func (h *Handler) GetTopPredictions(w http.ResponseWriter, r *http.Request) {
 	q := r.URL.Query()
@@ -234,8 +217,6 @@ func (h *Handler) GetTopPredictions(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, preds)
 }
 
-// Red flags ───────────────────────────────────────────────────────────────────
-
 func (h *Handler) GetRedFlags(w http.ResponseWriter, r *http.Request) {
 	q := r.URL.Query()
 	result, err := h.prediction.GetRedFlags(q.Get("league"), q.Get("position"), timeFilterParam(r))
@@ -246,8 +227,6 @@ func (h *Handler) GetRedFlags(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, result)
 }
 
-// Dashboard ───────────────────────────────────────────────────────────────────
-
 func (h *Handler) GetDashboard(w http.ResponseWriter, r *http.Request) {
 	result, err := h.prediction.GetDashboard(timeFilterParam(r))
 	if err != nil {
@@ -256,8 +235,6 @@ func (h *Handler) GetDashboard(w http.ResponseWriter, r *http.Request) {
 	}
 	writeJSON(w, http.StatusOK, result)
 }
-
-// Benchwarmers ─────────────────────────────────────────────────────────────────
 
 func (h *Handler) GetBenchwarmers(w http.ResponseWriter, r *http.Request) {
 	q := r.URL.Query()
@@ -268,8 +245,6 @@ func (h *Handler) GetBenchwarmers(w http.ResponseWriter, r *http.Request) {
 	}
 	writeJSON(w, http.StatusOK, result)
 }
-
-// Synergy ─────────────────────────────────────────────────────────────────────
 
 func (h *Handler) GetSynergy(w http.ResponseWriter, r *http.Request) {
 	raw := r.URL.Query().Get("players")
@@ -292,8 +267,6 @@ func (h *Handler) GetSynergy(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, result)
 }
 
-// Momentum ────────────────────────────────────────────────────────────────────
-
 func (h *Handler) GetMomentum(w http.ResponseWriter, r *http.Request) {
 	idStr := r.URL.Query().Get("player")
 	id, err := strconv.ParseUint(idStr, 10, 64)
@@ -308,8 +281,6 @@ func (h *Handler) GetMomentum(w http.ResponseWriter, r *http.Request) {
 	}
 	writeJSON(w, http.StatusOK, data)
 }
-
-// Player photo proxy ───────────────────────────────────────────────────────────
 
 func (h *Handler) GetPlayerPhoto(w http.ResponseWriter, r *http.Request) {
 	id, ok := parsePlayerID(r)
@@ -332,8 +303,6 @@ func (h *Handler) GetPlayerPhoto(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 	}
 }
-
-// Player stats ─────────────────────────────────────────────────────────────────
 
 func (h *Handler) GetPlayerStats(w http.ResponseWriter, r *http.Request) {
 	id, ok := parsePlayerID(r)

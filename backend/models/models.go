@@ -31,7 +31,6 @@ type Player struct {
 	Nationality  string `json:"nationality"`
 	MarketValue  uint   `json:"market_value"`
 
-	// ── Season totals ──────────────────────────────────────────────────────────
 	GamesPlayed   int     `json:"games_played"`
 	MinutesPlayed int     `gorm:"index" json:"minutes_played"`
 	Goals         int     `json:"goals"`
@@ -53,7 +52,6 @@ type Player struct {
 	GoalsConceded int     `json:"goals_conceded"` // GK
 	FormScore     float64 `json:"form_score"`     // average match rating (1-10)
 
-	// ── Recent stats (last 3 played games) ────────────────────────────────────
 	RecentGamesPlayed   int     `json:"recent_games_played"`
 	RecentMinutes       int     `json:"recent_minutes"`
 	RecentGoals         int     `json:"recent_goals"`
@@ -75,7 +73,6 @@ type Player struct {
 	RecentGoalsConceded int     `json:"recent_goals_conceded"`
 	RecentFormScore     float64 `json:"recent_form_score"`
 
-	// ── Opponent context ───────────────────────────────────────────────────────
 	NextOpponent  string  `json:"next_opponent"`  // team name of next scheduled opponent
 	OpponentScore float64 `json:"opponent_score"` // 0-10: historical performance vs that opponent
 }
@@ -202,5 +199,3 @@ type SynergyResult struct {
 	SynergyScore   float64  `json:"synergy_score"`
 }
 
-// NOTE: prediction weights/tuning removed. Prediction scoring uses fixed,
-// built-in position weights.

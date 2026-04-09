@@ -41,8 +41,6 @@ func (c *Client) ProxyPlayerPhoto(w io.Writer, headerSetter func(string), apiID 
 	return err
 }
 
-// --- Raw API response types ---
-
 type paginated[T any] struct {
 	Count   int `json:"count"`
 	Results []T `json:"results"`
@@ -145,8 +143,6 @@ type rawPlayerStat struct {
 	GoalsConceded   uint         `json:"goals_conceded"`
 }
 
-// --- Fetch helpers ---
-
 func fetchAll[Raw any](c *Client, path string, params map[string]string) ([]Raw, error) {
 	var all []Raw
 	page := 1
@@ -174,8 +170,6 @@ func fetchAll[Raw any](c *Client, path string, params map[string]string) ([]Raw,
 	}
 	return all, nil
 }
-
-// --- Public methods ---
 
 func (c *Client) GetLeagues() ([]models.League, error) {
 	raw, err := fetchAll[rawLeague](c, "/api/leagues/", nil)

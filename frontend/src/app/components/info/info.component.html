@@ -176,6 +176,47 @@
         3 games → 55% actual + 45% neutral &nbsp;|&nbsp; 10 games → 87% actual &nbsp;|&nbsp; 20+ games → 100% actual (no dampening)
       </div>
 
+      <!-- Inactivity & minutes penalties -->
+      <h3 class="section-label">Inactivity &amp; Low-Minutes Penalties</h3>
+      <p class="info-card__intro" style="margin-bottom:12px">
+        Players who haven't played recently, or are only receiving cameo minutes, are dragged toward a
+        <strong>below-neutral baseline of 2.5</strong> so they can never rank positively on stale or limited stats.
+        The formula is: <code>score × factor + 2.5 × (1 − factor)</code>.
+        Both penalties are applied independently — in practice they target mutually exclusive situations.
+      </p>
+
+      <div class="factor-list factor-list--compact">
+
+        <div class="factor">
+          <div class="factor__pill factor__pill--avail">Inactivity</div>
+          <div class="factor__body">
+            <div class="factor__desc">
+              Based on <strong>days since the player's last match</strong>:
+              <br/>• <strong>0 – 14 days</strong>: factor = 1.00 — no penalty, player is active
+              <br/>• <strong>14 – 28 days</strong>: factor 1.00 → 0.70 — mild (rotation rest or short knock)
+              <br/>• <strong>28 – 56 days</strong>: factor 0.70 → 0.35 — significant (injury / dropped from squad)
+              <br/>• <strong>56+ days or no data</strong>: factor = 0.35 — score pulled hard toward 2.5
+              <br/><em>Example: a strong player (raw 9.0) absent 60 days → 9 × 0.35 + 2.5 × 0.65 ≈ 4.8 (below neutral)</em>
+            </div>
+          </div>
+        </div>
+
+        <div class="factor">
+          <div class="factor__pill factor__pill--disc">Low Minutes</div>
+          <div class="factor__body">
+            <div class="factor__desc">
+              Based on <strong>average minutes per game in the last 3 appearances</strong>:
+              <br/>• <strong>≥ 60 min/game</strong>: factor = 1.00 — starter or near-starter, no penalty
+              <br/>• <strong>45 – 60 min/game</strong>: factor 1.00 → 0.85 — regular rotation, mild drag
+              <br/>• <strong>30 – 45 min/game</strong>: factor 0.85 → 0.60 — fringe player
+              <br/>• <strong>&lt; 30 min/game</strong>: factor = 0.40 — cameo role, score pushed clearly below neutral
+              <br/><em>Example: a raw score of 7.0 at 15 min/game → 7 × 0.40 + 2.5 × 0.60 = 4.3</em>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
       <p class="info-card__note">
         On the player profile page, Prediction Controls scale Form / Threat / Opponent / Minutes / Home-Away
         and then renormalize. The league grids use default controls.

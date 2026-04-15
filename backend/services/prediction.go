@@ -345,6 +345,14 @@ func (s *PredictionService) enrichAndCompute(p models.Player, nextOpponent strin
 	p.RecentGamesPlayed = len(played)
 	aggregateRecent(&p, played)
 
+	if len(played) > 0 {
+		d := played[0].Event.EventDate
+		if len(d) > 10 {
+			d = d[:10]
+		}
+		p.LastMatchDate = d
+	}
+
 	p.NextOpponent = nextOpponent
 	p.IsHome = isHome
 	p.OpponentScore = playerVsOpponentScore(stats, nextOpponent)
@@ -1197,6 +1205,74 @@ func disciplineComponent(p models.Player) float64 {
 	return disc
 }
 
+// recentMinutesFactor returns a multiplier (0–1) that penalises players who are
+// playing but only receiving cameo minutes in their recent games. The penalty
+// is applied the same way as the inactivity penalty — the final score is blended
+// toward the below-neutral baseline so a squad player getting 15 min/game cannot
+// score positively on their season stats alone.
+//
+//   ≥ 60 min/game: factor=1.00  — starter / near-starter, no penalty
+//   45–60 min/game: factor 1.00→0.85 — regular rotation, mild penalty
+//   30–45 min/game: factor 0.85→0.60 — fringe player
+//   < 30 min/game:  factor 0.40       — cameo role, heavy penalty
+//
+// Only applied when recent game data exists (RecentGamesPlayed > 0); inactivity
+// handles the zero-games case separately.
+func recentMinutesFactor(p models.Player) float64 {
+	if p.RecentGamesPlayed == 0 {
+		return 1.0 // no recent data — inactivity penalty handles this
+	}
+	avgMins := float64(p.RecentMinutes) / float64(p.RecentGamesPlayed)
+	switch {
+	case avgMins >= 60:
+		return 1.0
+	case avgMins >= 45:
+		// linear 1.00 → 0.85 over 15 min
+		return 1.0 - (60-avgMins)/15*0.15
+	case avgMins >= 30:
+		// linear 0.85 → 0.60 over 15 min
+		return 0.85 - (45-avgMins)/15*0.25
+	default:
+		// < 30 min/game — trusted only for cameos
+		return 0.40
+	}
+}
+
+// inactivityFactor returns a multiplier (0–1) and a pull-toward baseline (2.5)
+// for players who haven't played recently. The longer the absence, the more the
+// score is dragged below the neutral midpoint so inactive players never rank high.
+//
+//   0–14 days:  factor=1.00  → no penalty
+//   14–28 days: factor 1.00→0.70 (mild — rotation / rest)
+//   28–56 days: factor 0.70→0.35 (significant — injury / dropped)
+//   56+ days:   factor=0.35  → score pulled hard toward 2.5
+//
+// The blended score is: predicted*factor + 2.5*(1-factor).
+// A star player (raw 9.0) absent 60 days → 9*0.35 + 2.5*0.65 ≈ 4.8 (below neutral).
+// An average player (raw 5.5) absent 60 days → 5.5*0.35 + 2.5*0.65 ≈ 3.5 (clearly negative).
+func inactivityFactor(lastMatchDate string) float64 {
+	if lastMatchDate == "" {
+		return 0.35 // no data — treat as long-term absent
+	}
+	t, err := time.Parse("2006-01-02", lastMatchDate)
+	if err != nil {
+		return 0.35
+	}
+	days := time.Since(t).Hours() / 24
+	switch {
+	case days <= 14:
+		return 1.0
+	case days <= 28:
+		// linear 1.0 → 0.70 over 14 days
+		return 1.0 - (days-14)/14*0.30
+	case days <= 56:
+		// linear 0.70 → 0.35 over 28 days
+		return 0.70 - (days-28)/28*0.35
+	default:
+		return 0.35
+	}
+}
+
 // calcPrediction combines seven independent components with position-specific weights.
 //
 // Each component is now enriched with position-specific signals and recent-form blending
@@ -1389,6 +1465,22 @@ func (s *PredictionService) calcPrediction(player models.Player) *models.PlayerP
 			predicted -= 0.20 * confidence
 		}
 	}
+
+	// Inactivity / low-minutes penalties: both drag the score toward a below-neutral
+	// baseline (2.5) so players who aren't playing — or are only receiving cameo
+	// minutes — never rank positively on stale or limited stats.
+	//   • inactivityFactor: long absence (days since last match)
+	//   • recentMinutesFactor: playing but only getting short stints
+	// The two cases are mutually exclusive in practice, so both are applied
+	// independently without accumulating an unfair double-penalty.
+	const inactivityBaseline = 2.5
+	if f := inactivityFactor(player.LastMatchDate); f < 1.0 {
+		predicted = predicted*f + inactivityBaseline*(1.0-f)
+	}
+	if f := recentMinutesFactor(player); f < 1.0 {
+		predicted = predicted*f + inactivityBaseline*(1.0-f)
+	}
+
 	predicted = math.Max(0, math.Min(10, predicted))
 
 	// Keep more precision to reduce artificial ties after normalization.

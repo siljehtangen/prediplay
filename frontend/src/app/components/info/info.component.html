@@ -1,8 +1,8 @@
 <div class="page">
   <h1 class="page__title">How It Works</h1>
-  <p class="page__subtitle">Understanding the predictions behind every score, pick, and flag</p>
+  <p class="page__subtitle">A full breakdown of every score, flag, and label — no black boxes</p>
 
-  <!-- Player Prediction Score -->
+  <!-- ── Player Prediction Score ─────────────────────────────────────────── -->
   <mat-card class="info-card">
     <mat-card-content>
       <div class="info-card__heading">
@@ -10,80 +10,180 @@
         <h2>Player Prediction Score (0 – 10)</h2>
       </div>
       <p class="info-card__intro">
-        Every player receives a <strong>predicted score</strong> representing their expected performance in the upcoming match.
-        Internally we calculate <strong>7 component scores</strong> (0–10) and then combine them using <strong>position-specific weights</strong> (GK/DEF/MID/FWD).
-        In the player profile, the Prediction Controls scale the macro groups (Form/Threat/Opponent/Minutes/Home-Away) while preserving the per-position structure.
+        Every player receives a <strong>Predicted Score</strong> representing their expected performance in the upcoming match.
+        We compute <strong>7 independent components</strong> (each 0–10), combine them with
+        <strong>position- and sub-role-specific weights</strong>, then apply a
+        <strong>sample-size confidence dampening</strong> and a <strong>venue advantage modifier</strong>.
       </p>
 
+      <!-- 7 components -->
+      <h3 class="section-label">The 7 Components</h3>
       <div class="factor-list">
+
         <div class="factor">
-          <div class="factor__bar" style="width: 35%"></div>
+          <div class="factor__pill factor__pill--form">Form</div>
           <div class="factor__body">
-            <div class="factor__name">Form <span class="factor__weight">(scaled)</span></div>
             <div class="factor__desc">
-              Uses the player's match rating (<strong>FormScore</strong>, 1–10). If missing, we fall back to ~6.0 as a neutral baseline.
+              Season average match rating blended with recent form.
+              <br/>• Outfield: <strong>60% season + 40% last-3-games</strong> — rewards current momentum while keeping seasonal stability.
+              <br/>• GK: <strong>50 / 50</strong> — recent clean sheets and blunders are more predictive game-to-game for keepers.
+              <br/>• Fallback: 6.0 if no rating data is available.
             </div>
           </div>
         </div>
 
         <div class="factor">
-          <div class="factor__bar" style="width: 25%"></div>
+          <div class="factor__pill factor__pill--attack">Attack</div>
           <div class="factor__body">
-            <div class="factor__name">Threat <span class="factor__weight">(scaled)</span></div>
             <div class="factor__desc">
-              Combines two attacking sub-components:
-              <br/>• <strong>Attack</strong> (xG/90 with conversion bonus, plus shots-on-target volume)
-              <br/>• <strong>Creativity</strong> (xA/90 with assist bonus, plus key-pass quality)
+              Goal-scoring threat via three independent signals blended 60% season / 40% recent:
+              <br/>• <strong>xG per 90</strong> with position-specific scaling (FWD ×14 cap 10 | MID ×14 cap 8 | DEF ×10 cap 5 | GK ×6 cap 3)
+              <br/>• <strong>Conversion bonus</strong> (0–2): rewards clinical finishers whose goals exceed their xG.
+              <br/>• <strong>Shot volume</strong> (0–2): shots on target per 90, regardless of xG quality.
             </div>
           </div>
         </div>
 
         <div class="factor">
-          <div class="factor__bar" style="width: 15%"></div>
+          <div class="factor__pill factor__pill--creativity">Creativity</div>
           <div class="factor__body">
-            <div class="factor__name">Opponent Difficulty <span class="factor__weight">(scaled)</span></div>
             <div class="factor__desc">
-              Uses the matchup difficulty (<strong>OpponentScore</strong>, 0–10). If missing we default to ~5.
+              Fully position-specific:
+              <br/>• <strong>DEF</strong> — key passes per 90 (build-up quality) + assist delivery bonus. Typical CB ≈ 2; attacking FB ≈ 8.
+              <br/>• <strong>MID</strong> — xA per 90 (×16, cap 8) + assist bonus + xA-per-key-pass quality + pass accuracy bonus (72%→0, 88%→2).
+              <br/>• <strong>FWD</strong> — xA per 90 + assist bonus + key pass quality (without the pass accuracy bonus).
             </div>
           </div>
         </div>
 
         <div class="factor">
-          <div class="factor__bar" style="width: 15%"></div>
+          <div class="factor__pill factor__pill--defensive">Defensive</div>
           <div class="factor__body">
-            <div class="factor__name">Minutes Likelihood <span class="factor__weight">(scaled)</span></div>
             <div class="factor__desc">
-              Uses an <strong>availability</strong> score based on minutes played, blended across season + recent matches.
+              Position-specific signals:
+              <br/>• <strong>GK</strong>: save rate (0–7) + goals conceded per game (0–2) + recent save-rate trend (±1.5) + save volume (0–0.5) + pass accuracy (0–1.0).
+              <br/>• <strong>DEF</strong>: duel win rate (0–4.5) + tackle win rate (0–4.0) + tackle activity (0–1.5) + pass accuracy (0–1.5).
+              <br/>• <strong>MID</strong>: duel win rate (0–5) + tackle win rate (0–3) + floor of 1.0. DMs score 8+; AMs score ~4.5.
+              <br/>• <strong>FWD</strong>: hold-up play via duel win rate only (range 1–6).
             </div>
           </div>
         </div>
 
         <div class="factor">
-          <div class="factor__bar factor__bar--last" style="width: 10%"></div>
+          <div class="factor__pill factor__pill--avail">Availability</div>
           <div class="factor__body">
-            <div class="factor__name">Home / Away Factor <span class="factor__weight">(scaled)</span></div>
             <div class="factor__desc">
-              This is the <strong>defensive component</strong> (GK save strength / DEF duels+duels volume / MID duel work / reduced FWD defensive impact).
+              Average minutes per game vs a full 90 — detects rotation risk and injury absences.
+              <br/>Blended <strong>50% season / 50% recent</strong>. A player averaging 88 min all season but subbed at 45 for 3 games
+              drops from ~8.6 to ~7.2 — a meaningful rotation signal.
             </div>
           </div>
+        </div>
+
+        <div class="factor">
+          <div class="factor__pill factor__pill--disc">Discipline</div>
+          <div class="factor__body">
+            <div class="factor__desc">
+              Starts at 10; each yellow card per game costs 5 points, each red card costs 15.
+              <br/>Blended <strong>40% season + 60% recent</strong> — suspension risk is driven by recent behaviour.
+              A player with 3 yellows in 3 games is an immediate concern regardless of a clean season.
+            </div>
+          </div>
+        </div>
+
+        <div class="factor">
+          <div class="factor__pill factor__pill--opp">Opponent</div>
+          <div class="factor__body">
+            <div class="factor__desc">
+              Player's historical performance against the next opponent specifically.
+              Uses match ratings (and G+A where ratings are missing) across all past meetings.
+              <br/>Formula: <code>5.0 + (avgRatingVsOpponent − 6.5) × 5.0</code>, clamped 1–10.
+              <br/>Defaults to <strong>5.0</strong> (neutral) when no prior history exists.
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Sub-role inference -->
+      <h3 class="section-label">Sub-Role Inference</h3>
+      <p class="info-card__intro">
+        We only store four positions (GK / DEF / MID / FWD) but real footballers play very different roles.
+        The engine infers a sub-role from the player's actual stat signature and adjusts weights accordingly —
+        so a defensive midfielder isn't penalised by the creativity-heavy weights designed for an attacking mid.
+      </p>
+      <div class="subrole-grid">
+        <div class="subrole-card">
+          <div class="subrole-card__pos">DEF</div>
+          <div class="subrole-card__name">Attacking Full-Back</div>
+          <div class="subrole-card__trigger">≥ 1.0 key passes/game <em>or</em> ≥ 0.15 assists/game</div>
+          <div class="formula-box formula-box--inline">form·0.20 + atk·0.10 + cre·0.14 + def·0.28 + avail·0.12 + disc·0.08 + opp·0.08</div>
+        </div>
+        <div class="subrole-card">
+          <div class="subrole-card__pos">DEF</div>
+          <div class="subrole-card__name">Centre-Back</div>
+          <div class="subrole-card__trigger">All other defenders</div>
+          <div class="formula-box formula-box--inline">form·0.22 + atk·0.05 + cre·0.05 + def·0.35 + avail·0.13 + disc·0.10 + opp·0.10</div>
+        </div>
+        <div class="subrole-card">
+          <div class="subrole-card__pos">MID</div>
+          <div class="subrole-card__name">Defensive Midfielder</div>
+          <div class="subrole-card__trigger">≥ 6 duels/90 AND &lt; 1.5 key passes/game</div>
+          <div class="formula-box formula-box--inline">form·0.20 + atk·0.10 + cre·0.14 + def·0.24 + avail·0.11 + disc·0.11 + opp·0.10</div>
+        </div>
+        <div class="subrole-card">
+          <div class="subrole-card__pos">MID</div>
+          <div class="subrole-card__name">Attacking / Box-to-Box</div>
+          <div class="subrole-card__trigger">All other midfielders</div>
+          <div class="formula-box formula-box--inline">form·0.20 + atk·0.17 + cre·0.24 + def·0.12 + avail·0.10 + disc·0.09 + opp·0.08</div>
+        </div>
+        <div class="subrole-card">
+          <div class="subrole-card__pos">FWD</div>
+          <div class="subrole-card__name">Creative / False Nine</div>
+          <div class="subrole-card__trigger">Creativity score ≥ 5.5 <em>or</em> ≥ 0.20 assists/game</div>
+          <div class="formula-box formula-box--inline">form·0.18 + atk·0.27 + cre·0.23 + def·0.02 + avail·0.10 + disc·0.08 + opp·0.12</div>
+        </div>
+        <div class="subrole-card">
+          <div class="subrole-card__pos">FWD</div>
+          <div class="subrole-card__name">Pure Striker</div>
+          <div class="subrole-card__trigger">All other forwards</div>
+          <div class="formula-box formula-box--inline">form·0.18 + atk·0.35 + cre·0.14 + def·0.02 + avail·0.10 + disc·0.08 + opp·0.13</div>
+        </div>
+        <div class="subrole-card subrole-card--full">
+          <div class="subrole-card__pos">GK</div>
+          <div class="subrole-card__name">Goalkeeper</div>
+          <div class="subrole-card__trigger">Fixed weights — no sub-role</div>
+          <div class="formula-box formula-box--inline">form·0.22 + def·0.60 + avail·0.06 + disc·0.04 + opp·0.08</div>
         </div>
       </div>
 
+      <!-- Venue advantage -->
+      <h3 class="section-label">Venue Advantage</h3>
       <div class="formula-box">
-        <strong>Position-weighted</strong> PredictedScore (raw 0–10) is computed from:
-        <br/>GK: 0.22·Form + 0.60·Defensive + 0.06·Availability + 0.04·Discipline + 0.08·Opponent
-        <br/>DEF: 0.22·Form + 0.08·Attack + 0.07·Creativity + 0.30·Defensive + 0.13·Availability + 0.10·Discipline + 0.10·Opponent
-        <br/>MID: 0.20·Form + 0.17·Attack + 0.24·Creativity + 0.12·Defensive + 0.10·Availability + 0.09·Discipline + 0.08·Opponent
-        <br/>FWD: 0.18·Form + 0.33·Attack + 0.17·Creativity + 0.02·Defensive + 0.10·Availability + 0.08·Discipline + 0.12·Opponent
+        After the weighted score is computed and confidence-dampened, a venue modifier is applied when the next fixture is known:
+        <br/><strong>Home:</strong> +0.25 × confidence &nbsp;|&nbsp; <strong>Away:</strong> −0.20 × confidence
+        <br/>The modifier is scaled by the player's confidence factor so small-sample players aren't
+        over-boosted by venue alone. If no next fixture is scheduled, no modifier is applied.
       </div>
+
+      <!-- Confidence dampening -->
+      <h3 class="section-label">Sample-Size Confidence Dampening</h3>
+      <div class="formula-box">
+        Per-90 stats become unstable with few games played. We pull the raw score toward a neutral 5.5
+        for players with limited samples:
+        <br/><strong>Confidence = min(1.0, 0.55 + (gamesPlayed − 3) × 0.0265)</strong>
+        <br/><br/>
+        3 games → 55% actual + 45% neutral &nbsp;|&nbsp; 10 games → 87% actual &nbsp;|&nbsp; 20+ games → 100% actual (no dampening)
+      </div>
+
       <p class="info-card__note">
-        On the player profile page, Prediction Controls scale Form/Threat/Opponent/Minutes/Home-Away (then we renormalize).
-        The league grids use the default controls.
+        On the player profile page, Prediction Controls scale Form / Threat / Opponent / Minutes / Home-Away
+        and then renormalize. The league grids use default controls.
       </p>
     </mat-card-content>
   </mat-card>
 
-  <!-- Risk Levels -->
+  <!-- ── Risk Levels ──────────────────────────────────────────────────────── -->
   <mat-card class="info-card">
     <mat-card-content>
       <div class="info-card__heading">
@@ -96,7 +196,7 @@
       <div class="risk-table">
         <div class="risk-row">
           <span class="chip chip--low">Low Risk</span>
-          <span class="risk-range">Score &ge; 7.0</span>
+          <span class="risk-range">Score ≥ 7.0</span>
           <span class="risk-desc">Safe to start — strong form, regular minutes, good matchup.</span>
         </div>
         <div class="risk-row">
@@ -110,10 +210,14 @@
           <span class="risk-desc">Consider benching — poor form, rotation risk, or tough fixture.</span>
         </div>
       </div>
+      <p class="info-card__note">
+        When viewing All Positions, scores are first normalized within each position group before ranking,
+        so GKs and FWDs compete fairly. The raw score (shown in the card) is restored for display consistency.
+      </p>
     </mat-card-content>
   </mat-card>
 
-  <!-- Hidden Gems -->
+  <!-- ── Hidden Gems ─────────────────────────────────────────────────────── -->
   <mat-card class="info-card">
     <mat-card-content>
       <div class="info-card__heading">
@@ -121,35 +225,73 @@
         <h2>Hidden Gems</h2>
       </div>
       <p class="info-card__intro">
-        Hidden Gems are undervalued players with genuine upside — typically lower-owned in fantasy leagues but projecting well.
+        Hidden Gems are undervalued players whose underlying metrics significantly outpace their visible
+        returns — suggesting untapped potential or a breakout incoming.
+        They must have a predicted score between <strong>4.5 and 8.0</strong> (not too weak, not already elite)
+        and fewer G+A than a position-typical cap (GK: 6 | DEF: 10 | MID: 12 | FWD: 14).
+        <strong>Any single one</strong> of 7 signals qualifies them:
       </p>
-      <div class="criteria-list">
-        <div class="criterion">
-          <mat-icon>check</mat-icon>
-          <span>Predicted score between <strong>4.5 and 8.0</strong></span>
+      <div class="signal-list">
+        <div class="signal">
+          <span class="signal__num">1</span>
+          <div class="signal__body">
+            <strong>xG+xA outpacing G+A</strong> — expected output ≥ 0.25/90 and exceeds actual returns by 40%+.
+            Regression to mean is in their favour.
+          </div>
         </div>
-        <div class="criterion">
-          <mat-icon>check</mat-icon>
-          <span>
-            Goals+Assists below a <strong>position-typical cap</strong> (GK/DEF/MID/FWD thresholds)
-          </span>
+        <div class="signal">
+          <span class="signal__num">2</span>
+          <div class="signal__body">
+            <strong>High shot volume, conversion hasn't clicked</strong> — ≥ 15 total shots but goals below 22%
+            of shots on target. Consistently in shooting positions; finishing will follow.
+          </div>
         </div>
-        <div class="criterion">
-          <mat-icon>check</mat-icon>
-          <span>
-            And <strong>at least one</strong> of 6 upside signals is true
-            (xG+xA outperforming returns, shots+conversion mismatch, creativity without assists,
-            high threat but low output, high xG/shot, or improving underlying trajectory).
-          </span>
+        <div class="signal">
+          <span class="signal__num">3</span>
+          <div class="signal__body">
+            <strong>Creative but unrewarded</strong> — Creativity score ≥ 5.0 but assists are below 15% of key passes.
+            Team-mates are spurning the chances, not the player.
+          </div>
+        </div>
+        <div class="signal">
+          <span class="signal__num">4</span>
+          <div class="signal__body">
+            <strong>High threat, few returns</strong> — Attack component ≥ 5.0 but G+A total below the position low-return
+            threshold (DEF: 4 | MID: 6 | FWD: 8). Quality not yet visible in the stat line.
+          </div>
+        </div>
+        <div class="signal">
+          <span class="signal__num">5</span>
+          <div class="signal__body">
+            <strong>Premium shot positions</strong> — xG per shot ≥ 0.12 across ≥ 6 shots but below the goals threshold.
+            Getting into top-quality positions; conversion is due.
+          </div>
+        </div>
+        <div class="signal">
+          <span class="signal__num">6</span>
+          <div class="signal__body">
+            <strong>Improving trajectory</strong> — Recent xG+xA/90 is ≥ 30% above the season average (requires ≥ 3 recent games).
+            Underlying form is genuinely trending up right now.
+          </div>
+        </div>
+        <div class="signal">
+          <span class="signal__num">7</span>
+          <div class="signal__body">
+            <strong>Position-specific specialist quality</strong>:
+            <br/>• <em>GK</em>: ≥ 3.0 saves/game + ≥ 1.2 GC/game + ≥ 68% save rate — bailing out a weak defence.
+            <br/>• <em>DEF</em>: ≥ 87% pass accuracy + ≥ 52% duel win rate — elite ball-playing defender not rewarded in G+A.
+            <br/>• <em>MID</em>: ≥ 5 duels/90 + creativity ≥ 4.5 — high-energy engine with creative upside.
+            <br/>• <em>FWD</em>: xG per shot ≥ 0.16 across ≥ 10 shots — consistently occupying premium scoring positions.
+          </div>
         </div>
       </div>
       <p class="info-card__note">
-        Hidden Gems appear separately from the Top Picks list so the two groups never overlap.
+        Hidden Gems appear separately from Top Picks so the two groups never overlap.
       </p>
     </mat-card-content>
   </mat-card>
 
-  <!-- Red Flags -->
+  <!-- ── Red Flags ───────────────────────────────────────────────────────── -->
   <mat-card class="info-card">
     <mat-card-content>
       <div class="info-card__heading">
@@ -157,49 +299,102 @@
         <h2>Red Flags</h2>
       </div>
       <p class="info-card__intro">
-        Red Flags highlight players you should consider dropping or benching — those showing alarming dips in form and output.
-        Only players with 270+ minutes played are assessed (so new signings aren't unfairly penalised).
+        Red Flags highlight players showing alarming declines in form and output.
+        Only players with <strong>270+ minutes overall</strong> (or 45+ in recent view) are assessed
+        so new signings aren't unfairly penalised.
+        Ten signals are computed and combined with position-specific weights into a 0–10 alarm score.
       </p>
 
-      <div class="formula-box formula-box--danger">
-        <strong>RedFlagScore</strong> is a position-weighted composite (0–10) built from:
-        FormDecline, OutputDrop, xThreatDecline, ShotAccuracyDecline, InvolvementDecline, DisciplineRisk
-        (GK additionally uses gkDecline from save rate + goals conceded trends).
-        <br/>GK: 0.25·FormDecline + 0.45·gkDecline + 0.10·DisciplineRisk + 0.20·InvolvementDecline
-        <br/>DEF: 0.25·FormDecline + 0.18·OutputDrop + 0.12·xThreatDecline + 0.22·InvolvementDecline + 0.23·DisciplineRisk
-        <br/>MID: 0.25·FormDecline + 0.20·OutputDrop + 0.18·xThreatDecline + 0.10·ShotAccDecline + 0.17·InvolvementDecline + 0.10·DisciplineRisk
-        <br/>FWD: 0.25·FormDecline + 0.28·OutputDrop + 0.20·xThreatDecline + 0.15·ShotAccDecline + 0.08·InvolvementDecline + 0.04·DisciplineRisk
+      <h3 class="section-label">The 10 Signals</h3>
+      <div class="signal-list">
+        <div class="signal">
+          <span class="signal__num signal__num--red">1</span>
+          <div class="signal__body">
+            <strong>Form Decline</strong> — takes the worse of two sub-signals:
+            absolute distance below the 7.0 "good form" baseline
+            (<code>(7.0 − recentRating) / 3.0 × 10</code>) and
+            a relative drop from the season average (each rating point dropped scores 2.5).
+          </div>
+        </div>
+        <div class="signal">
+          <span class="signal__num signal__num--red">2</span>
+          <div class="signal__body">
+            <strong>Output Drop</strong> — G+A per 90 compared against position baselines
+            (DEF: 0.10 | MID: 0.22 | FWD: 0.35). Takes the worse of the absolute shortfall
+            and the relative decline from the player's own season average.
+          </div>
+        </div>
+        <div class="signal">
+          <span class="signal__num signal__num--red">3</span>
+          <div class="signal__body">
+            <strong>xG+xA Decline</strong> — expected threat per 90 falling vs the season average.
+            An early-warning signal before G+A actually drops.
+          </div>
+        </div>
+        <div class="signal">
+          <span class="signal__num signal__num--red">4</span>
+          <div class="signal__body">
+            <strong>Shot Accuracy Decline</strong> — shots-on-target rate falling vs the season average
+            (requires ≥ 10 total shots). Signals a player struggling to test the keeper.
+          </div>
+        </div>
+        <div class="signal">
+          <span class="signal__num signal__num--red">5</span>
+          <div class="signal__body">
+            <strong>Involvement Decline</strong> — pass accuracy falling vs the season average
+            (requires ≥ 20 total passes). Fading touch/influence in build-up play.
+          </div>
+        </div>
+        <div class="signal">
+          <span class="signal__num signal__num--red">6</span>
+          <div class="signal__body">
+            <strong>Discipline Risk</strong> — recent period only.
+            Each yellow card scores 2.5; each red scores 8.0 (capped at 10).
+            Players on the edge of suspension are surfaced quickly.
+          </div>
+        </div>
+        <div class="signal">
+          <span class="signal__num signal__num--red">7</span>
+          <div class="signal__body">
+            <strong>GK-Specific: Save Rate &amp; Conceding</strong> — recent save rate falling vs the season
+            average, plus an additional penalty when conceding ≥ 2.5 goals per game recently.
+          </div>
+        </div>
+        <div class="signal">
+          <span class="signal__num signal__num--red">8</span>
+          <div class="signal__body">
+            <strong>DEF: Duel Win Rate Decline</strong> — season vs recent duel win rate comparison
+            (requires ≥ 15 season duels + ≥ 4 recent). Opponents increasingly getting past them.
+          </div>
+        </div>
+        <div class="signal">
+          <span class="signal__num signal__num--red">9</span>
+          <div class="signal__body">
+            <strong>MID: Key Pass Decline</strong> — key passes per 90 falling sharply vs season average
+            (requires ≥ 8 total key passes). Creative influence fading — often an early sign of fatigue or loss of role.
+          </div>
+        </div>
+        <div class="signal">
+          <span class="signal__num signal__num--red">10</span>
+          <div class="signal__body">
+            <strong>FWD: xG Per Shot Decline</strong> — shot quality (xG per shot) falling vs season average
+            (requires ≥ 10 season shots + ≥ 3 recent). Striker no longer getting into premium positions.
+          </div>
+        </div>
       </div>
 
-      <div class="factor-list factor-list--compact">
-        <div class="factor">
-          <div class="factor__body">
-            <div class="factor__name factor__name--red">Form Decline</div>
-            <div class="factor__desc">
-              Combines an absolute drop below 7.0 (recent vs baseline) with a relative drop (overall vs recent).
-            </div>
-          </div>
-        </div>
-        <div class="factor">
-          <div class="factor__body">
-            <div class="factor__name factor__name--red">Output Drop</div>
-            <div class="factor__desc">
-              Goals+Assists per 90 minutes, compared against a positional output baseline:
-            </div>
-            <div class="position-baselines">
-              <span class="baseline-chip">DEF: 0.10 G+A/90</span>
-              <span class="baseline-chip">MID: 0.22 G+A/90</span>
-              <span class="baseline-chip">FWD: 0.35 G+A/90</span>
-              <span class="baseline-chip">GK: not assessed</span>
-            </div>
-          </div>
-        </div>
+      <h3 class="section-label">Position Weights</h3>
+      <div class="formula-box formula-box--danger">
+        GK: &nbsp;FormDecline·0.25 + gkDecline·0.45 + DisciplineRisk·0.10 + InvolvementDecline·0.20
+        <br/>DEF: FormDecline·0.22 + OutputDrop·0.15 + xThreatDecline·0.10 + InvolvementDecline·0.18 + DisciplineRisk·0.20 + DuelWinDecline·0.15
+        <br/>MID: FormDecline·0.22 + OutputDrop·0.18 + xThreatDecline·0.14 + ShotAccDecline·0.08 + InvolvementDecline·0.14 + DisciplineRisk·0.10 + KeyPassDecline·0.14
+        <br/>FWD: FormDecline·0.21 + OutputDrop·0.24 + xThreatDecline·0.17 + ShotAccDecline·0.12 + InvolvementDecline·0.07 + DisciplineRisk·0.04 + xGPerShotDecline·0.15
       </div>
 
       <div class="severity-list">
         <div class="sev-row">
           <span class="sev-badge sev-badge--critical">Critical</span>
-          <span>Danger Score &ge; 7.5 — drop immediately</span>
+          <span>Danger Score ≥ 7.5 — drop immediately</span>
         </div>
         <div class="sev-row">
           <span class="sev-badge sev-badge--high">High</span>
@@ -213,7 +408,7 @@
     </mat-card-content>
   </mat-card>
 
-  <!-- Benchwarmers -->
+  <!-- ── Benchwarmers ────────────────────────────────────────────────────── -->
   <mat-card class="info-card">
     <mat-card-content>
       <div class="info-card__heading">
@@ -223,28 +418,57 @@
       <p class="info-card__intro">
         Benchwarmers are consistent, reliable players who won't blow you away but won't hurt you either.
         Great for filling out your squad when premium options aren't available.
+        They must <strong>not</strong> be Hidden Gems or Red Flags, and need 270+ minutes overall (or 45+ recent).
       </p>
+
+      <h3 class="section-label">The 5 Consistency Components</h3>
+      <div class="factor-list factor-list--compact">
+        <div class="factor">
+          <div class="factor__pill factor__pill--avail">Availability</div>
+          <div class="factor__body">
+            <div class="factor__desc">Average minutes per game vs a full 90. A starter playing every minute scores 10.</div>
+          </div>
+        </div>
+        <div class="factor">
+          <div class="factor__pill factor__pill--form">Form Consistency</div>
+          <div class="factor__body">
+            <div class="factor__desc">
+              Two sub-signals combined 60/40:
+              <br/>• <strong>Band score</strong>: how close the season average is to the reliable 6.0–7.5 band (centre 6.75). Volatile highs or lows score low.
+              <br/>• <strong>Stability score</strong>: how close recent form is to the season average. A player at 6.8 overall but 4.5 recently is <em>not</em> a benchwarmer — they're declining.
+            </div>
+          </div>
+        </div>
+        <div class="factor">
+          <div class="factor__pill factor__pill--attack">Output Reliability</div>
+          <div class="factor__body">
+            <div class="factor__desc">
+              Proximity to a <em>moderate</em> G+A/90 baseline — too far above OR below reduces the score.
+              Benchwarmers are steady, not elite. GKs use save rate proximity instead.
+            </div>
+          </div>
+        </div>
+        <div class="factor">
+          <div class="factor__pill factor__pill--creativity">Passing Reliability</div>
+          <div class="factor__body">
+            <div class="factor__desc">Pass accuracy proximity to a position-specific target. Reliable players recycle the ball cleanly without errors or heroics.</div>
+          </div>
+        </div>
+        <div class="factor">
+          <div class="factor__pill factor__pill--disc">Discipline</div>
+          <div class="factor__body">
+            <div class="factor__desc">Card rate per game — reliable players stay on the pitch.</div>
+          </div>
+        </div>
+      </div>
+
       <div class="formula-box">
-        <strong>Consistency Score</strong> is computed from position-weighted reliability components:
-        <br/>GK: 0.30·Availability + 0.25·FormConsistency + 0.30·OutputReliability + 0.15·Discipline
-        <br/>DEF: 0.25·Availability + 0.25·FormConsistency + 0.18·OutputReliability + 0.17·PassingReliability + 0.15·Discipline
-        <br/>MID: 0.20·Availability + 0.25·FormConsistency + 0.23·OutputReliability + 0.22·PassingReliability + 0.10·Discipline
-        <br/>FWD: 0.20·Availability + 0.25·FormConsistency + 0.30·OutputReliability + 0.15·PassingReliability + 0.10·Discipline
+        GK:  Availability·0.30 + FormConsistency·0.25 + OutputReliability·0.30 + Discipline·0.15
+        <br/>DEF: Availability·0.25 + FormConsistency·0.25 + OutputReliability·0.18 + PassingReliability·0.17 + Discipline·0.15
+        <br/>MID: Availability·0.20 + FormConsistency·0.25 + OutputReliability·0.23 + PassingReliability·0.22 + Discipline·0.10
+        <br/>FWD: Availability·0.20 + FormConsistency·0.25 + OutputReliability·0.30 + PassingReliability·0.15 + Discipline·0.10
       </div>
-      <div class="criteria-list">
-        <div class="criterion">
-          <mat-icon>check</mat-icon>
-          <span>Not a <strong>Hidden Gem</strong> and not a <strong>Red Flag</strong> (red-flag score below the cut-off)</span>
-        </div>
-        <div class="criterion">
-          <mat-icon>check</mat-icon>
-          <span>270+ minutes (overall) or 45+ minutes (recent), with recent-view requiring enough recent games</span>
-        </div>
-        <div class="criterion">
-          <mat-icon>check</mat-icon>
-          <span>Consistency score must be at least <strong>4.0</strong> to produce a label</span>
-        </div>
-      </div>
+
       <div class="label-list">
         <div class="label-row"><span class="label-badge label-badge--solid">Rock Solid</span><span>Consistency ≥ 7.5</span></div>
         <div class="label-row"><span class="label-badge label-badge--steady">Steady Option</span><span>Consistency 5.5 – 7.4</span></div>
@@ -253,7 +477,7 @@
     </mat-card-content>
   </mat-card>
 
-  <!-- Match Predictions -->
+  <!-- ── Match Predictions ───────────────────────────────────────────────── -->
   <mat-card class="info-card">
     <mat-card-content>
       <div class="info-card__heading">
@@ -261,7 +485,8 @@
         <h2>Match Predictions</h2>
       </div>
       <p class="info-card__intro">
-        Match outcome probabilities are powered by a machine-learning model trained on historical match data across all five leagues.
+        Match outcome probabilities are powered by a machine-learning model trained on historical match data
+        across all five supported leagues.
       </p>
       <div class="match-pred-grid">
         <div class="match-pred-item">
@@ -303,7 +528,7 @@
     </mat-card-content>
   </mat-card>
 
-  <!-- Synergy -->
+  <!-- ── Synergy ─────────────────────────────────────────────────────────── -->
   <mat-card class="info-card">
     <mat-card-content>
       <div class="info-card__heading">
@@ -315,10 +540,11 @@
         Picking players from different positions adds a diversity bonus.
       </p>
       <div class="formula-box">
-        Synergy Score = Sum of Individual Scores + (Number of Distinct Positions − 1) × 0.5
+        Synergy Score = Σ Individual Predicted Scores + (Distinct Positions − 1) × 0.5
       </div>
       <p class="info-card__note">
-        A squad with all four position types (GK, DEF, MID, FWD) earns a +1.5 bonus on top of their combined scores.
+        A squad covering all four position types (GK, DEF, MID, FWD) earns a +1.5 bonus on top of their combined scores.
+        This rewards balanced squads over stacking one position.
       </p>
     </mat-card-content>
   </mat-card>

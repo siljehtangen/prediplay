@@ -40,6 +40,142 @@
   &--blue   { color: #42a5f5; }
 }
 
+// ── Section label ────────────────────────────────────────────────────────
+
+.section-label {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: #666;
+  margin: 20px 0 12px;
+}
+
+// ── Factor pills ─────────────────────────────────────────────────────────
+
+.factor__pill {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 3px 9px;
+  border-radius: 10px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  margin-top: 2px;
+
+  &--form      { background: rgba(108,99,255,.15); color: #a89cff; border: 1px solid rgba(108,99,255,.3); }
+  &--attack    { background: rgba(244,67,54,.12);  color: #ef9a9a; border: 1px solid rgba(244,67,54,.25); }
+  &--creativity{ background: rgba(255,152,0,.12);  color: #ffb74d; border: 1px solid rgba(255,152,0,.25); }
+  &--defensive { background: rgba(66,165,245,.12); color: #90caf9; border: 1px solid rgba(66,165,245,.25); }
+  &--avail     { background: rgba(76,175,80,.12);  color: #a5d6a7; border: 1px solid rgba(76,175,80,.25); }
+  &--disc      { background: rgba(255,213,79,.12); color: #ffd54f; border: 1px solid rgba(255,213,79,.25); }
+  &--opp       { background: rgba(171,71,188,.12); color: #ce93d8; border: 1px solid rgba(171,71,188,.25); }
+}
+
+// ── Sub-role grid ────────────────────────────────────────────────────────
+
+.subrole-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.subrole-card {
+  background: rgba(255,255,255,.03);
+  border: 1px solid rgba(255,255,255,.07);
+  border-radius: 10px;
+  padding: 14px 16px;
+
+  &--full { grid-column: 1 / -1; }
+
+  &__pos {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: #6c63ff;
+    background: rgba(108,99,255,.12);
+    border: 1px solid rgba(108,99,255,.25);
+    border-radius: 6px;
+    padding: 2px 8px;
+    margin-bottom: 6px;
+  }
+
+  &__name {
+    font-size: 14px;
+    font-weight: 700;
+    color: #e8e8f0;
+    margin-bottom: 4px;
+  }
+
+  &__trigger {
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 10px;
+    font-style: italic;
+
+    em { font-style: normal; color: #888; }
+  }
+}
+
+// ── Signal list ──────────────────────────────────────────────────────────
+
+.signal-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.signal {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+
+  &__num {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    font-size: 11px;
+    font-weight: 800;
+    flex-shrink: 0;
+    background: rgba(255,152,0,.15);
+    color: #ffb74d;
+    border: 1px solid rgba(255,152,0,.3);
+    margin-top: 1px;
+
+    &--red {
+      background: rgba(244,67,54,.15);
+      color: #ef9a9a;
+      border-color: rgba(244,67,54,.3);
+    }
+  }
+
+  &__body {
+    font-size: 13px;
+    color: #aaa;
+    line-height: 1.55;
+
+    strong { color: #ccc; }
+    code   { font-family: 'Courier New', monospace; font-size: 12px; color: #c4bfff; background: rgba(108,99,255,.1); padding: 1px 5px; border-radius: 4px; }
+    em     { color: #888; font-style: normal; }
+  }
+}
+
+// ── Inline formula box ───────────────────────────────────────────────────
+
+.formula-box--inline {
+  margin-bottom: 0;
+  font-size: 11.5px;
+  padding: 10px 14px;
+}
+
 // ── Factor bars ──────────────────────────────────────────────────────────────
 
 .factor-list {
@@ -55,17 +191,6 @@
   display: flex;
   align-items: flex-start;
   gap: 12px;
-
-  &__bar {
-    height: 6px;
-    min-width: 6px;
-    margin-top: 6px;
-    border-radius: 3px;
-    background: linear-gradient(90deg, #6c63ff, #a89cff);
-    flex-shrink: 0;
-
-    &--last { background: linear-gradient(90deg, #6c63ff80, #6c63ff40); }
-  }
 
   &__body { flex: 1; }
 

@@ -241,7 +241,11 @@ func (s *PredictionService) SyncPlayers() {
 		}
 	}
 
-	nextOpponentByTeam := map[uint]string{}
+	type nextFixture struct {
+		opponent string
+		isHome   bool
+	}
+	nextFixtureByTeam := map[uint]nextFixture{}
 	today := time.Now().Format("2006-01-02")
 	nextWeek := time.Now().AddDate(0, 0, 14).Format("2006-01-02")
 	if events, err := s.client.GetEvents(today, nextWeek, "", ""); err == nil {
@@ -249,11 +253,11 @@ func (s *PredictionService) SyncPlayers() {
 			return events[i].Date.Before(events[j].Date)
 		})
 		for _, ev := range events {
-			if _, done := nextOpponentByTeam[ev.HomeTeamID]; !done {
-				nextOpponentByTeam[ev.HomeTeamID] = ev.AwayTeam.Name
+			if _, done := nextFixtureByTeam[ev.HomeTeamID]; !done {
+				nextFixtureByTeam[ev.HomeTeamID] = nextFixture{opponent: ev.AwayTeam.Name, isHome: true}
 			}
-			if _, done := nextOpponentByTeam[ev.AwayTeamID]; !done {
-				nextOpponentByTeam[ev.AwayTeamID] = ev.HomeTeam.Name
+			if _, done := nextFixtureByTeam[ev.AwayTeamID]; !done {
+				nextFixtureByTeam[ev.AwayTeamID] = nextFixture{opponent: ev.HomeTeam.Name, isHome: false}
 			}
 		}
 	}
@@ -273,7 +277,8 @@ func (s *PredictionService) SyncPlayers() {
 			sem <- struct{}{}
 			defer func() { <-sem }()
 			p := players[i]
-			updates[i] = s.enrichAndCompute(p, nextOpponentByTeam[p.TeamID])
+			fix := nextFixtureByTeam[p.TeamID]
+			updates[i] = s.enrichAndCompute(p, fix.opponent, fix.isHome)
 		}(i)
 	}
 
@@ -323,7 +328,7 @@ func playerVsOpponentScore(stats []models.PlayerStat, opponentTeamName string) f
 
 // enrichAndCompute fetches all stats for a player and computes the aggregate fields
 // in-memory. It does not write to the DB; the caller can batch persist the result.
-func (s *PredictionService) enrichAndCompute(p models.Player, nextOpponent string) models.Player {
+func (s *PredictionService) enrichAndCompute(p models.Player, nextOpponent string, isHome bool) models.Player {
 	stats, err := s.client.GetPlayerStats(p.ID)
 	if err != nil || len(stats) == 0 {
 		return p
@@ -341,6 +346,7 @@ func (s *PredictionService) enrichAndCompute(p models.Player, nextOpponent strin
 	aggregateRecent(&p, played)
 
 	p.NextOpponent = nextOpponent
+	p.IsHome = isHome
 	p.OpponentScore = playerVsOpponentScore(stats, nextOpponent)
 
 	return p
@@ -1371,6 +1377,19 @@ func (s *PredictionService) calcPrediction(player models.Player) *models.PlayerP
 	const neutralScore = 5.5
 	confidence := math.Min(1.0, 0.55+float64(player.GamesPlayed-3)*(0.45/17.0))
 	predicted = predicted*confidence + neutralScore*(1.0-confidence)
+
+	// Venue advantage: home teams win ~45% of matches vs ~27% for away teams.
+	// A modest modifier (+0.25 home / -0.20 away) is scaled by confidence so
+	// small-sample players aren't over-boosted by venue alone.
+	// No modifier when IsHome is false AND the next opponent is unknown (default zero value).
+	if player.NextOpponent != "" {
+		if player.IsHome {
+			predicted += 0.25 * confidence
+		} else {
+			predicted -= 0.20 * confidence
+		}
+	}
+	predicted = math.Max(0, math.Min(10, predicted))
 
 	// Keep more precision to reduce artificial ties after normalization.
 	predicted = math.Round(predicted*1000) / 1000

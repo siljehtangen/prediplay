@@ -75,6 +75,7 @@ type Player struct {
 
 	NextOpponent  string  `json:"next_opponent"`  // team name of next scheduled opponent
 	OpponentScore float64 `json:"opponent_score"` // 0-10: historical performance vs that opponent
+	IsHome        bool    `json:"is_home"`        // true if next match is at home
 }
 
 type Event struct {

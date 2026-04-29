@@ -91,9 +91,10 @@ func isHiddenGem(p models.Player, predicted, attackScore, creativityScore float6
 		highQualityPositions = xgPerShot >= 0.12 && p.Goals < lowGoals
 	}
 
-	// Signal 6: recent underlying stats trending clearly upward
+	// Signal 6: recent underlying stats trending clearly upward.
 	improvingTrajectory := false
-	if p.RecentGamesPlayed >= 3 && p.RecentMinutes > 0 && xgXaPer90 > 0.05 {
+	recentInScoringView := p.RecentGamesPlayed > 0 && p.RecentMinutes == p.MinutesPlayed
+	if !recentInScoringView && p.RecentGamesPlayed >= 3 && p.RecentMinutes > 0 && xgXaPer90 > 0.05 {
 		recentXT90 := (p.RecentXG + p.RecentXA) / math.Max(1, float64(p.RecentMinutes)/90.0)
 		improvingTrajectory = recentXT90 > xgXaPer90*1.30
 	}
@@ -117,7 +118,7 @@ func isHiddenGem(p models.Player, predicted, attackScore, creativityScore float6
 	positionGemReason := ""
 	switch p.Position {
 	case "GK":
-		if p.GamesPlayed >= 5 && p.Saves > 0 {
+		if p.GamesPlayed >= 3 && p.Saves > 0 {
 			savesPerGame := float64(p.Saves) / float64(p.GamesPlayed)
 			gcPerGame := float64(p.GoalsConceded) / float64(p.GamesPlayed)
 			total := float64(p.Saves + p.GoalsConceded)
@@ -128,7 +129,7 @@ func isHiddenGem(p models.Player, predicted, attackScore, creativityScore float6
 			}
 		}
 	case "DEF":
-		if p.TotalPasses >= 30 && p.GamesPlayed >= 5 {
+		if p.TotalPasses >= 30 && p.GamesPlayed >= 3 {
 			passAcc := float64(p.AccuratePasses) / float64(p.TotalPasses)
 			duelRate := 0.5
 			if p.DuelsTotal > 0 {
@@ -140,7 +141,7 @@ func isHiddenGem(p models.Player, predicted, attackScore, creativityScore float6
 			}
 		}
 	case "MID":
-		if p.GamesPlayed >= 5 {
+		if p.GamesPlayed >= 3 {
 			duelsPer90 := float64(p.DuelsTotal) / mins90
 			if duelsPer90 >= 5.0 && creativityScore >= 4.5 && p.Goals+p.Assists < 8 {
 				positionGem = true

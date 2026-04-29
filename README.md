@@ -1,13 +1,6 @@
 # Prediplay
 
-Prediplay is a full-stack football analytics application. It pulls player statistics from the Bzzoiro sports API for the top 5 major leagues, runs predictions and scoring, and serves the results through a REST API consumed by an Angular frontend.
-
-Scoring highlights:
-
-- Top players
-- Benchwarmers
-- Hidden gems
-- Red flags
+Football analytics app that pulls player statistics from the Bzzoiro sports API across the top 5 major leagues, runs predictions and scoring, and serves results through a REST API consumed by an Angular frontend.
 
 ## Project Structure
 
@@ -20,14 +13,14 @@ prediplay/
 ## Prerequisites
 
 - [Go 1.22+](https://go.dev/dl/)
-- [Node.js 18+ and npm](https://nodejs.org/)
+- [Node.js 18+](https://nodejs.org/)
 - [Angular CLI](https://angular.io/cli): `npm install -g @angular/cli`
 
-## Backend
+## Setup
 
-### Configuration
+### Backend
 
-Create a `.env` file in `backend/`:
+Create `backend/.env`:
 
 ```env
 BZZOIRO_API_TOKEN=your_token_here
@@ -36,18 +29,23 @@ DATABASE_PATH=./prediplay_fresh.db
 PORT=8080
 ```
 
-`BZZOIRO_API_TOKEN` is required. The other values have defaults and are optional.
-
-### Run
+`BZZOIRO_API_TOKEN` is required. All other values are optional with defaults shown above.
 
 ```bash
-cd backend
-go run .
+cd backend && go run .
 ```
 
-The server starts on `http://localhost:8080`. Player sync runs in the background on startup.
+Server starts on `http://localhost:8080`. Player sync runs in the background on startup.
 
-### API Endpoints
+### Frontend
+
+```bash
+cd frontend && npm install && ng serve
+```
+
+App runs on `http://localhost:4200` and proxies API calls to the backend.
+
+## API Endpoints
 
 | Method | Path | Description |
 |--------|------|-------------|
@@ -66,27 +64,3 @@ The server starts on `http://localhost:8080`. Player sync runs in the background
 | GET | `/api/predict/synergy` | Team synergy analysis |
 | GET | `/api/predict/momentum` | Momentum analysis |
 | GET | `/api/dashboard` | Dashboard summary |
-
-## Frontend
-
-```bash
-cd frontend
-npm install
-ng serve
-```
-
-The app runs on `http://localhost:4200` and proxies API calls to the backend at `http://localhost:8080`.
-
-## Development
-
-Run backend and frontend in separate terminals:
-
-**Terminal 1 — backend:**
-```bash
-cd backend && go run .
-```
-
-**Terminal 2 — frontend:**
-```bash
-cd frontend && ng serve
-```

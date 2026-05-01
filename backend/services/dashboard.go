@@ -2,6 +2,7 @@ package services
 
 import (
 	"fmt"
+	"log"
 	"math"
 	"prediplay/backend/models"
 	"strings"
@@ -19,8 +20,14 @@ func (s *PredictionService) GetDashboard(timeFilter string) ([]models.DashboardL
 	ch := make(chan leagueResult, len(dashboardLeagueList))
 	for i, league := range dashboardLeagueList {
 		go func(idx int, l string) {
-			top, _ := s.GetTopPredictions(l, "", "", timeFilter)
-			flags, _ := s.GetRedFlags(l, "", timeFilter)
+			top, err := s.GetTopPredictions(l, "", "", timeFilter)
+			if err != nil {
+				log.Printf("GetDashboard: GetTopPredictions for %s: %v", l, err)
+			}
+			flags, err := s.GetRedFlags(l, "", timeFilter)
+			if err != nil {
+				log.Printf("GetDashboard: GetRedFlags for %s: %v", l, err)
+			}
 			if len(top) > 3 {
 				top = top[:3]
 			}
@@ -48,7 +55,10 @@ func (s *PredictionService) GetMomentum(playerID uint) (*models.MomentumData, er
 		return nil, fmt.Errorf("player not found: %w", err)
 	}
 
-	stats, _ := s.client.GetPlayerStats(playerID)
+	stats, err := s.client.GetPlayerStats(playerID)
+	if err != nil {
+		log.Printf("GetMomentum: failed to fetch stats for player %d: %v", playerID, err)
+	}
 
 	played := playedGames(stats)
 	sortByDateDesc(played)
@@ -114,6 +124,9 @@ func (s *PredictionService) GetSynergy(playerIDs []uint) (*models.SynergyResult,
 		if err := s.db.First(&p, id).Error; err == nil {
 			players = append(players, p)
 		}
+	}
+	if len(players) == 0 {
+		return nil, fmt.Errorf("no players found for the provided IDs")
 	}
 	total := 0.0
 	positions := map[string]bool{}

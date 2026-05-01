@@ -143,7 +143,7 @@ func (h *Handler) GetPlayerStats(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusBadRequest, "invalid player id")
 		return
 	}
-	stats, err := h.bzzoiro.GetPlayerStatsRecent(id)
+	stats, err := h.bzzoiro.GetPlayerStats(id)
 	if err != nil {
 		// External API unavailable — return empty array so player detail still renders
 		writeJSON(w, http.StatusOK, []models.PlayerStat{})

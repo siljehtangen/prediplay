@@ -1,6 +1,7 @@
 package bzzoiro
 
 import (
+	"log"
 	"prediplay/backend/models"
 	"time"
 )
@@ -43,7 +44,13 @@ func mapEvents(raw []rawEvent) []models.Event {
 }
 
 func mapEvent(r rawEvent) models.Event {
-	t, _ := time.Parse(time.RFC3339, r.Date)
+	t, err := time.Parse(time.RFC3339, r.Date)
+	if err != nil {
+		// Some events use date-only format; try that before giving up.
+		if t, err = time.Parse("2006-01-02", r.Date); err != nil {
+			log.Printf("[bzzoiro] unparseable event date %q: %v", r.Date, err)
+		}
+	}
 	return models.Event{
 		ID:         r.ID,
 		LeagueID:   r.League,

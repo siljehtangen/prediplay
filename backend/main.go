@@ -1,8 +1,14 @@
 package main
 
 import (
+	"context"
+	"errors"
 	"log"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"prediplay/backend/bzzoiro"
 	"prediplay/backend/config"
@@ -22,7 +28,7 @@ func main() {
 
 	bzzoiroClient := bzzoiro.New(cfg.BzzoiroBaseURL, cfg.BzzoiroToken)
 	predSvc := services.NewPredictionService(database, bzzoiroClient)
-	go predSvc.SyncPlayers() // runs in background; server starts immediately
+	go runSync(predSvc)
 
 	h := handlers.New(bzzoiroClient, predSvc)
 
@@ -31,9 +37,8 @@ func main() {
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.Compress(5))
 
-	// CORS: allow Angular dev server
 	c := cors.New(cors.Options{
-		AllowedOrigins:   []string{"http://localhost:4200", "http://localhost:3000"},
+		AllowedOrigins:   cfg.CORSOrigins,
 		AllowedMethods:   []string{"GET", "POST", "OPTIONS"},
 		AllowedHeaders:   []string{"Accept", "Content-Type", "Authorization"},
 		AllowCredentials: true,
@@ -59,8 +64,41 @@ func main() {
 		r.Get("/predict/momentum", h.GetMomentum)
 	})
 
-	log.Printf("Prediplay backend listening on :%s", cfg.Port)
-	if err := http.ListenAndServe(":"+cfg.Port, r); err != nil {
-		log.Fatalf("Server failed: %v", err)
+	srv := &http.Server{
+		Addr:         ":" + cfg.Port,
+		Handler:      r,
+		ReadTimeout:  15 * time.Second,
+		WriteTimeout: 30 * time.Second,
+		IdleTimeout:  60 * time.Second,
 	}
+
+	go func() {
+		log.Printf("Prediplay backend listening on :%s", cfg.Port)
+		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			log.Fatalf("Server failed: %v", err)
+		}
+	}()
+
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+
+	log.Println("Shutting down server…")
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	if err := srv.Shutdown(ctx); err != nil {
+		log.Fatalf("Server forced to shutdown: %v", err)
+	}
+	log.Println("Server stopped")
+}
+
+// runSync runs SyncPlayers in the background, recovering from any panic so it
+// does not bring down the server.
+func runSync(svc *services.PredictionService) {
+	defer func() {
+		if r := recover(); r != nil {
+			log.Printf("[sync] panic recovered: %v", r)
+		}
+	}()
+	svc.SyncPlayers()
 }

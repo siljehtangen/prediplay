@@ -10,6 +10,11 @@ import (
 	"github.com/go-resty/resty/v2"
 )
 
+// photoClient is a plain HTTP client used only for image proxying.
+// Separate from the resty client so it can have its own timeout without
+// affecting API request settings.
+var photoClient = &http.Client{Timeout: 10 * time.Second}
+
 type Client struct {
 	http    *resty.Client
 	baseURL string
@@ -27,7 +32,7 @@ func New(baseURL, token string) *Client {
 // writes it directly to w. Returns an error if the image cannot be fetched.
 func (c *Client) ProxyPlayerPhoto(w io.Writer, headerSetter func(string), apiID uint) error {
 	url := fmt.Sprintf("%s/img/player/%d/?token=%s", c.baseURL, apiID, c.token)
-	resp, err := http.Get(url) //nolint:noctx
+	resp, err := photoClient.Get(url)
 	if err != nil {
 		return err
 	}

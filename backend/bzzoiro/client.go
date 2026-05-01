@@ -5,6 +5,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/go-resty/resty/v2"
@@ -25,7 +26,7 @@ func New(baseURL, token string) *Client {
 	r := resty.New().
 		SetHeader("Authorization", "Token "+token).
 		SetTimeout(15 * time.Second)
-	return &Client{http: r, baseURL: baseURL, token: token}
+	return &Client{http: r, baseURL: strings.TrimRight(baseURL, "/"), token: token}
 }
 
 // ProxyPlayerPhoto fetches the player photo from the bzzoiro image API and

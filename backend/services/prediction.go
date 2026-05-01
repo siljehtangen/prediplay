@@ -24,11 +24,6 @@ func (s *PredictionService) GetPlayerPrediction(playerID uint) (*models.PlayerPr
 	if err := s.db.First(&player, playerID).Error; err != nil {
 		return nil, fmt.Errorf("player not found: %w", err)
 	}
-	stats, err := s.client.GetPlayerStats(playerID)
-	if err == nil && len(stats) > 0 {
-		aggregateOverall(&player, stats)
-		s.db.Save(&player)
-	}
 	return s.calcPrediction(player), nil
 }
 

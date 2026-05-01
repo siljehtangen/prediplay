@@ -6,6 +6,7 @@ import (
 	"prediplay/backend/models"
 	"sort"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"gorm.io/gorm/clause"
@@ -34,6 +35,7 @@ func (s *PredictionService) SyncPlayers() {
 		for _, team := range teams {
 			teamPlayers, err := s.client.GetPlayersFirstPage("", fmt.Sprintf("%d", team.ID))
 			if err != nil {
+				log.Printf("[sync] Warning: players for team %d (%s): %v", team.ID, team.Name, err)
 				continue
 			}
 			for i := range teamPlayers {
@@ -69,6 +71,7 @@ func (s *PredictionService) SyncPlayers() {
 	const maxConcurrent = 10
 	sem := make(chan struct{}, maxConcurrent)
 	var wg sync.WaitGroup
+	var failCount atomic.Int64
 	// Compute all updated player rows in-memory, then batch persist.
 	updates := make([]models.Player, len(players))
 
@@ -80,11 +83,19 @@ func (s *PredictionService) SyncPlayers() {
 			defer func() { <-sem }()
 			p := players[i]
 			fix := nextFixtureByTeam[p.TeamID]
-			updates[i] = s.enrichAndCompute(p, fix.opponent, fix.isHome)
+			updated, ok := s.enrichAndCompute(p, fix.opponent, fix.isHome)
+			if !ok {
+				failCount.Add(1)
+			}
+			updates[i] = updated
 		}(i)
 	}
 
 	wg.Wait()
+
+	if n := failCount.Load(); n > 0 {
+		log.Printf("[sync] Warning: %d/%d players had no stats data", n, len(players))
+	}
 
 	// Batch persist to drastically reduce "SLOW SQL" spam from per-player UPDATEs.
 	if len(updates) > 0 {
@@ -101,10 +112,10 @@ func (s *PredictionService) SyncPlayers() {
 
 // enrichAndCompute fetches all stats for a player and computes the aggregate fields
 // in-memory. It does not write to the DB; the caller can batch persist the result.
-func (s *PredictionService) enrichAndCompute(p models.Player, nextOpponent string, isHome bool) models.Player {
+func (s *PredictionService) enrichAndCompute(p models.Player, nextOpponent string, isHome bool) (models.Player, bool) {
 	stats, err := s.client.GetPlayerStats(p.ID)
 	if err != nil || len(stats) == 0 {
-		return p
+		return p, false
 	}
 
 	aggregateOverall(&p, stats)
@@ -130,5 +141,5 @@ func (s *PredictionService) enrichAndCompute(p models.Player, nextOpponent strin
 	p.IsHome = isHome
 	p.OpponentScore = playerVsOpponentScore(stats, nextOpponent)
 
-	return p
+	return p, true
 }

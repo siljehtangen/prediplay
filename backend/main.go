@@ -92,9 +92,21 @@ func main() {
 	log.Println("Server stopped")
 }
 
-// runSync runs SyncPlayers in the background, recovering from any panic so it
-// does not bring down the server.
+const syncInterval = 6 * time.Hour
+
+// runSync calls SyncPlayers immediately, then repeats every syncInterval.
+// Each run is wrapped in its own recover so a panic in one cycle does not
+// stop future cycles.
 func runSync(svc *services.PredictionService) {
+	doSync(svc)
+	ticker := time.NewTicker(syncInterval)
+	defer ticker.Stop()
+	for range ticker.C {
+		doSync(svc)
+	}
+}
+
+func doSync(svc *services.PredictionService) {
 	defer func() {
 		if r := recover(); r != nil {
 			log.Printf("[sync] panic recovered: %v", r)

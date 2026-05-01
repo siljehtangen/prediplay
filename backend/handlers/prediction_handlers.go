@@ -94,7 +94,7 @@ func (h *Handler) GetSynergy(w http.ResponseWriter, r *http.Request) {
 	}
 	result, err := h.prediction.GetSynergy(ids)
 	if err != nil {
-		writeError(w, http.StatusInternalServerError, err.Error())
+		writeError(w, http.StatusNotFound, err.Error())
 		return
 	}
 	writeJSON(w, http.StatusOK, result)

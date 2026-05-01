@@ -88,6 +88,10 @@ func (h *Handler) GetSynergy(w http.ResponseWriter, r *http.Request) {
 			ids = append(ids, uint(id))
 		}
 	}
+	if len(ids) == 0 {
+		writeError(w, http.StatusBadRequest, "no valid player IDs provided")
+		return
+	}
 	result, err := h.prediction.GetSynergy(ids)
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, err.Error())

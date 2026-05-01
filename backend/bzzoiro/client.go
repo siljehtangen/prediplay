@@ -3,8 +3,9 @@ package bzzoiro
 import (
 	"fmt"
 	"io"
-	"log"
+	"log/slog"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -29,8 +30,6 @@ func New(baseURL, token string) *Client {
 	return &Client{http: r, baseURL: strings.TrimRight(baseURL, "/"), token: token}
 }
 
-// ProxyPlayerPhoto fetches the player photo from the bzzoiro image API and
-// writes it directly to w. Returns an error if the image cannot be fetched.
 func (c *Client) ProxyPlayerPhoto(w io.Writer, headerSetter func(string), apiID uint) error {
 	url := fmt.Sprintf("%s/img/player/%d/?token=%s", c.baseURL, apiID, c.token)
 	resp, err := photoClient.Get(url)
@@ -50,15 +49,14 @@ const maxPages = 50
 
 func fetchAll[Raw any](c *Client, path string, params map[string]string) ([]Raw, error) {
 	var all []Raw
-	page := 1
-	for {
+	url := c.baseURL + path
+	for page := 1; ; page++ {
 		var resp paginated[Raw]
-		url := c.baseURL + path
 		req := c.http.R().SetResult(&resp)
 		for k, v := range params {
 			req = req.SetQueryParam(k, v)
 		}
-		req = req.SetQueryParam("page", fmt.Sprintf("%d", page))
+		req = req.SetQueryParam("page", strconv.Itoa(page))
 
 		r, err := req.Get(url)
 		if err != nil {
@@ -72,10 +70,9 @@ func fetchAll[Raw any](c *Client, path string, params map[string]string) ([]Raw,
 			break
 		}
 		if page >= maxPages {
-			log.Printf("[fetchAll] page limit (%d) reached for %s, stopping early", maxPages, path)
+			slog.Warn("fetchAll page limit reached, stopping early", "limit", maxPages, "path", path)
 			break
 		}
-		page++
 	}
 	return all, nil
 }

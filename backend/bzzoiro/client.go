@@ -3,6 +3,7 @@ package bzzoiro
 import (
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"time"
 
@@ -39,6 +40,8 @@ func (c *Client) ProxyPlayerPhoto(w io.Writer, headerSetter func(string), apiID 
 	return err
 }
 
+const maxPages = 50
+
 func fetchAll[Raw any](c *Client, path string, params map[string]string) ([]Raw, error) {
 	var all []Raw
 	page := 1
@@ -60,6 +63,10 @@ func fetchAll[Raw any](c *Client, path string, params map[string]string) ([]Raw,
 		}
 		all = append(all, resp.Results...)
 		if len(all) >= resp.Count || len(resp.Results) == 0 {
+			break
+		}
+		if page >= maxPages {
+			log.Printf("[fetchAll] page limit (%d) reached for %s, stopping early", maxPages, path)
 			break
 		}
 		page++

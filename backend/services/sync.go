@@ -2,6 +2,7 @@ package services
 
 import (
 	"fmt"
+	"log"
 	"prediplay/backend/models"
 	"sort"
 	"sync"
@@ -12,11 +13,11 @@ import (
 
 // SyncPlayers refreshes player and stats data for all 5 supported leagues.
 func (s *PredictionService) SyncPlayers() {
-	fmt.Println("[sync] Starting player sync…")
+	log.Println("[sync] Starting player sync…")
 
 	apiLeagues, err := s.client.GetLeagues()
 	if err != nil {
-		fmt.Printf("[sync] Warning: could not fetch leagues: %v\n", err)
+		log.Printf("[sync] Warning: could not fetch leagues: %v", err)
 	}
 	leagueIDByName := map[string]uint{}
 	for _, l := range apiLeagues {
@@ -27,7 +28,7 @@ func (s *PredictionService) SyncPlayers() {
 	for country, leagueName := range targetLeagues {
 		teams, err := s.client.GetTeams(country, leagueIDByName[leagueName])
 		if err != nil {
-			fmt.Printf("[sync] Warning: teams for %s: %v\n", country, err)
+			log.Printf("[sync] Warning: teams for %s: %v", country, err)
 			continue
 		}
 		for _, team := range teams {
@@ -63,7 +64,7 @@ func (s *PredictionService) SyncPlayers() {
 		}
 	}
 
-	fmt.Printf("[sync] Fetching stats for %d players…\n", len(players))
+	log.Printf("[sync] Fetching stats for %d players…", len(players))
 
 	const maxConcurrent = 10
 	sem := make(chan struct{}, maxConcurrent)
@@ -91,11 +92,11 @@ func (s *PredictionService) SyncPlayers() {
 			Columns:   []clause.Column{{Name: "id"}},
 			UpdateAll: true,
 		}).CreateInBatches(&updates, 200).Error; err != nil {
-			fmt.Printf("[sync] Error during batch upsert: %v\n", err)
+			log.Printf("[sync] Error during batch upsert: %v", err)
 		}
 	}
 
-	fmt.Println("[sync] Player sync complete")
+	log.Println("[sync] Player sync complete")
 }
 
 // enrichAndCompute fetches all stats for a player and computes the aggregate fields

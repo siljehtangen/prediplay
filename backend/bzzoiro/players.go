@@ -6,6 +6,7 @@ import (
 	"strings"
 )
 
+// GetPlayers returns players filtered by position, nationality, and team.
 func (c *Client) GetPlayers(position, nationality, team string) ([]models.Player, error) {
 	params := map[string]string{}
 	if position != "" {
@@ -28,6 +29,8 @@ func (c *Client) GetPlayers(position, nationality, team string) ([]models.Player
 	return out, nil
 }
 
+// GetPlayersFirstPage returns only the first page of players filtered by position and team ID.
+// Used during sync to avoid fetching all pages for every team.
 func (c *Client) GetPlayersFirstPage(position, teamID string) ([]models.Player, error) {
 	var resp paginated[rawPlayer]
 	url := c.baseURL + "/api/players/"
@@ -69,7 +72,7 @@ func normalizePosition(p string) string {
 func mapRawPlayer(r rawPlayer) models.Player {
 	return models.Player{
 		ID:           r.ID,
-		ApiID:        r.APIID,
+		APIID:        r.APIID,
 		Name:         r.Name,
 		ShortName:    r.ShortName,
 		TeamID:       r.CurrentTeam.ID,
@@ -83,6 +86,7 @@ func mapRawPlayer(r rawPlayer) models.Player {
 	}
 }
 
+// GetPlayerStats returns the full stats history for the given player ID.
 func (c *Client) GetPlayerStats(playerID uint) ([]models.PlayerStat, error) {
 	params := map[string]string{"player": fmt.Sprintf("%d", playerID)}
 	raw, err := fetchAll[rawPlayerStat](c, "/api/player-stats/", params)
@@ -121,6 +125,8 @@ func (c *Client) GetPlayerStatsSince(playerID uint, dateFrom string) ([]models.P
 	return out, nil
 }
 
+// GetPlayerStatsRecent returns the first page of stats for the given player,
+// which contains the most recent matches.
 func (c *Client) GetPlayerStatsRecent(playerID uint) ([]models.PlayerStat, error) {
 	var resp paginated[rawPlayerStat]
 	url := c.baseURL + "/api/player-stats/"

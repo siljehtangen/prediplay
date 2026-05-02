@@ -11,21 +11,30 @@ import (
 // This spread prevents scores from clustering in the 5.5-6.5 band.
 
 // formComponent blends season and recent match ratings for a forward-looking form signal.
-// Recent form is weighted more heavily since it better predicts the upcoming match.
 // GKs get a 50/50 blend because a string of recent clean sheets (or blunders) matters more
-// game-to-game for a keeper than for outfield players.
+// game-to-game than for outfield players.
+//
+// Outfield uses asymmetric blending:
+//   - Declining form (recent < season): 55/45 — be responsive to real declines
+//   - Stable/improving form (recent ≥ season): 65/35 — dampen hot-streak over-inflation
+//
+// Threshold raised to 3 games to match the scoringView eligibility gate; 2-game
+// samples are too noisy to trust for blending adjustments.
 func formComponent(p models.Player) float64 {
 	seasonForm := p.FormScore
 	if seasonForm <= 0 {
 		seasonForm = 6.0
 	}
-	if p.RecentFormScore > 0 && p.RecentGamesPlayed >= 2 {
+	if p.RecentFormScore > 0 && p.RecentGamesPlayed >= 3 {
 		if p.Position == "GK" {
 			// GK: 50/50 — recent clean sheets / howlers are strongly predictive
 			return math.Max(0, math.Min(10, seasonForm*0.50+p.RecentFormScore*0.50))
 		}
-		// Outfield: 60% season stability + 40% recent form
-		return math.Max(0, math.Min(10, seasonForm*0.60+p.RecentFormScore*0.40))
+		// Asymmetric: respond quickly to declines, stay stable for hot streaks
+		if p.RecentFormScore < seasonForm {
+			return math.Max(0, math.Min(10, seasonForm*0.55+p.RecentFormScore*0.45))
+		}
+		return math.Max(0, math.Min(10, seasonForm*0.65+p.RecentFormScore*0.35))
 	}
 	return math.Max(0, math.Min(10, seasonForm))
 }
@@ -43,14 +52,15 @@ func formComponent(p models.Player) float64 {
 // Conversion bonus (+0-2): rewards clinical finishers without double-counting xG.
 // Shot volume (+0-2):      how often the player tests the keeper regardless of xG quality.
 func attackComponent(p models.Player) float64 {
-	mins90 := math.Max(1, float64(p.MinutesPlayed)/90.0)
+	mins90 := per90(p.MinutesPlayed)
 	xgPer90 := p.XG / mins90
 	goalsPer90 := float64(p.Goals) / mins90
 	sotPer90 := float64(p.ShotsOnTarget) / mins90
 
-	// Blend in recent stats when available — captures current offensive momentum
-	if p.RecentGamesPlayed >= 2 && p.RecentMinutes > 0 {
-		recentMins90 := math.Max(1, float64(p.RecentMinutes)/90.0)
+	// Blend in recent stats when available — captures current offensive momentum.
+	// Require 3 games to match scoringView gate (2-game samples add more noise than signal).
+	if p.RecentGamesPlayed >= 3 && p.RecentMinutes > 0 {
+		recentMins90 := per90(p.RecentMinutes)
 		xgPer90 = xgPer90*0.60 + (p.RecentXG/recentMins90)*0.40
 		goalsPer90 = goalsPer90*0.60 + (float64(p.RecentGoals)/recentMins90)*0.40
 		sotPer90 = sotPer90*0.60 + (float64(p.RecentShotsOnTarget)/recentMins90)*0.40
@@ -97,7 +107,7 @@ func attackComponent(p models.Player) float64 {
 //  4. Pass accuracy (MID only, 0-2): 72%→0, 80%→0.9, 88%→2.0.
 //     Differentiates tidy ball-players from ball-losers in the build-up.
 func creativityComponent(p models.Player) float64 {
-	mins90 := math.Max(1, float64(p.MinutesPlayed)/90.0)
+	mins90 := per90(p.MinutesPlayed)
 
 	// ── DEF: build-up quality ────────────────────────────────────────────────
 	// Attacking full-backs (1.5 KP/90) score ~9; typical CBs (0.3 KP/90) score ~2.
@@ -105,8 +115,8 @@ func creativityComponent(p models.Player) float64 {
 	// CBs and attacking FBs are correctly differentiated from limited defenders.
 	if p.Position == "DEF" {
 		kpPer90 := float64(p.KeyPasses) / mins90
-		if p.RecentGamesPlayed >= 2 && p.RecentMinutes > 0 {
-			recentMins90 := math.Max(1, float64(p.RecentMinutes)/90.0)
+		if p.RecentGamesPlayed >= 3 && p.RecentMinutes > 0 {
+			recentMins90 := per90(p.RecentMinutes)
 			kpPer90 = kpPer90*0.60 + (float64(p.RecentKeyPasses)/recentMins90)*0.40
 		}
 		kpScore := math.Min(8, kpPer90*6) // 1.33 KP/90 → 8.0 (attacking FB ceiling)
@@ -122,8 +132,8 @@ func creativityComponent(p models.Player) float64 {
 	xaPer90 := p.XA / mins90
 	assistsPer90 := float64(p.Assists) / mins90
 
-	if p.RecentGamesPlayed >= 2 && p.RecentMinutes > 0 {
-		recentMins90 := math.Max(1, float64(p.RecentMinutes)/90.0)
+	if p.RecentGamesPlayed >= 3 && p.RecentMinutes > 0 {
+		recentMins90 := per90(p.RecentMinutes)
 		xaPer90 = xaPer90*0.60 + (p.RecentXA/recentMins90)*0.40
 		assistsPer90 = assistsPer90*0.60 + (float64(p.RecentAssists)/recentMins90)*0.40
 	}
@@ -167,7 +177,7 @@ func creativityComponent(p models.Player) float64 {
 //
 //   - FWD: hold-up play (duel win rate only). Score range 1–6.
 func defensiveComponent(p models.Player) float64 {
-	mins90 := math.Max(1, float64(p.MinutesPlayed)/90.0)
+	mins90 := per90(p.MinutesPlayed)
 
 	switch p.Position {
 	case "GK":
@@ -194,7 +204,7 @@ func defensiveComponent(p models.Player) float64 {
 		// those in poor form. Each 5% swing in save rate = ±0.5.
 		trendBonus := 0.0
 		recentTotal := float64(p.RecentSaves + p.RecentGoalsConceded)
-		if p.RecentGamesPlayed >= 2 && recentTotal >= 3 {
+		if p.RecentGamesPlayed >= 3 && recentTotal >= 3 {
 			recentSaveRate := float64(p.RecentSaves) / recentTotal
 			trendBonus = math.Max(-1.5, math.Min(1.5, (recentSaveRate-saveRate)*10))
 		}
@@ -218,13 +228,18 @@ func defensiveComponent(p models.Player) float64 {
 		return math.Max(0, math.Min(10, rateScore+gcScore+trendBonus+volumeBonus+gkPassAcc))
 
 	case "DEF":
-		duelRate := 0.50
-		if p.DuelsTotal > 0 {
-			duelRate = float64(p.DuelsWon) / float64(p.DuelsTotal)
+		duelRate := safeRate(p.DuelsWon, p.DuelsTotal)
+		tackleRate := safeRate(p.TacklesWon, p.TacklesTotal)
+		// Blend in recent duel/tackle rates — a defender losing ground in physical
+		// battles over the last 3 games is a meaningful current-form signal.
+		// Require a minimum sample (≥4 recent duels, ≥3 tackles) to avoid single-game noise.
+		if p.RecentGamesPlayed >= 3 && p.RecentDuelsTotal >= 4 {
+			recentDuelRate := float64(p.RecentDuelsWon) / float64(p.RecentDuelsTotal)
+			duelRate = duelRate*0.60 + recentDuelRate*0.40
 		}
-		tackleRate := 0.50
-		if p.TacklesTotal > 0 {
-			tackleRate = float64(p.TacklesWon) / float64(p.TacklesTotal)
+		if p.RecentGamesPlayed >= 3 && p.RecentTacklesTotal >= 3 {
+			recentTackleRate := float64(p.RecentTacklesWon) / float64(p.RecentTacklesTotal)
+			tackleRate = tackleRate*0.60 + recentTackleRate*0.40
 		}
 		// Volume bonus: high-activity defenders rewarded (cap at +1.5)
 		tacklesPer90 := float64(p.TacklesTotal) / mins90
@@ -243,22 +258,27 @@ func defensiveComponent(p models.Player) float64 {
 		return math.Min(10, duelRate*4.5+tackleRate*4.0+activityBonus+passAccBonus)
 
 	case "MID":
-		duelRate := 0.50
-		if p.DuelsTotal > 0 {
-			duelRate = float64(p.DuelsWon) / float64(p.DuelsTotal)
+		duelRate := safeRate(p.DuelsWon, p.DuelsTotal)
+		tackleRate := safeRate(p.TacklesWon, p.TacklesTotal)
+		// Blend in recent duel/tackle rates — a pressing midfielder losing duels
+		// or tackles recently is losing influence even if season totals look fine.
+		if p.RecentGamesPlayed >= 3 && p.RecentDuelsTotal >= 4 {
+			recentDuelRate := float64(p.RecentDuelsWon) / float64(p.RecentDuelsTotal)
+			duelRate = duelRate*0.60 + recentDuelRate*0.40
 		}
-		tackleRate := 0.50
-		if p.TacklesTotal > 0 {
-			tackleRate = float64(p.TacklesWon) / float64(p.TacklesTotal)
+		if p.RecentGamesPlayed >= 3 && p.RecentTacklesTotal >= 3 {
+			recentTackleRate := float64(p.RecentTacklesWon) / float64(p.RecentTacklesTotal)
+			tackleRate = tackleRate*0.60 + recentTackleRate*0.40
 		}
 		// Two signals instead of one: presses + ball-winners get separate credit.
 		// DM winning 65% duels + 70% tackles → ~8.1; AM avoiding duels → ~4.5 floor.
 		return math.Min(10, duelRate*5.0+tackleRate*3.0+1.0)
 
 	default: // FWD — hold-up play contribution only
-		duelRate := 0.50
-		if p.DuelsTotal > 0 {
-			duelRate = float64(p.DuelsWon) / float64(p.DuelsTotal)
+		duelRate := safeRate(p.DuelsWon, p.DuelsTotal)
+		if p.RecentGamesPlayed >= 3 && p.RecentDuelsTotal >= 4 {
+			recentDuelRate := float64(p.RecentDuelsWon) / float64(p.RecentDuelsTotal)
+			duelRate = duelRate*0.60 + recentDuelRate*0.40
 		}
 		return math.Min(10, duelRate*5+1.0)
 	}
@@ -267,45 +287,59 @@ func defensiveComponent(p models.Player) float64 {
 // availabilityComponent scores average minutes per game vs a full 90.
 // A player averaging 90 min/game scores 10; 45 min/game scores 5.
 //
-// Blend is 50% season / 50% recent. The previous 70/30 split was too slow to
-// detect rotation: a player averaging 88 min/game all season who has been
-// subbed at 45 min for 3 straight games still scored ~8.6 instead of signalling
-// the rotation risk. At 50/50 that same pattern scores ~7.2 — a meaningful drop.
+// When recent data exists (≥1 game), an asymmetric blend is used:
+//   - Minutes dropping recently  → 55/45 (more responsive — catch rotation early)
+//   - Minutes stable or rising   → 65/35 (more stable — don't over-react to one full game)
+//
+// When no recent game data exists, season average is used alone — the old
+// math.Max(1, RecentGamesPlayed) pattern produced 0 recent minutes divided by 1,
+// which silently halved the score of any player without recent records.
 func availabilityComponent(p models.Player) float64 {
 	gamesSeason := math.Max(1, float64(p.GamesPlayed))
 	avgMinsSeason := float64(p.MinutesPlayed) / gamesSeason
 	availSeason := avgMinsSeason / 90.0 * 10.0
 
-	recentGames := math.Max(1, float64(p.RecentGamesPlayed))
-	avgMinsRecent := float64(p.RecentMinutes) / recentGames
-	availRecent := avgMinsRecent / 90.0 * 10.0
-
-	avail := availSeason*0.50 + availRecent*0.50
-	if avail < 0 {
-		avail = 0
+	if p.RecentGamesPlayed > 0 {
+		recentGames := float64(p.RecentGamesPlayed)
+		avgMinsRecent := float64(p.RecentMinutes) / recentGames
+		availRecent := avgMinsRecent / 90.0 * 10.0
+		var seasonW, recentW float64
+		if availRecent < availSeason {
+			seasonW, recentW = 0.55, 0.45 // minutes dropping — be responsive
+		} else {
+			seasonW, recentW = 0.65, 0.35 // stable/rising — stay conservative
+		}
+		return math.Min(10, math.Max(0, availSeason*seasonW+availRecent*recentW))
 	}
-	return math.Min(10, avail)
+	return math.Min(10, math.Max(0, availSeason))
 }
 
 // disciplineComponent penalises cards. Starting at 10:
 // each yellow card per game costs 5 points; each red costs 15.
 //
-// Blend is 40% season / 60% recent. Suspension risk is primarily driven by
-// recent behaviour — a player picking up 3 yellows in 3 games is imminently
-// suspended regardless of how clean they were earlier in the season. The old
-// 70/30 blend buried that signal under a clean season record.
+// When recent data exists, blend is 40% season / 60% recent — suspension risk is
+// primarily driven by recent behaviour (3 yellows in 3 games = imminent ban).
+//
+// When no recent game data exists, season rate is used alone — the old
+// math.Max(1, RecentGamesPlayed) pattern divided 0 recent cards by 1, which
+// silently zeroed out the 60% recent weight and made every record look 40% cleaner.
 func disciplineComponent(p models.Player) float64 {
 	gamesSeason := math.Max(1, float64(p.GamesPlayed))
 	yellowPerGameSeason := float64(p.YellowCards) / gamesSeason
 	redPerGameSeason := float64(p.RedCards) / gamesSeason
 
-	recentGames := math.Max(1, float64(p.RecentGamesPlayed))
-	yellowPerGameRecent := float64(p.RecentYellowCards) / recentGames
-	redPerGameRecent := float64(p.RecentRedCards) / recentGames
-
-	// 40% season base rate + 60% recent — recent cards dominate (suspension risk)
-	yellowPerGame := yellowPerGameSeason*0.40 + yellowPerGameRecent*0.60
-	redPerGame := redPerGameSeason*0.40 + redPerGameRecent*0.60
+	var yellowPerGame, redPerGame float64
+	if p.RecentGamesPlayed > 0 {
+		recentGames := float64(p.RecentGamesPlayed)
+		yellowPerGameRecent := float64(p.RecentYellowCards) / recentGames
+		redPerGameRecent := float64(p.RecentRedCards) / recentGames
+		// 40% season base rate + 60% recent — recent cards dominate (suspension risk)
+		yellowPerGame = yellowPerGameSeason*0.40 + yellowPerGameRecent*0.60
+		redPerGame = redPerGameSeason*0.40 + redPerGameRecent*0.60
+	} else {
+		yellowPerGame = yellowPerGameSeason
+		redPerGame = redPerGameSeason
+	}
 
 	disc := 10 - yellowPerGame*5 - redPerGame*15
 	if disc < 0 {
@@ -575,18 +609,18 @@ func (s *PredictionService) calcPrediction(player models.Player) *models.PlayerP
 		}
 	}
 
-	// Inactivity / low-minutes penalties: both drag the score toward a below-neutral
+	// Inactivity / low-minutes penalties: drag the score toward a below-neutral
 	// baseline (2.5) so players who aren't playing — or are only receiving cameo
 	// minutes — never rank positively on stale or limited stats.
 	//   • inactivityFactor: long absence (days since last match)
 	//   • recentMinutesFactor: playing but only getting short stints
-	// The two cases are mutually exclusive in practice, so both are applied
-	// independently without accumulating an unfair double-penalty.
+	// Apply the harsher of the two factors as a single penalty — stacking both
+	// independently can over-penalise rotation players (e.g. 3 games × 30 min,
+	// played 20 days ago) who already have one genuine penalty against them.
 	const inactivityBaseline = 2.5
-	if f := inactivityFactor(player.LastMatchDate); f < 1.0 {
-		predicted = predicted*f + inactivityBaseline*(1.0-f)
-	}
-	if f := recentMinutesFactor(player); f < 1.0 {
+	iF := inactivityFactor(player.LastMatchDate)
+	mF := recentMinutesFactor(player)
+	if f := math.Min(iF, mF); f < 1.0 {
 		predicted = predicted*f + inactivityBaseline*(1.0-f)
 	}
 

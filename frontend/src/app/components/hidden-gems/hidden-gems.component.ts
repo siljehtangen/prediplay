@@ -110,7 +110,6 @@ export class HiddenGemsComponent implements OnInit {
       ];
     }
 
-    // FWD
     return [
       form,
       { icon: 'gps_fixed', text: `xG ${fmt1(player.xG)} / xA ${fmt1(player.xA)}` },

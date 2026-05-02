@@ -10,15 +10,18 @@ import (
 	"gorm.io/gorm"
 )
 
+// PredictionService computes player predictions from database stats and bzzoiro API data.
 type PredictionService struct {
 	db     *gorm.DB
 	client *bzzoiro.Client
 }
 
+// NewPredictionService creates a PredictionService backed by the given database and bzzoiro client.
 func NewPredictionService(db *gorm.DB, client *bzzoiro.Client) *PredictionService {
 	return &PredictionService{db: db, client: client}
 }
 
+// GetPlayerPrediction returns a computed prediction for the player with the given ID.
 func (s *PredictionService) GetPlayerPrediction(playerID uint) (*models.PlayerPrediction, error) {
 	var player models.Player
 	if err := s.db.First(&player, playerID).Error; err != nil {
@@ -27,6 +30,8 @@ func (s *PredictionService) GetPlayerPrediction(playerID uint) (*models.PlayerPr
 	return s.calcPrediction(player), nil
 }
 
+// GetTopPredictions returns up to topPredictionsLimit player predictions for the given
+// league, position, gem filter ("gems", "non-gems", or ""), and time filter.
 func (s *PredictionService) GetTopPredictions(league, position, gemFilter, timeFilter string) ([]models.PlayerPrediction, error) {
 	players, err := s.loadPlayers(league, position)
 	if err != nil {
@@ -98,8 +103,8 @@ func (s *PredictionService) GetTopPredictions(league, position, gemFilter, timeF
 	sort.Slice(preds, func(i, j int) bool {
 		return preds[i].PredictedScore > preds[j].PredictedScore
 	})
-	if len(preds) > 9 {
-		preds = preds[:9]
+	if len(preds) > topPredictionsLimit {
+		preds = preds[:topPredictionsLimit]
 	}
 	return preds, nil
 }

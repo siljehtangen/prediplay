@@ -12,7 +12,6 @@ import (
 	"gorm.io/gorm/clause"
 )
 
-// SyncPlayers refreshes player and stats data for all 5 supported leagues.
 func (s *PredictionService) SyncPlayers() {
 	log.Println("[sync] Starting player sync…")
 
@@ -110,8 +109,6 @@ func (s *PredictionService) SyncPlayers() {
 	log.Println("[sync] Player sync complete")
 }
 
-// enrichAndCompute fetches all stats for a player and computes the aggregate fields
-// in-memory. It does not write to the DB; the caller can batch persist the result.
 func (s *PredictionService) enrichAndCompute(p models.Player, nextOpponent string, isHome bool) (models.Player, bool) {
 	stats, err := s.client.GetPlayerStats(p.ID)
 	if err != nil || len(stats) == 0 {

@@ -12,6 +12,8 @@ import (
 	"gorm.io/gorm/clause"
 )
 
+// SyncPlayers fetches all players and their stats from the bzzoiro API, computes
+// enriched stats and predictions, and upserts the results into the database.
 func (s *PredictionService) SyncPlayers() {
 	log.Println("[sync] Starting player sync…")
 
@@ -109,6 +111,8 @@ func (s *PredictionService) SyncPlayers() {
 	log.Println("[sync] Player sync complete")
 }
 
+// enrichAndCompute fetches per-match stats for p, aggregates them into season and recent
+// totals, and returns the updated player. Returns (p, false) if no stats are available.
 func (s *PredictionService) enrichAndCompute(p models.Player, nextOpponent string, isHome bool) (models.Player, bool) {
 	stats, err := s.client.GetPlayerStats(p.ID)
 	if err != nil || len(stats) == 0 {

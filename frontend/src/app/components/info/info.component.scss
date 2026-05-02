@@ -320,8 +320,6 @@
   }
 }
 
-// ── Position baselines ───────────────────────────────────────────────────────
-
 .position-baselines {
   display: flex;
   flex-wrap: wrap;
@@ -338,8 +336,6 @@
   border: 1px solid rgba(244,67,54,.2);
   font-family: monospace;
 }
-
-// ── Benchwarmer labels ───────────────────────────────────────────────────────
 
 .label-list {
   display: flex;
@@ -380,8 +376,6 @@
     border: 1px solid rgba(158,158,158,.2);
   }
 }
-
-// ── Match predictions grid ───────────────────────────────────────────────────
 
 .match-pred-grid {
   display: grid;

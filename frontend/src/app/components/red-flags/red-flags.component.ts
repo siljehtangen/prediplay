@@ -133,7 +133,6 @@ export class RedFlagsComponent implements OnInit {
       ];
     }
 
-    // FWD fallback
     return [
       { label: 'Recent goals', value: fmtInt(player.recent_goals) },
       { label: 'Recent assists', value: fmtInt(player.recent_assists) },

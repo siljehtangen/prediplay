@@ -40,7 +40,6 @@ func (h *Handler) GetEvents(w http.ResponseWriter, r *http.Request) {
 	leagueParam := q.Get("league")
 
 	if leagueParam != "" {
-		// Specific league requested — pass directly to the upstream API.
 		events, err := h.bzzoiro.GetEvents(
 			q.Get("date_from"), q.Get("date_to"), leagueParam, q.Get("status"),
 		)
@@ -52,7 +51,6 @@ func (h *Handler) GetEvents(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// No league filter: fetch the 5 supported leagues and query each in parallel.
 	allLeagues, err := h.bzzoiro.GetLeagues()
 	if err != nil {
 		writeError(w, http.StatusBadGateway, err.Error())

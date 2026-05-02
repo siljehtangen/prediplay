@@ -40,8 +40,6 @@
   &--blue   { color: #42a5f5; }
 }
 
-// ── Section label ────────────────────────────────────────────────────────
-
 .section-label {
   font-size: 13px;
   font-weight: 700;
@@ -50,8 +48,6 @@
   color: #666;
   margin: 20px 0 12px;
 }
-
-// ── Factor pills ─────────────────────────────────────────────────────────
 
 .factor__pill {
   font-size: 10px;
@@ -72,8 +68,6 @@
   &--disc      { background: rgba(255,213,79,.12); color: #ffd54f; border: 1px solid rgba(255,213,79,.25); }
   &--opp       { background: rgba(171,71,188,.12); color: #ce93d8; border: 1px solid rgba(171,71,188,.25); }
 }
-
-// ── Sub-role grid ────────────────────────────────────────────────────────
 
 .subrole-grid {
   display: grid;

@@ -133,7 +133,6 @@ export class BenchwarmersComponent implements OnInit {
       ];
     }
 
-    // FWD fallback
     return [
       { label: 'Mins', value: fmtInt(player.minutes_played) },
       { label: 'Form', value: fmt1(player.form_score) },

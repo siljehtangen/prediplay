@@ -23,6 +23,10 @@ func safeRate(won, total int) float64 {
 
 // positionQuota defines how many top players to pick per position when no
 // position filter is active. Matches a typical attacking lineup shape (4-3-3 / 4-2-3-1).
+// topPredictionsLimit is the maximum number of predictions returned when no position
+// filter is active. It equals the sum of positionQuota values (1+2+3+3).
+const topPredictionsLimit = 9
+
 var positionQuota = map[string]int{
 	"GK":  1,
 	"DEF": 2,
@@ -39,7 +43,7 @@ func pickByPositionQuota[T any](items []T, getPos func(T) string, less func(a, b
 		}
 		byPos[pos] = append(byPos[pos], item)
 	}
-	result := make([]T, 0, 9)
+	result := make([]T, 0, topPredictionsLimit)
 	for pos, quota := range positionQuota {
 		group := byPos[pos]
 		sort.Slice(group, func(i, j int) bool { return less(group[i], group[j]) })

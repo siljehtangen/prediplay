@@ -8,6 +8,7 @@ import (
 	"github.com/joho/godotenv"
 )
 
+// Config holds the application configuration loaded from environment variables.
 type Config struct {
 	BzzoiroToken   string
 	BzzoiroBaseURL string
@@ -16,6 +17,8 @@ type Config struct {
 	CORSOrigins    []string
 }
 
+// Load reads configuration from environment variables, loading a .env file first if present.
+// It terminates the process if any required variables are missing.
 func Load() *Config {
 	if err := godotenv.Load(); err != nil {
 		log.Println("No .env file found, reading from environment")

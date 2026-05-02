@@ -2,11 +2,13 @@ package services
 
 import "prediplay/backend/models"
 
+// GetPlayer returns the player record with the given ID.
 func (s *PredictionService) GetPlayer(playerID uint) (models.Player, error) {
 	var p models.Player
 	return p, s.db.First(&p, playerID).Error
 }
 
+// GetAllPlayers returns players filtered by league, position, and team name substring.
 func (s *PredictionService) GetAllPlayers(league, position, team string) ([]models.Player, error) {
 	query := s.db.Model(&models.Player{})
 	if league != "" {

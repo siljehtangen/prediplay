@@ -10,6 +10,8 @@ import (
 	"gorm.io/gorm/logger"
 )
 
+// Init opens the SQLite database at path, configures WAL mode for concurrent access,
+// and runs AutoMigrate for all models. It terminates the process on any error.
 func Init(path string) *gorm.DB {
 	// WAL journal mode allows concurrent reads while a write is in progress.
 	// busy_timeout tells SQLite to wait up to 5 s instead of returning SQLITE_BUSY

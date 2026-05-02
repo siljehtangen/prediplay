@@ -2,6 +2,7 @@ package models
 
 import "time"
 
+// League represents a football league stored in the database.
 type League struct {
 	ID      uint   `gorm:"primaryKey" json:"id"`
 	Name    string `json:"name"`
@@ -9,6 +10,7 @@ type League struct {
 	Active  bool   `json:"active"`
 }
 
+// Team represents a football team stored in the database.
 type Team struct {
 	ID       uint   `gorm:"primaryKey" json:"id"`
 	Name     string `json:"name"`
@@ -16,9 +18,11 @@ type Team struct {
 	LeagueID uint   `json:"league_id"`
 }
 
+// Player represents a football player with full-season and recent-form statistics.
+// Position is one of GK, DEF, MID, FWD.
 type Player struct {
 	ID           uint   `gorm:"primaryKey" json:"id"`
-	ApiID        uint   `json:"api_id"`
+	APIID        uint   `gorm:"column:api_id" json:"api_id"`
 	Name         string `json:"name"`
 	ShortName    string `json:"short_name"`
 	TeamID       uint   `json:"team_id"`
@@ -31,54 +35,55 @@ type Player struct {
 	Nationality  string `json:"nationality"`
 	MarketValue  uint   `json:"market_value"`
 
-	GamesPlayed   int     `json:"games_played"`
-	MinutesPlayed int     `gorm:"index" json:"minutes_played"`
-	Goals         int     `json:"goals"`
-	Assists       int     `json:"assists"`
-	XG            float64 `json:"xG"`
-	XA            float64 `json:"xA"`
-	TotalShots    int     `json:"total_shots"`
-	ShotsOnTarget int     `json:"shots_on_target"`
-	KeyPasses     int     `json:"key_passes"`
-	TotalPasses   int     `json:"total_passes"`
-	AccuratePasses int    `json:"accurate_passes"`
-	DuelsWon      int     `json:"duels_won"`
-	DuelsTotal    int     `json:"duels_total"`
-	TacklesWon    int     `json:"tackles_won"`
-	TacklesTotal  int     `json:"tackles_total"`
-	YellowCards   int     `json:"yellow_cards"`
-	RedCards      int     `json:"red_cards"`
-	Saves         int     `json:"saves"`          // GK
-	GoalsConceded int     `json:"goals_conceded"` // GK
-	FormScore     float64 `json:"form_score"`     // average match rating (1-10)
+	GamesPlayed    int     `json:"games_played"`
+	MinutesPlayed  int     `gorm:"index" json:"minutes_played"`
+	Goals          int     `json:"goals"`
+	Assists        int     `json:"assists"`
+	XG             float64 `json:"xG"`
+	XA             float64 `json:"xA"`
+	TotalShots     int     `json:"total_shots"`
+	ShotsOnTarget  int     `json:"shots_on_target"`
+	KeyPasses      int     `json:"key_passes"`
+	TotalPasses    int     `json:"total_passes"`
+	AccuratePasses int     `json:"accurate_passes"`
+	DuelsWon       int     `json:"duels_won"`
+	DuelsTotal     int     `json:"duels_total"`
+	TacklesWon     int     `json:"tackles_won"`
+	TacklesTotal   int     `json:"tackles_total"`
+	YellowCards    int     `json:"yellow_cards"`
+	RedCards       int     `json:"red_cards"`
+	Saves          int     `json:"saves"`          // GK only
+	GoalsConceded  int     `json:"goals_conceded"` // GK only
+	FormScore      float64 `json:"form_score"`     // average match rating (1–10)
 
-	RecentGamesPlayed   int     `json:"recent_games_played"`
-	RecentMinutes       int     `json:"recent_minutes"`
-	RecentGoals         int     `json:"recent_goals"`
-	RecentAssists       int     `json:"recent_assists"`
-	RecentXG            float64 `json:"recent_xg"`
-	RecentXA            float64 `json:"recent_xa"`
-	RecentTotalShots    int     `json:"recent_total_shots"`
-	RecentShotsOnTarget int     `json:"recent_shots_on_target"`
-	RecentKeyPasses     int     `json:"recent_key_passes"`
-	RecentTotalPasses   int     `json:"recent_total_passes"`
-	RecentAccuratePasses int    `json:"recent_accurate_passes"`
-	RecentDuelsWon      int     `json:"recent_duels_won"`
-	RecentDuelsTotal    int     `json:"recent_duels_total"`
-	RecentTacklesWon    int     `json:"recent_tackles_won"`
-	RecentTacklesTotal  int     `json:"recent_tackles_total"`
-	RecentYellowCards   int     `json:"recent_yellow_cards"`
-	RecentRedCards      int     `json:"recent_red_cards"`
-	RecentSaves         int     `json:"recent_saves"`
-	RecentGoalsConceded int     `json:"recent_goals_conceded"`
-	RecentFormScore     float64 `json:"recent_form_score"`
+	RecentGamesPlayed    int     `json:"recent_games_played"`
+	RecentMinutes        int     `json:"recent_minutes"`
+	RecentGoals          int     `json:"recent_goals"`
+	RecentAssists        int     `json:"recent_assists"`
+	RecentXG             float64 `json:"recent_xg"`
+	RecentXA             float64 `json:"recent_xa"`
+	RecentTotalShots     int     `json:"recent_total_shots"`
+	RecentShotsOnTarget  int     `json:"recent_shots_on_target"`
+	RecentKeyPasses      int     `json:"recent_key_passes"`
+	RecentTotalPasses    int     `json:"recent_total_passes"`
+	RecentAccuratePasses int     `json:"recent_accurate_passes"`
+	RecentDuelsWon       int     `json:"recent_duels_won"`
+	RecentDuelsTotal     int     `json:"recent_duels_total"`
+	RecentTacklesWon     int     `json:"recent_tackles_won"`
+	RecentTacklesTotal   int     `json:"recent_tackles_total"`
+	RecentYellowCards    int     `json:"recent_yellow_cards"`
+	RecentRedCards       int     `json:"recent_red_cards"`
+	RecentSaves          int     `json:"recent_saves"`
+	RecentGoalsConceded  int     `json:"recent_goals_conceded"`
+	RecentFormScore      float64 `json:"recent_form_score"`
 
 	NextOpponent  string  `json:"next_opponent"`
-	OpponentScore float64 `json:"opponent_score"` // 0-10: historical performance vs that opponent
+	OpponentScore float64 `json:"opponent_score"` // 0–10: historical performance vs that opponent
 	IsHome        bool    `json:"is_home"`
-	LastMatchDate string  `json:"last_match_date"` // date of the most recent played game (YYYY-MM-DD)
+	LastMatchDate string  `json:"last_match_date"` // YYYY-MM-DD of the most recent played game
 }
 
+// Event represents a scheduled or completed football match.
 type Event struct {
 	ID         uint      `gorm:"primaryKey" json:"id"`
 	LeagueID   uint      `json:"league_id"`
@@ -90,7 +95,7 @@ type Event struct {
 	Status     string    `json:"status"`
 }
 
-// Prediction maps directly to the /api/predictions/ response
+// Prediction maps directly to the /api/predictions/ response.
 type Prediction struct {
 	ID              uint    `json:"id"`
 	HomeTeam        string  `json:"home_team"`
@@ -105,7 +110,7 @@ type Prediction struct {
 	ModelVersion    string  `json:"model_version"`
 }
 
-// StatEvent is the event embedded inside player-stats responses
+// StatEvent is the event embedded inside player-stats responses.
 type StatEvent struct {
 	ID        uint   `json:"id"`
 	HomeTeam  string `json:"home_team"`
@@ -115,7 +120,7 @@ type StatEvent struct {
 	AwayScore int    `json:"away_score"`
 }
 
-// PlayerStat is a single per-match stat record from /api/player-stats/
+// PlayerStat is a single per-match stat record from /api/player-stats/.
 type PlayerStat struct {
 	Event           StatEvent `json:"event"`
 	MinutesPlayed   uint      `json:"minutes_played"`
@@ -140,42 +145,46 @@ type PlayerStat struct {
 	GoalsConceded   uint      `json:"goals_conceded"`
 }
 
-// PlayerPrediction is not stored in DB, computed on the fly.
-// Contribution fields carry the raw component scores (0-10) for the frontend.
+// PlayerPrediction is computed on the fly (not stored in DB).
+// Contribution fields carry the raw component scores (0–10) for the frontend.
 type PlayerPrediction struct {
-	Player             Player  `json:"player"`
-	PredictedScore     float64 `json:"predicted_score"`
-	RiskLevel          string  `json:"risk_level"` // low, medium, high
-	HiddenGem          bool    `json:"hidden_gem"`
-	HiddenGemReasons  []string `json:"hidden_gem_reasons,omitempty"`
-	FormContribution   float64 `json:"form_contribution"`    // form component (0-10)
-	ThreatContribution float64 `json:"threat_contribution"`  // attack component (0-10)
-	OpponentDifficulty float64 `json:"opponent_difficulty"`  // opponent component (0-10)
-	MinutesLikelihood  float64 `json:"minutes_likelihood"`   // availability component (0-10)
-	DefensiveContribution float64 `json:"defensive_contribution"` // defensive component (0-10)
-	NextEvent          *Event  `json:"next_event,omitempty"`
+	Player                Player   `json:"player"`
+	PredictedScore        float64  `json:"predicted_score"`
+	RiskLevel             string   `json:"risk_level"` // low, medium, high
+	HiddenGem             bool     `json:"hidden_gem"`
+	HiddenGemReasons      []string `json:"hidden_gem_reasons,omitempty"`
+	FormContribution      float64  `json:"form_contribution"`
+	ThreatContribution    float64  `json:"threat_contribution"`
+	OpponentDifficulty    float64  `json:"opponent_difficulty"`
+	MinutesLikelihood     float64  `json:"minutes_likelihood"`
+	DefensiveContribution float64  `json:"defensive_contribution"`
+	NextEvent             *Event   `json:"next_event,omitempty"`
 }
 
+// RedFlagPlayer pairs a player with their computed decline signals.
 type RedFlagPlayer struct {
 	Player       Player   `json:"player"`
-	RedFlagScore float64  `json:"red_flag_score"` // 0-10, higher = more alarming
+	RedFlagScore float64  `json:"red_flag_score"` // 0–10, higher = more alarming
 	FormDecline  float64  `json:"form_decline"`
 	OutputDrop   float64  `json:"output_drop"`
 	Reasons      []string `json:"reasons"`
 }
 
+// BenchwarmerPlayer pairs a player with their consistency score and descriptive label.
 type BenchwarmerPlayer struct {
 	Player           Player  `json:"player"`
-	ConsistencyScore float64 `json:"consistency_score"` // 0-10
-	Label            string  `json:"label"`             // "Rock Solid", "Steady Option", "Rotation Pick"
+	ConsistencyScore float64 `json:"consistency_score"` // 0–10
+	Label            string  `json:"label"`             // e.g. "Rock Solid", "Steady Option"
 }
 
+// DashboardLeague groups top predictions and red flags for a single league.
 type DashboardLeague struct {
 	Name       string             `json:"name"`
 	TopPlayers []PlayerPrediction `json:"top_players"`
 	RedFlags   []RedFlagPlayer    `json:"red_flags"`
 }
 
+// MomentumGame holds the performance data for a single match in a momentum series.
 type MomentumGame struct {
 	Date     string  `json:"date"`
 	Opponent string  `json:"opponent"`
@@ -185,16 +194,17 @@ type MomentumGame struct {
 	Minutes  int     `json:"minutes"`
 }
 
+// MomentumData describes a player's performance trend over their last few games.
 type MomentumData struct {
 	Player Player         `json:"player"`
 	Games  []MomentumGame `json:"games"`
 	Trend  string         `json:"trend"` // rising, falling, stable
 }
 
+// SynergyResult holds the combined prediction score for a group of players.
 type SynergyResult struct {
 	Players        []Player `json:"players"`
 	TotalPredicted float64  `json:"total_predicted"`
 	SynergyBonus   float64  `json:"synergy_bonus"`
 	SynergyScore   float64  `json:"synergy_score"`
 }
-

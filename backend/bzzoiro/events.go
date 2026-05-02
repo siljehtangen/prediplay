@@ -6,6 +6,7 @@ import (
 	"time"
 )
 
+// GetEvents returns events filtered by date range, league, and status.
 func (c *Client) GetEvents(dateFrom, dateTo, league, status string) ([]models.Event, error) {
 	params := map[string]string{}
 	if dateFrom != "" {
@@ -27,6 +28,7 @@ func (c *Client) GetEvents(dateFrom, dateTo, league, status string) ([]models.Ev
 	return mapEvents(raw), nil
 }
 
+// GetLive returns all currently live events.
 func (c *Client) GetLive() ([]models.Event, error) {
 	raw, err := fetchAll[rawEvent](c, "/api/live/", nil)
 	if err != nil {

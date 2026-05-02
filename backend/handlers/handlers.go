@@ -34,7 +34,6 @@ func writeError(w http.ResponseWriter, status int, msg string) {
 	writeJSON(w, status, map[string]string{"error": msg})
 }
 
-// timeFilterParam returns the time_filter query param, defaulting to "recent".
 func timeFilterParam(r *http.Request) string {
 	if f := r.URL.Query().Get("time_filter"); f != "" {
 		return f
@@ -42,7 +41,6 @@ func timeFilterParam(r *http.Request) string {
 	return "recent"
 }
 
-// parsePlayerID parses the "id" URL param as a uint. Returns 0 and false on failure.
 func parsePlayerID(r *http.Request) (uint, bool) {
 	id, err := strconv.ParseUint(chi.URLParam(r, "id"), 10, 64)
 	if err != nil {
@@ -51,8 +49,6 @@ func parsePlayerID(r *http.Request) (uint, bool) {
 	return uint(id), true
 }
 
-// normalizeLeagueName maps an API league name to the canonical name used
-// throughout Prediplay. Returns "" if the league is not one of the 5 supported.
 func normalizeLeagueName(name string) string {
 	n := strings.ToLower(name)
 	switch {

@@ -159,12 +159,13 @@ func creativityComponent(p models.Player) float64 {
 
 // defensiveComponent is fully position-specific.
 //
-//   - GK:  four signals — save rate (0-7), goals-conceded rate (0-2), recent trend
-//     (±1.5), and save volume (0-0.5). The four-signal approach produces a much wider
-//     spread than save rate alone, which clusters most keepers in a narrow 65-80%
-//     band. Example spread: elite GK (~85% SR, 0.7 GC/g) → ~9-10; average (~72%, 1.2
-//     GC/g) → ~6-7; poor (~60%, 1.8 GC/g) → ~2-3.
-//     Minimum threshold raised to 2 games and 5 shots faced to avoid single-game noise.
+//   - GK:  five signals — save rate (0-7), goals-conceded rate (0-2), recent trend
+//     (±1.5), save volume (0-0.5), and pass accuracy (0-1.0). The multi-signal approach
+//     produces a much wider spread than save rate alone, which clusters most keepers
+//     in a narrow 65-80% band. Example spread: elite GK (~85% SR, 0.7 GC/g) → ~9-10;
+//     average (~72%, 1.2 GC/g) → ~6-7; poor (~60%, 1.8 GC/g) → ~2-3.
+//     Minimum threshold: 2 games and 5 shots faced (backstop for edge cases; scoringView
+//     already gates at 3 games in the normal prediction flow).
 //
 //   - DEF: duel win rate (0-4.5) + tackle win rate (0-4.0) + activity volume (0-1.5)
 //     + pass accuracy bonus (0-1.5) for ball-playing defenders. The pass accuracy
@@ -643,6 +644,6 @@ func (s *PredictionService) calcPrediction(player models.Player) *models.PlayerP
 		ThreatContribution: math.Round(attack*100) / 100,
 		OpponentDifficulty: math.Round(opponent*100) / 100,
 		MinutesLikelihood: math.Round(availability*100) / 100,
-		HomeAwayFactor:    math.Round(defensive*100) / 100,
+		DefensiveContribution: math.Round(defensive*100) / 100,
 	}
 }

@@ -115,8 +115,6 @@
   }
 }
 
-// ── Signal list ──────────────────────────────────────────────────────────
-
 .signal-list {
   display: flex;
   flex-direction: column;
@@ -162,15 +160,11 @@
   }
 }
 
-// ── Inline formula box ───────────────────────────────────────────────────
-
 .formula-box--inline {
   margin-bottom: 0;
   font-size: 11.5px;
   padding: 10px 14px;
 }
-
-// ── Factor bars ──────────────────────────────────────────────────────────────
 
 .factor-list {
   display: flex;

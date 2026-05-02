@@ -17,12 +17,14 @@ import (
 // affecting API request settings.
 var photoClient = &http.Client{Timeout: 10 * time.Second}
 
+// Client is the HTTP client for the bzzoiro sports data API.
 type Client struct {
 	http    *resty.Client
 	baseURL string
 	token   string
 }
 
+// New creates a Client configured with the given base URL and API token.
 func New(baseURL, token string) *Client {
 	r := resty.New().
 		SetHeader("Authorization", "Token "+token).
@@ -30,6 +32,8 @@ func New(baseURL, token string) *Client {
 	return &Client{http: r, baseURL: strings.TrimRight(baseURL, "/"), token: token}
 }
 
+// ProxyPlayerPhoto fetches the player photo from the bzzoiro image endpoint and
+// copies it into w, calling headerSetter with the Content-Type before writing body bytes.
 func (c *Client) ProxyPlayerPhoto(w io.Writer, headerSetter func(string), apiID uint) error {
 	url := fmt.Sprintf("%s/img/player/%d/?token=%s", c.baseURL, apiID, c.token)
 	resp, err := photoClient.Get(url)

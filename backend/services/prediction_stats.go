@@ -7,7 +7,6 @@ import (
 	"strings"
 )
 
-// targetLeagues maps country name to canonical league name used throughout the app.
 var targetLeagues = map[string]string{
 	"England": "Premier League",
 	"Spain":   "La Liga",
@@ -24,7 +23,6 @@ func supportedLeagueNames() []string {
 	return names
 }
 
-// playedGames returns only entries where the player actually took the pitch.
 func playedGames(stats []models.PlayerStat) []models.PlayerStat {
 	out := make([]models.PlayerStat, 0, len(stats))
 	for _, st := range stats {
@@ -35,7 +33,6 @@ func playedGames(stats []models.PlayerStat) []models.PlayerStat {
 	return out
 }
 
-// sortByDateDesc sorts stats in-place, most recent game first.
 func sortByDateDesc(stats []models.PlayerStat) {
 	sort.Slice(stats, func(i, j int) bool {
 		di, dj := stats[i].Event.EventDate, stats[j].Event.EventDate
@@ -49,7 +46,6 @@ func sortByDateDesc(stats []models.PlayerStat) {
 	})
 }
 
-// statTotals holds accumulated raw stat values from a slice of PlayerStat.
 type statTotals struct {
 	mins, goals, assists, shots, shotsOT, keyPasses uint
 	totalPasses, accPasses, duelsWon, duelsTotal     uint
@@ -91,7 +87,6 @@ func accumulateStats(stats []models.PlayerStat) statTotals {
 	return t
 }
 
-// aggregateOverall computes full-season totals into the Player's main stat fields.
 func aggregateOverall(p *models.Player, stats []models.PlayerStat) {
 	t := accumulateStats(stats)
 	p.GamesPlayed = t.gamesPlayed
@@ -120,7 +115,6 @@ func aggregateOverall(p *models.Player, stats []models.PlayerStat) {
 	}
 }
 
-// aggregateRecent computes stats from the last 3 played games into the Player's Recent* fields.
 func aggregateRecent(p *models.Player, stats []models.PlayerStat) {
 	t := accumulateStats(stats)
 	p.RecentMinutes = int(t.mins)

@@ -116,9 +116,9 @@ export class PlayerDetailComponent implements OnInit, OnDestroy {
     this.chart = new Chart(this.canvasRef.nativeElement, {
       type: 'bar',
       data: {
-        labels: ['Form', 'Threat (xG/xA)', 'Opponent', 'Minutes', 'Home/Away'],
+        labels: ['Form', 'Threat (xG/xA)', 'Opponent', 'Minutes', 'Defensive'],
         datasets: [{
-          data: [p.form_contribution, p.threat_contribution, p.opponent_difficulty, p.minutes_likelihood, p.home_away_factor],
+          data: [p.form_contribution, p.threat_contribution, p.opponent_difficulty, p.minutes_likelihood, p.defensive_contribution],
           backgroundColor: ['#6c63ff', '#81c784', '#ffd54f', '#64b5f6', '#f06292'],
           borderRadius: 4,
         }]

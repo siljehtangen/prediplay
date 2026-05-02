@@ -2,6 +2,7 @@ package bzzoiro
 
 import "prediplay/backend/models"
 
+// GetPredictions returns match predictions, optionally restricted to upcoming fixtures.
 func (c *Client) GetPredictions(upcoming bool) ([]models.Prediction, error) {
 	params := map[string]string{}
 	if upcoming {

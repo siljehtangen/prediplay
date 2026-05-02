@@ -9,8 +9,16 @@ import (
 	"time"
 )
 
+// dashboardTopN is the number of top players and red-flag players shown per league.
+const dashboardTopN = 3
+
+// momentumGameLimit is the maximum number of recent games included in a momentum series.
+const momentumGameLimit = 10
+
 var dashboardLeagueList = []string{"Premier League", "La Liga", "Bundesliga", "Serie A", "Ligue 1"}
 
+// GetDashboard returns top predictions and red flags for each supported league,
+// fetched in parallel. Individual league errors are logged and produce empty results.
 func (s *PredictionService) GetDashboard(timeFilter string) ([]models.DashboardLeague, error) {
 	type leagueResult struct {
 		idx      int
@@ -28,11 +36,11 @@ func (s *PredictionService) GetDashboard(timeFilter string) ([]models.DashboardL
 			if err != nil {
 				log.Printf("GetDashboard: GetRedFlags for %s: %v", l, err)
 			}
-			if len(top) > 3 {
-				top = top[:3]
+			if len(top) > dashboardTopN {
+				top = top[:dashboardTopN]
 			}
-			if len(flags) > 3 {
-				flags = flags[:3]
+			if len(flags) > dashboardTopN {
+				flags = flags[:dashboardTopN]
 			}
 			ch <- leagueResult{idx: idx, top: top, redFlags: flags}
 		}(i, league)
@@ -49,6 +57,7 @@ func (s *PredictionService) GetDashboard(timeFilter string) ([]models.DashboardL
 	return results, nil
 }
 
+// GetMomentum returns a player's performance trend over their most recent games.
 func (s *PredictionService) GetMomentum(playerID uint) (*models.MomentumData, error) {
 	var player models.Player
 	if err := s.db.First(&player, playerID).Error; err != nil {
@@ -62,8 +71,8 @@ func (s *PredictionService) GetMomentum(playerID uint) (*models.MomentumData, er
 
 	played := playedGames(stats)
 	sortByDateDesc(played)
-	if len(played) > 10 {
-		played = played[:10]
+	if len(played) > momentumGameLimit {
+		played = played[:momentumGameLimit]
 	}
 
 	games := make([]models.MomentumGame, 0, len(played))
@@ -117,6 +126,8 @@ func (s *PredictionService) GetMomentum(playerID uint) (*models.MomentumData, er
 	return &models.MomentumData{Player: player, Games: games, Trend: trend}, nil
 }
 
+// GetSynergy returns the combined prediction score and a position-diversity bonus
+// for the given set of player IDs.
 func (s *PredictionService) GetSynergy(playerIDs []uint) (*models.SynergyResult, error) {
 	players := make([]models.Player, 0, len(playerIDs))
 	for _, id := range playerIDs {

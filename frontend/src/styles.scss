@@ -1,4 +1,3 @@
-/* Global styles – Prediplay dark theme */
 *, *::before, *::after { box-sizing: border-box; }
 
 html, body {
@@ -24,7 +23,6 @@ body { background-color: #0d0d1a !important; }
   color: #e8e8f0 !important;
 }
 
-/* Chips */
 .chip {
   display: inline-flex;
   align-items: center;
@@ -43,7 +41,6 @@ body { background-color: #0d0d1a !important; }
   &--league { background: rgba(33,150,243,.15); color: #90caf9; border: 1px solid rgba(33,150,243,.3); }
 }
 
-/* Score circles */
 .score-circle {
   width: 56px;
   height: 56px;
@@ -61,7 +58,6 @@ body { background-color: #0d0d1a !important; }
   &--high   { border-color: #81c784; color: #81c784; background: rgba(76,175,80,.12); }
 }
 
-/* Section header */
 .section-header {
   display: flex;
   align-items: center;
@@ -72,7 +68,6 @@ body { background-color: #0d0d1a !important; }
   .section-icon { color: #6c63ff; font-size: 22px; }
 }
 
-/* Page layout */
 .page {
   padding: 24px;
   max-width: 1200px;
@@ -82,7 +77,6 @@ body { background-color: #0d0d1a !important; }
   &__subtitle { font-size: 14px; color: #888; margin: 0 0 28px; }
 }
 
-/* Filters */
 .filters {
   display: flex;
   gap: 12px;
@@ -93,7 +87,6 @@ body { background-color: #0d0d1a !important; }
   .mat-mdc-form-field { min-width: 160px; }
 }
 
-/* Time filter toggle (Recent / Overall) */
 .time-filter-toggle {
   display: inline-flex;
   border: 1px solid rgba(108,99,255,.35);
@@ -120,7 +113,6 @@ body { background-color: #0d0d1a !important; }
   }
 }
 
-/* League section headers on category pages */
 .league-section {
   margin-bottom: 40px;
 
@@ -146,14 +138,12 @@ body { background-color: #0d0d1a !important; }
   }
 }
 
-/* Player grid */
 .player-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 16px;
 }
 
-/* Loading / empty states */
 .loading-container, .empty-state {
   display: flex;
   flex-direction: column;
@@ -174,12 +164,10 @@ body { background-color: #0d0d1a !important; }
   .mat-mdc-select-value-text, .mat-mdc-input-element { color: #e8e8f0 !important; }
 }
 
-/* Material select panel */
 .mat-mdc-select-panel { background: #1a1a2e !important; }
 .mat-mdc-option { color: #e8e8f0 !important; }
 .mat-mdc-option:hover { background: rgba(108,99,255,.15) !important; }
 
-/* Progress bar color */
 .mat-mdc-progress-bar .mdc-linear-progress__bar-inner {
   border-color: #7c73ff !important;
 }

@@ -121,7 +121,6 @@ export class TopPlayersComponent implements OnInit {
       ];
     }
 
-    // FWD
     return [
       { label: 'Goals', value: fmtInt(player.goals) },
       { label: 'Assists', value: fmtInt(player.assists) },

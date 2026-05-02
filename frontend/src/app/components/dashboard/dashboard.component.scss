@@ -5,8 +5,6 @@
   margin-bottom: 8px;
 }
 
-// ── League sections ───────────────────────────────────────────────────────────
-
 .league-section {
   margin-top: 44px;
 
@@ -38,8 +36,6 @@
   gap: 8px;
 }
 
-// ── Column label ──────────────────────────────────────────────────────────────
-
 .col-label {
   display: flex;
   align-items: center;
@@ -66,8 +62,6 @@
   &:hover { opacity: 1; }
   &--flags { color: #f44336; }
 }
-
-// ── Featured card (#1) with donut ────────────────────────────────────────────
 
 .featured-card {
   display: flex;
@@ -160,8 +154,6 @@
   border-color: rgba(129,199,132,.20);
 }
 
-// ── Donut chart ───────────────────────────────────────────────────────────────
-
 .donut-wrap {
   position: relative;
   width: 80px;
@@ -205,8 +197,6 @@
   letter-spacing: 0.4px;
 }
 
-// ── Donut legend ──────────────────────────────────────────────────────────────
-
 .legend {
   display: flex;
   flex-direction: column;
@@ -240,8 +230,6 @@
   color: #a89cff;
   margin-left: auto;
 }
-
-// ── Mini rows (#2, #3) ────────────────────────────────────────────────────────
 
 .mini-row {
   display: flex;
@@ -326,8 +314,6 @@
   }
 }
 
-// ── Form graph ────────────────────────────────────────────────────────────────
-
 .form-graph {
   padding: 10px 12px;
   border-radius: 8px;
@@ -396,8 +382,6 @@
   transition: opacity 0.1s;
   &:hover { opacity: 1; }
 }
-
-// ── Empty states ──────────────────────────────────────────────────────────────
 
 .empty-state-inline {
   display: flex;

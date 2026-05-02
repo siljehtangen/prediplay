@@ -30,9 +30,6 @@ var positionQuota = map[string]int{
 	"FWD": 3,
 }
 
-// pickByPositionQuota selects items using per-position quotas (GK=1 DEF=2 MID=3 FWD=3)
-// so no single position can flood the top-N list.
-// getPos extracts the canonical position; less returns true when a should rank before b.
 func pickByPositionQuota[T any](items []T, getPos func(T) string, less func(a, b T) bool) []T {
 	byPos := map[string][]T{"GK": {}, "DEF": {}, "MID": {}, "FWD": {}}
 	for _, item := range items {
@@ -74,8 +71,6 @@ func canonicalPosition(pos string) string {
 	}
 }
 
-// percentile returns a value at fraction frac (0..1) from a sorted ascending slice.
-// Example: frac=0.05 => 5th percentile.
 func percentile(sortedAsc []float64, frac float64) float64 {
 	if len(sortedAsc) == 0 {
 		return 0

@@ -101,7 +101,6 @@
 
 .form-label { font-size: 11px; color: #666; white-space: nowrap; }
 
-// Stack the score circle and the label under it.
 .score-stack {
   display: flex;
   flex-direction: column;
@@ -127,7 +126,6 @@
   line-height: 1;
 }
 
-// Risk colors (same as former score-circle variants, but without borders/backgrounds).
 .list-score--high {
   color: #81c784;
 }

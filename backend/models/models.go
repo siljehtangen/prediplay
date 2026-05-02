@@ -152,7 +152,7 @@ type PlayerPrediction struct {
 	ThreatContribution float64 `json:"threat_contribution"`  // attack component (0-10)
 	OpponentDifficulty float64 `json:"opponent_difficulty"`  // opponent component (0-10)
 	MinutesLikelihood  float64 `json:"minutes_likelihood"`   // availability component (0-10)
-	HomeAwayFactor     float64 `json:"home_away_factor"`     // defensive component (0-10)
+	DefensiveContribution float64 `json:"defensive_contribution"` // defensive component (0-10)
 	NextEvent          *Event  `json:"next_event,omitempty"`
 }
 

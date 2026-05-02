@@ -73,9 +73,9 @@ type Player struct {
 	RecentGoalsConceded int     `json:"recent_goals_conceded"`
 	RecentFormScore     float64 `json:"recent_form_score"`
 
-	NextOpponent  string  `json:"next_opponent"`  // team name of next scheduled opponent
+	NextOpponent  string  `json:"next_opponent"`
 	OpponentScore float64 `json:"opponent_score"` // 0-10: historical performance vs that opponent
-	IsHome        bool    `json:"is_home"`        // true if next match is at home
+	IsHome        bool    `json:"is_home"`
 	LastMatchDate string  `json:"last_match_date"` // date of the most recent played game (YYYY-MM-DD)
 }
 
@@ -156,7 +156,6 @@ type PlayerPrediction struct {
 	NextEvent          *Event  `json:"next_event,omitempty"`
 }
 
-// RedFlagPlayer represents a player showing worrying form/output trends
 type RedFlagPlayer struct {
 	Player       Player   `json:"player"`
 	RedFlagScore float64  `json:"red_flag_score"` // 0-10, higher = more alarming
@@ -165,14 +164,12 @@ type RedFlagPlayer struct {
 	Reasons      []string `json:"reasons"`
 }
 
-// BenchwarmerPlayer represents a consistent, reliable but non-elite player
 type BenchwarmerPlayer struct {
 	Player           Player  `json:"player"`
 	ConsistencyScore float64 `json:"consistency_score"` // 0-10
 	Label            string  `json:"label"`             // "Rock Solid", "Steady Option", "Rotation Pick"
 }
 
-// DashboardLeague is the per-league summary returned by /api/dashboard.
 type DashboardLeague struct {
 	Name       string             `json:"name"`
 	TopPlayers []PlayerPrediction `json:"top_players"`

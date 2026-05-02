@@ -66,7 +66,7 @@ func isHiddenGem(p models.Player, predicted, attackScore, creativityScore float6
 	if p.Goals+p.Assists >= maxGATotal {
 		return false, nil // already well-known / priced in
 	}
-	mins90 := math.Max(1, float64(p.MinutesPlayed)/90.0)
+	mins90 := per90(p.MinutesPlayed)
 	xgXaPer90 := (p.XG + p.XA) / mins90
 	gAPer90 := float64(p.Goals+p.Assists) / mins90
 
@@ -131,10 +131,7 @@ func isHiddenGem(p models.Player, predicted, attackScore, creativityScore float6
 	case "DEF":
 		if p.TotalPasses >= 30 && p.GamesPlayed >= 3 {
 			passAcc := float64(p.AccuratePasses) / float64(p.TotalPasses)
-			duelRate := 0.5
-			if p.DuelsTotal > 0 {
-				duelRate = float64(p.DuelsWon) / float64(p.DuelsTotal)
-			}
+			duelRate := safeRate(p.DuelsWon, p.DuelsTotal)
 			if passAcc >= 0.87 && duelRate >= 0.52 && p.Goals+p.Assists < 5 {
 				positionGem = true
 				positionGemReason = "Ball-playing defender with elite distribution"
@@ -204,7 +201,7 @@ func isHiddenGem(p models.Player, predicted, attackScore, creativityScore float6
 //	A 1-point drop (e.g. 7.5 → 6.5) = 2.5; a 2-point drop = 5.0.
 //	Old formula divided by season average, meaning a drop from 7.5 to 6.5 scored 1.3 — too lenient.
 func calcRedFlag(p models.Player) (score, formDecline, outputDrop float64, reasons []string) {
-	mins90 := math.Max(1, float64(p.MinutesPlayed)/90.0)
+	mins90 := per90(p.MinutesPlayed)
 	recentMins90 := math.Max(0.5, float64(p.RecentMinutes)/90.0)
 
 	// ── 1. Form decline ───────────────────────────────────────────────────────
@@ -433,7 +430,7 @@ func calcRedFlag(p models.Player) (score, formDecline, outputDrop float64, reaso
 //  5. Discipline — card rate per game (reliable players stay on the pitch).
 func calcBenchwarmer(p models.Player) (score float64, label string) {
 	games := math.Max(1, float64(p.GamesPlayed))
-	mins90 := math.Max(1, float64(p.MinutesPlayed)/90.0)
+	mins90 := per90(p.MinutesPlayed)
 
 	// 1. Availability (0-10)
 	avgMins := float64(p.MinutesPlayed) / games
@@ -518,14 +515,8 @@ func calcBenchwarmer(p models.Player) (score float64, label string) {
 		gcPerGame := float64(p.GoalsConceded) / games
 		specialityScore = math.Max(0, 10-math.Abs(gcPerGame-0.9)*7)
 	case "DEF":
-		duelRate := 0.5
-		if p.DuelsTotal > 0 {
-			duelRate = float64(p.DuelsWon) / float64(p.DuelsTotal)
-		}
-		tackleRate := 0.5
-		if p.TacklesTotal > 0 {
-			tackleRate = float64(p.TacklesWon) / float64(p.TacklesTotal)
-		}
+		duelRate := safeRate(p.DuelsWon, p.DuelsTotal)
+		tackleRate := safeRate(p.TacklesWon, p.TacklesTotal)
 		specialityScore = math.Max(0, 10-math.Abs(duelRate-0.55)*20)*0.60 +
 			math.Max(0, 10-math.Abs(tackleRate-0.55)*20)*0.40
 	case "MID":

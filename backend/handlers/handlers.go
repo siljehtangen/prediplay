@@ -13,11 +13,14 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
+// Handler wires together the bzzoiro API client and the prediction service
+// to serve all HTTP endpoints.
 type Handler struct {
 	bzzoiro    *bzzoiro.Client
 	prediction *services.PredictionService
 }
 
+// New creates a Handler backed by the given bzzoiro client and prediction service.
 func New(b *bzzoiro.Client, p *services.PredictionService) *Handler {
 	return &Handler{bzzoiro: b, prediction: p}
 }

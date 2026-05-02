@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"sort"
 	"sync"
@@ -9,6 +10,8 @@ import (
 	"prediplay/backend/models"
 )
 
+// GetLeagues returns all leagues supported by the application, with names normalised
+// to a canonical form (e.g. "Premier League", "La Liga").
 func (h *Handler) GetLeagues(w http.ResponseWriter, r *http.Request) {
 	all, err := h.bzzoiro.GetLeagues()
 	if err != nil {
@@ -25,6 +28,7 @@ func (h *Handler) GetLeagues(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, filtered)
 }
 
+// GetTeams returns teams for the given country (query param: country).
 func (h *Handler) GetTeams(w http.ResponseWriter, r *http.Request) {
 	country := r.URL.Query().Get("country")
 	teams, err := h.bzzoiro.GetTeams(country)
@@ -35,6 +39,9 @@ func (h *Handler) GetTeams(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, teams)
 }
 
+// GetEvents returns events filtered by league, date range, and status.
+// When no league is specified it fans out across all supported leagues in parallel,
+// returning whatever results succeed (individual league errors are logged and skipped).
 func (h *Handler) GetEvents(w http.ResponseWriter, r *http.Request) {
 	q := r.URL.Query()
 	leagueParam := q.Get("league")
@@ -79,6 +86,7 @@ func (h *Handler) GetEvents(w http.ResponseWriter, r *http.Request) {
 				dateFrom, dateTo, fmt.Sprintf("%d", leagueID), status,
 			)
 			if err != nil {
+				log.Printf("[handler] GetEvents league %d: %v", leagueID, err)
 				return
 			}
 			mu.Lock()
@@ -94,6 +102,7 @@ func (h *Handler) GetEvents(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, combined)
 }
 
+// GetLive returns all currently live events.
 func (h *Handler) GetLive(w http.ResponseWriter, r *http.Request) {
 	events, err := h.bzzoiro.GetLive()
 	if err != nil {
@@ -103,6 +112,7 @@ func (h *Handler) GetLive(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, events)
 }
 
+// GetPredictions returns match predictions, optionally filtered to upcoming fixtures only.
 func (h *Handler) GetPredictions(w http.ResponseWriter, r *http.Request) {
 	upcoming := r.URL.Query().Get("upcoming") == "true"
 	preds, err := h.bzzoiro.GetPredictions(upcoming)
@@ -113,6 +123,7 @@ func (h *Handler) GetPredictions(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, preds)
 }
 
+// GetPlayerPhoto proxies the player photo from the bzzoiro API, cached for 24 hours.
 func (h *Handler) GetPlayerPhoto(w http.ResponseWriter, r *http.Request) {
 	id, ok := parsePlayerID(r)
 	if !ok {
@@ -120,7 +131,7 @@ func (h *Handler) GetPlayerPhoto(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	player, err := h.prediction.GetPlayer(id)
-	if err != nil || player.ApiID == 0 {
+	if err != nil || player.APIID == 0 {
 		http.NotFound(w, r)
 		return
 	}
@@ -129,12 +140,15 @@ func (h *Handler) GetPlayerPhoto(w http.ResponseWriter, r *http.Request) {
 		if ct != "" {
 			w.Header().Set("Content-Type", ct)
 		}
-	}, player.ApiID)
+	}, player.APIID)
 	if err != nil {
 		http.NotFound(w, r)
 	}
 }
 
+// GetPlayerStats returns per-match stats for a player from the bzzoiro API.
+// Returns an empty array (not an error) when the external API is unavailable,
+// so the player detail page can still render with partial data.
 func (h *Handler) GetPlayerStats(w http.ResponseWriter, r *http.Request) {
 	id, ok := parsePlayerID(r)
 	if !ok {
@@ -143,7 +157,6 @@ func (h *Handler) GetPlayerStats(w http.ResponseWriter, r *http.Request) {
 	}
 	stats, err := h.bzzoiro.GetPlayerStats(id)
 	if err != nil {
-		// External API unavailable — return empty array so player detail still renders
 		writeJSON(w, http.StatusOK, []models.PlayerStat{})
 		return
 	}

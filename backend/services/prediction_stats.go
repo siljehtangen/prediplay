@@ -115,7 +115,7 @@ func aggregateOverall(p *models.Player, stats []models.PlayerStat) {
 	p.GoalsConceded = int(t.gconceded)
 	if t.ratedGames > 0 {
 		p.FormScore = t.rating / float64(t.ratedGames)
-	} else if p.FormScore == 0 {
+	} else if p.FormScore <= 0 {
 		p.FormScore = 6.0
 	}
 }
@@ -195,6 +195,14 @@ func scoringView(p models.Player, timeFilter string) (models.Player, bool) {
 
 // playerVsOpponentScore returns a 0-10 score for the player's historical performance
 // against a given opponent. Returns 5.0 (neutral) if no prior history exists.
+//
+// Sample-size confidence: the raw signal is blended toward the 5.0 neutral based on
+// how many historical games exist. A single game is far too noisy to trust fully —
+// a hat-trick or howler in one match shouldn't dominate the prediction.
+//   - 1 game  → 25% raw signal, 75% neutral (5.0)
+//   - 2 games → 50% raw, 50% neutral
+//   - 3 games → 75% raw, 25% neutral
+//   - 4+ games → 100% raw (full confidence)
 func playerVsOpponentScore(stats []models.PlayerStat, opponentTeamName string) float64 {
 	if opponentTeamName == "" {
 		return 5.0
@@ -219,5 +227,9 @@ func playerVsOpponentScore(stats []models.PlayerStat, opponentTeamName string) f
 		total += score
 	}
 	avg := total / float64(len(matched))
-	return math.Min(10, math.Max(1, 5.0+(avg-6.5)*5.0))
+	raw := math.Min(10, math.Max(1, 5.0+(avg-6.5)*5.0))
+
+	// Scale confidence linearly: full trust at 4+ games, 25% trust at 1 game.
+	h2hConf := math.Min(1.0, float64(len(matched))/4.0)
+	return 5.0*(1.0-h2hConf) + raw*h2hConf
 }

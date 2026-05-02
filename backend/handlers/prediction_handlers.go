@@ -6,6 +6,7 @@ import (
 	"strings"
 )
 
+// GetPlayers returns all players filtered by league, position, and team name.
 func (h *Handler) GetPlayers(w http.ResponseWriter, r *http.Request) {
 	q := r.URL.Query()
 	players, err := h.prediction.GetAllPlayers(q.Get("league"), q.Get("position"), q.Get("team"))
@@ -16,6 +17,7 @@ func (h *Handler) GetPlayers(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, players)
 }
 
+// GetPlayerPrediction returns the computed prediction for a single player by ID.
 func (h *Handler) GetPlayerPrediction(w http.ResponseWriter, r *http.Request) {
 	id, ok := parsePlayerID(r)
 	if !ok {
@@ -30,6 +32,8 @@ func (h *Handler) GetPlayerPrediction(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, pred)
 }
 
+// GetTopPredictions returns the top-ranked predictions filtered by league, position,
+// and hidden-gem status (query param: hidden_gem=true).
 func (h *Handler) GetTopPredictions(w http.ResponseWriter, r *http.Request) {
 	q := r.URL.Query()
 	gemFilter := "non-gems"
@@ -46,6 +50,7 @@ func (h *Handler) GetTopPredictions(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, preds)
 }
 
+// GetRedFlags returns players with declining performance signals, filtered by league and position.
 func (h *Handler) GetRedFlags(w http.ResponseWriter, r *http.Request) {
 	q := r.URL.Query()
 	result, err := h.prediction.GetRedFlags(q.Get("league"), q.Get("position"), timeFilterParam(r))
@@ -56,6 +61,7 @@ func (h *Handler) GetRedFlags(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, result)
 }
 
+// GetDashboard returns a per-league summary of top predictions and red flags.
 func (h *Handler) GetDashboard(w http.ResponseWriter, r *http.Request) {
 	result, err := h.prediction.GetDashboard(timeFilterParam(r))
 	if err != nil {
@@ -65,6 +71,7 @@ func (h *Handler) GetDashboard(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, result)
 }
 
+// GetBenchwarmers returns consistently reliable players filtered by league and position.
 func (h *Handler) GetBenchwarmers(w http.ResponseWriter, r *http.Request) {
 	q := r.URL.Query()
 	result, err := h.prediction.GetBenchwarmers(q.Get("league"), q.Get("position"), timeFilterParam(r))
@@ -75,6 +82,8 @@ func (h *Handler) GetBenchwarmers(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, result)
 }
 
+// GetSynergy returns the combined prediction score for a comma-separated list of player IDs
+// (query param: players=1,2,3).
 func (h *Handler) GetSynergy(w http.ResponseWriter, r *http.Request) {
 	raw := r.URL.Query().Get("players")
 	if raw == "" {
@@ -100,6 +109,8 @@ func (h *Handler) GetSynergy(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, result)
 }
 
+// GetMomentum returns a player's performance trend over their recent games
+// (query param: player=<id>).
 func (h *Handler) GetMomentum(w http.ResponseWriter, r *http.Request) {
 	idStr := r.URL.Query().Get("player")
 	id, err := strconv.ParseUint(idStr, 10, 64)

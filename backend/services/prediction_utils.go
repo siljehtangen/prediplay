@@ -6,6 +6,21 @@ import (
 	"sort"
 )
 
+// per90 converts a raw minutes total to a per-90-minutes denominator, floored at 1
+// to avoid division by zero for players with minimal recorded time.
+func per90(minutes int) float64 {
+	return math.Max(1, float64(minutes)/90.0)
+}
+
+// safeRate computes won/total as a fraction, returning 0.50 (neutral) when total is 0.
+// Used for duel win rate, tackle win rate, and similar "attempts → success" ratios.
+func safeRate(won, total int) float64 {
+	if total == 0 {
+		return 0.50
+	}
+	return float64(won) / float64(total)
+}
+
 // positionQuota defines how many top players to pick per position when no
 // position filter is active. Matches a typical attacking lineup shape (4-3-3 / 4-2-3-1).
 var positionQuota = map[string]int{

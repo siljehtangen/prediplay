@@ -136,7 +136,7 @@ export interface PlayerPrediction {
   threat_contribution: number;
   opponent_difficulty: number;
   minutes_likelihood: number;
-  home_away_factor: number;
+  defensive_contribution: number;
   next_event?: Event;
 }
 

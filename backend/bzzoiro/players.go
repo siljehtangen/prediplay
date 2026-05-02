@@ -28,7 +28,6 @@ func (c *Client) GetPlayers(position, nationality, team string) ([]models.Player
 	return out, nil
 }
 
-// GetPlayersFirstPage fetches only the first page of players (no pagination).
 func (c *Client) GetPlayersFirstPage(position, teamID string) ([]models.Player, error) {
 	var resp paginated[rawPlayer]
 	url := c.baseURL + "/api/players/"
@@ -84,7 +83,6 @@ func mapRawPlayer(r rawPlayer) models.Player {
 	}
 }
 
-// GetPlayerStats fetches all historical stats for a player (full season).
 func (c *Client) GetPlayerStats(playerID uint) ([]models.PlayerStat, error) {
 	params := map[string]string{"player": fmt.Sprintf("%d", playerID)}
 	raw, err := fetchAll[rawPlayerStat](c, "/api/player-stats/", params)
@@ -123,8 +121,6 @@ func (c *Client) GetPlayerStatsSince(playerID uint, dateFrom string) ([]models.P
 	return out, nil
 }
 
-// GetPlayerStatsRecent fetches only the first page of stats (most recent games).
-// Used during SyncPlayers to populate the DB cache quickly.
 func (c *Client) GetPlayerStatsRecent(playerID uint) ([]models.PlayerStat, error) {
 	var resp paginated[rawPlayerStat]
 	url := c.baseURL + "/api/player-stats/"

@@ -6,13 +6,23 @@ import (
 	"sort"
 )
 
+// minMinutesOverall is the minimum season minutes required for overall-mode analysis
+// (≈9 games × 30 min/game).
+const minMinutesOverall = 270
+
+// minMinutesRecent is the minimum season minutes required for recent-mode analysis
+// (≈1 full game).
+const minMinutesRecent = 45
+
 // GetRedFlags passes the original (full-stat) player to calcRedFlag so it can
 // compare recent vs overall as a true decline signal. The scoringView eligibility
 // filter (3 games played) is applied manually.
+// GetRedFlags returns players with declining performance signals, filtered by league,
+// position, and time filter.
 func (s *PredictionService) GetRedFlags(league, position, timeFilter string) ([]models.RedFlagPlayer, error) {
-	minMinutes := 270
+	minMinutes := minMinutesOverall
 	if timeFilter != "overall" {
-		minMinutes = 45
+		minMinutes = minMinutesRecent
 	}
 	players, err := s.loadPlayers(league, position, minMinutes)
 	if err != nil {

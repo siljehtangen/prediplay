@@ -5,6 +5,7 @@ import (
 	"prediplay/backend/models"
 )
 
+// GetLeagues returns all leagues from the bzzoiro API.
 func (c *Client) GetLeagues() ([]models.League, error) {
 	raw, err := fetchAll[rawLeague](c, "/api/leagues/", nil)
 	if err != nil {
@@ -17,6 +18,7 @@ func (c *Client) GetLeagues() ([]models.League, error) {
 	return out, nil
 }
 
+// GetTeams returns teams filtered by country and optionally by league ID.
 func (c *Client) GetTeams(country string, leagueID ...uint) ([]models.Team, error) {
 	params := map[string]string{}
 	if country != "" {

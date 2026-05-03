@@ -59,11 +59,24 @@ func attackComponent(p models.Player) float64 {
 
 	// Blend in recent stats when available — captures current offensive momentum.
 	// Require 3 games to match scoringView gate (2-game samples add more noise than signal).
+	// Asymmetric blending mirrors formComponent: respond quickly to attack declines,
+	// dampen hot-streak inflation (a 3-game purple patch shouldn't outweigh a full season).
 	if p.RecentGamesPlayed >= 3 && p.RecentMinutes > 0 {
 		recentMins90 := per90(p.RecentMinutes)
-		xgPer90 = xgPer90*0.60 + (p.RecentXG/recentMins90)*0.40
-		goalsPer90 = goalsPer90*0.60 + (float64(p.RecentGoals)/recentMins90)*0.40
-		sotPer90 = sotPer90*0.60 + (float64(p.RecentShotsOnTarget)/recentMins90)*0.40
+		recentXGPer90 := p.RecentXG / recentMins90
+		recentGoalsPer90 := float64(p.RecentGoals) / recentMins90
+		recentSotPer90 := float64(p.RecentShotsOnTarget) / recentMins90
+		if recentXGPer90 < xgPer90 {
+			// Declining attack: 50/50 — catch the drop early
+			xgPer90 = xgPer90*0.50 + recentXGPer90*0.50
+			goalsPer90 = goalsPer90*0.50 + recentGoalsPer90*0.50
+			sotPer90 = sotPer90*0.50 + recentSotPer90*0.50
+		} else {
+			// Stable/improving attack: 70/30 — season-anchored to prevent noise inflation
+			xgPer90 = xgPer90*0.70 + recentXGPer90*0.30
+			goalsPer90 = goalsPer90*0.70 + recentGoalsPer90*0.30
+			sotPer90 = sotPer90*0.70 + recentSotPer90*0.30
+		}
 	}
 
 	// Position-specific xG ceiling — prevents FWDs from plateauing at the same
@@ -132,10 +145,18 @@ func creativityComponent(p models.Player) float64 {
 	xaPer90 := p.XA / mins90
 	assistsPer90 := float64(p.Assists) / mins90
 
+	// Asymmetric blending: respond quickly to creativity declines, dampen hot streaks.
 	if p.RecentGamesPlayed >= 3 && p.RecentMinutes > 0 {
 		recentMins90 := per90(p.RecentMinutes)
-		xaPer90 = xaPer90*0.60 + (p.RecentXA/recentMins90)*0.40
-		assistsPer90 = assistsPer90*0.60 + (float64(p.RecentAssists)/recentMins90)*0.40
+		recentXAPer90 := p.RecentXA / recentMins90
+		recentAssistsPer90 := float64(p.RecentAssists) / recentMins90
+		if recentXAPer90 < xaPer90 {
+			xaPer90 = xaPer90*0.50 + recentXAPer90*0.50
+			assistsPer90 = assistsPer90*0.50 + recentAssistsPer90*0.50
+		} else {
+			xaPer90 = xaPer90*0.70 + recentXAPer90*0.30
+			assistsPer90 = assistsPer90*0.70 + recentAssistsPer90*0.30
+		}
 	}
 
 	xaScore := math.Min(8, xaPer90*16)
@@ -275,13 +296,26 @@ func defensiveComponent(p models.Player) float64 {
 		// DM winning 65% duels + 70% tackles → ~8.1; AM avoiding duels → ~4.5 floor.
 		return math.Min(10, duelRate*5.0+tackleRate*3.0+1.0)
 
-	default: // FWD — hold-up play contribution only
+	default: // FWD — hold-up + pressing contribution
+		// Duel rate: hold-up play (primary). Tackle rate + frequency: pressing intensity.
+		// Pressing forwards who win possession high up the pitch add real defensive value
+		// that pure duel-rate alone misses. The overall FWD defensive weight is 0.02 so
+		// the impact on the final score is small but the component is now correctly calibrated.
 		duelRate := safeRate(p.DuelsWon, p.DuelsTotal)
+		tackleRate := safeRate(p.TacklesWon, p.TacklesTotal)
 		if p.RecentGamesPlayed >= 3 && p.RecentDuelsTotal >= 4 {
 			recentDuelRate := float64(p.RecentDuelsWon) / float64(p.RecentDuelsTotal)
 			duelRate = duelRate*0.60 + recentDuelRate*0.40
 		}
-		return math.Min(10, duelRate*5+1.0)
+		if p.RecentGamesPlayed >= 3 && p.RecentTacklesTotal >= 3 {
+			recentTackleRate := float64(p.RecentTacklesWon) / float64(p.RecentTacklesTotal)
+			tackleRate = tackleRate*0.60 + recentTackleRate*0.40
+		}
+		// Press bonus (0-1.5): 2.5 tackles/90 → max 1.5. Caps out before it inflates a
+		// non-pressing striker's score — even 1 tackle/90 only adds 0.6.
+		tacklesPer90 := float64(p.TacklesTotal) / mins90
+		pressBonus := math.Min(1.5, tacklesPer90/2.5*1.5)
+		return math.Min(10, duelRate*4.0+tackleRate*2.0+pressBonus+1.0)
 	}
 }
 
@@ -471,11 +505,13 @@ func (s *PredictionService) calcPrediction(player models.Player) *models.PlayerP
 	isAttackingFB := defKPperGame >= 1.0 || defAssistsPerGame >= 0.15
 
 	// MID sub-role: holding/defensive mid vs attacking/box-to-box mid.
-	// DM: high duel volume per 90 (≥6) AND low key pass output (<1.5/game).
+	// DM: high duel volume per 90 (≥5.5) AND low key pass output (<1.5/game).
+	// Threshold lowered from 6.0 to 5.5 — traditional DMs in mid-block systems often
+	// average 5.5-6.5 duels/90 and were incorrectly classified as AM at the 6.0 boundary.
 	// AM/box-to-box: creativity is primary, defensive work is secondary.
 	midDuelsPer90 := float64(player.DuelsTotal) / mins90F
 	midKPperGame := float64(player.KeyPasses) / gamesF
-	isDM := midDuelsPer90 >= 6.0 && midKPperGame < 1.5
+	isDM := midDuelsPer90 >= 5.5 && midKPperGame < 1.5
 
 	// FWD sub-role: second striker / false nine vs pure striker.
 	// Creative FWD: creativity score ≥5.5 OR ≥0.20 assists per game.

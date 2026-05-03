@@ -92,11 +92,13 @@ func isHiddenGem(p models.Player, predicted, attackScore, creativityScore float6
 	}
 
 	// Signal 6: recent underlying stats trending clearly upward.
+	// Threshold lowered from 1.30 to 1.25 — a 25% improvement in recent xG+xA/90
+	// is already a meaningful signal of an upswing; 30% was missing gradual momentum shifts.
 	improvingTrajectory := false
 	recentInScoringView := p.RecentGamesPlayed > 0 && p.RecentMinutes == p.MinutesPlayed
 	if !recentInScoringView && p.RecentGamesPlayed >= 3 && p.RecentMinutes > 0 && xgXaPer90 > 0.05 {
 		recentXT90 := (p.RecentXG + p.RecentXA) / math.Max(1, float64(p.RecentMinutes)/90.0)
-		improvingTrajectory = recentXT90 > xgXaPer90*1.30
+		improvingTrajectory = recentXT90 > xgXaPer90*1.25
 	}
 
 	// Signal 7: position-specific specialist quality that standard signals miss.

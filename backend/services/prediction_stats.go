@@ -117,6 +117,7 @@ func aggregateOverall(p *models.Player, stats []models.PlayerStat) {
 
 func aggregateRecent(p *models.Player, stats []models.PlayerStat) {
 	t := accumulateStats(stats)
+	p.RecentGamesPlayed = t.gamesPlayed
 	p.RecentMinutes = int(t.mins)
 	p.RecentGoals = int(t.goals)
 	p.RecentAssists = int(t.assists)
@@ -137,9 +138,11 @@ func aggregateRecent(p *models.Player, stats []models.PlayerStat) {
 	p.RecentGoalsConceded = int(t.gconceded)
 	if t.ratedGames > 0 {
 		p.RecentFormScore = t.rating / float64(t.ratedGames)
-	} else {
-		p.RecentFormScore = 6.0
 	}
+	// Leave RecentFormScore = 0 when no rated games exist.
+	// formComponent checks RecentFormScore > 0 before blending, so a 0 value
+	// correctly falls back to season form alone rather than pulling toward
+	// an artificial 6.0 neutral when recent rating data is unavailable.
 }
 
 // withRecentStats returns a copy of p with all Recent* fields promoted to the main stat fields.

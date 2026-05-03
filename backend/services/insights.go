@@ -106,9 +106,9 @@ func (s *PredictionService) GetBenchwarmers(league, position, timeFilter string)
 				continue
 			}
 
-			// Exclude players already showing meaningful red-flag reasons.
-			rfScore, _, _, reasons := calcRedFlag(p)
-			if rfScore >= 4.0 && len(reasons) > 0 {
+			// Exclude players already showing meaningful red-flag decline.
+			rfScore, _, _, _ := calcRedFlag(p)
+			if rfScore >= 4.0 {
 				continue
 			}
 

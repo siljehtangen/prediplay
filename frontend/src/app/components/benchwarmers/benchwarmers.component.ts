@@ -72,15 +72,15 @@ export class BenchwarmersComponent implements OnInit {
   }
 
   labelIcon(label: string): string {
-    if (label === 'Rock Solid') return 'verified';
-    if (label === 'Steady Option') return 'trending_flat';
-    return 'swap_horiz';
+    if (label.includes('Rotation')) return 'swap_horiz';
+    if (['Reliable Stopper', 'Solid Defender', 'Steady Midfielder', 'Impact Substitute'].includes(label)) return 'trending_flat';
+    return 'verified';
   }
 
   labelClass(label: string): string {
-    if (label === 'Rock Solid') return 'label--solid';
-    if (label === 'Steady Option') return 'label--steady';
-    return 'label--rotation';
+    if (label.includes('Rotation')) return 'label--rotation';
+    if (['Reliable Stopper', 'Solid Defender', 'Steady Midfielder', 'Impact Substitute'].includes(label)) return 'label--steady';
+    return 'label--solid';
   }
 
   private sortByConsistency(players: BenchwarmerPlayer[]): BenchwarmerPlayer[] {

@@ -102,11 +102,13 @@ func (s *PredictionService) GetMomentum(playerID uint) (*models.MomentumData, er
 	trend := "stable"
 	n := len(games)
 	if n >= 2 {
+		// Split into two equal halves, skipping the middle game when n is odd so both
+		// halves have the same size and the comparison is symmetric.
 		half := n / 2
 		recent, older := 0.0, 0.0
 		for i := 0; i < half; i++ {
-			recent += games[i].Score
-			older += games[n-half+i].Score
+			recent += games[i].Score           // most recent half (games[0] is newest)
+			older += games[n-half+i].Score     // oldest half
 		}
 		diff := (recent - older) / float64(half)
 		if diff > 0.5 {

@@ -28,7 +28,10 @@ func main() {
 
 	bzzoiroClient := bzzoiro.New(cfg.BzzoiroBaseURL, cfg.BzzoiroToken)
 	predSvc := services.NewPredictionService(database, bzzoiroClient)
-	go runSync(predSvc)
+
+	syncCtx, syncCancel := context.WithCancel(context.Background())
+	defer syncCancel()
+	go runSync(syncCtx, predSvc)
 
 	h := handlers.New(bzzoiroClient, predSvc)
 
@@ -94,15 +97,17 @@ func main() {
 
 const syncInterval = 6 * time.Hour
 
-// runSync calls SyncPlayers immediately, then repeats every syncInterval.
-// Each run is wrapped in its own recover so a panic in one cycle does not
-// stop future cycles.
-func runSync(svc *services.PredictionService) {
+func runSync(ctx context.Context, svc *services.PredictionService) {
 	doSync(svc)
 	ticker := time.NewTicker(syncInterval)
 	defer ticker.Stop()
-	for range ticker.C {
-		doSync(svc)
+	for {
+		select {
+		case <-ticker.C:
+			doSync(svc)
+		case <-ctx.Done():
+			return
+		}
 	}
 }
 

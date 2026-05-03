@@ -132,29 +132,3 @@ func normalizePlayerPredictedScoresByPosition(preds []models.PlayerPrediction) {
 	}
 }
 
-func normalizeRedFlagScoresByPosition(flags []models.RedFlagPlayer) {
-	byPos := map[string][]int{}
-	for i := range flags {
-		pos := canonicalPosition(flags[i].Player.Position)
-		byPos[pos] = append(byPos[pos], i)
-	}
-
-	for pos := range byPos {
-		indices := byPos[pos]
-		scoresAsc := make([]float64, 0, len(indices))
-		for _, idx := range indices {
-			scoresAsc = append(scoresAsc, flags[idx].RedFlagScore)
-		}
-		sort.Float64s(scoresAsc)
-
-		// Use a slightly higher low tail to avoid extreme outliers,
-		// but use the true max for the high bound so the top end doesn't
-		// collapse into the hard cap.
-		low := percentile(scoresAsc, 0.01)
-		high := scoresAsc[len(scoresAsc)-1]
-
-		for _, idx := range indices {
-			flags[idx].RedFlagScore = normalizeScore(flags[idx].RedFlagScore, low, high)
-		}
-	}
-}

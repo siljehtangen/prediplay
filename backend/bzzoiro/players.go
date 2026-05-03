@@ -66,7 +66,7 @@ func normalizePosition(p string) string {
 	case "F", "FWD", "FORWARD", "ST", "CF", "LW", "RW", "SS", "A", "ATT", "ATTACKER":
 		return "FWD"
 	}
-	return p
+	return "FWD"
 }
 
 func mapRawPlayer(r rawPlayer) models.Player {

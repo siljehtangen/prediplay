@@ -95,7 +95,11 @@ func isHiddenGem(p models.Player, predicted, attackScore, creativityScore float6
 	// Threshold lowered from 1.30 to 1.25 — a 25% improvement in recent xG+xA/90
 	// is already a meaningful signal of an upswing; 30% was missing gradual momentum shifts.
 	improvingTrajectory := false
-	recentInScoringView := p.RecentGamesPlayed > 0 && p.RecentMinutes == p.MinutesPlayed
+	// Detect when withRecentStats has promoted recent fields to main fields.
+	// withRecentStats sets p.GamesPlayed = p.RecentGamesPlayed, so equality
+	// is the reliable indicator — minute totals can coincidentally match for
+	// players whose only season appearances were the last 3 games.
+	recentInScoringView := p.GamesPlayed > 0 && p.GamesPlayed == p.RecentGamesPlayed
 	if !recentInScoringView && p.RecentGamesPlayed >= 3 && p.RecentMinutes > 0 && xgXaPer90 > 0.05 {
 		recentXT90 := (p.RecentXG + p.RecentXA) / math.Max(1, float64(p.RecentMinutes)/90.0)
 		improvingTrajectory = recentXT90 > xgXaPer90*1.25

@@ -90,8 +90,12 @@ func (h *Handler) GetSynergy(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusBadRequest, "players query param required (e.g. players=1,2,3)")
 		return
 	}
+	const maxSynergyPlayers = 11
 	var ids []uint
 	for _, s := range strings.Split(raw, ",") {
+		if len(ids) == maxSynergyPlayers {
+			break
+		}
 		id, err := strconv.ParseUint(strings.TrimSpace(s), 10, 64)
 		if err == nil {
 			ids = append(ids, uint(id))

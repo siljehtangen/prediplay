@@ -64,7 +64,7 @@ func (s *PredictionService) GetMomentum(playerID uint) (*models.MomentumData, er
 		return nil, fmt.Errorf("player not found: %w", err)
 	}
 
-	stats, err := s.client.GetPlayerStats(playerID)
+	stats, err := s.client.GetPlayerStatsRecent(playerID)
 	if err != nil {
 		log.Printf("GetMomentum: failed to fetch stats for player %d: %v", playerID, err)
 	}

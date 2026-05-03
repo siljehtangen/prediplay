@@ -38,8 +38,8 @@ func writeError(w http.ResponseWriter, status int, msg string) {
 }
 
 func timeFilterParam(r *http.Request) string {
-	if f := r.URL.Query().Get("time_filter"); f != "" {
-		return f
+	if r.URL.Query().Get("time_filter") == "overall" {
+		return "overall"
 	}
 	return "recent"
 }

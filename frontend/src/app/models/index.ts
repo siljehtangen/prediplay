@@ -67,6 +67,11 @@ export interface Player {
   recent_saves: number;
   recent_goals_conceded: number;
   recent_form_score: number;
+
+  next_opponent: string;
+  opponent_score: number;
+  is_home: boolean;
+  last_match_date: string;
 }
 
 export interface Event {
@@ -173,7 +178,7 @@ export interface RedFlagPlayer {
 export interface BenchwarmerPlayer {
   player: Player;
   consistency_score: number;
-  label: 'Rock Solid' | 'Steady Option' | 'Rotation Pick';
+  label: string;
 }
 
 export interface DashboardLeague {

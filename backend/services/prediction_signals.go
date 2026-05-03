@@ -263,7 +263,7 @@ func calcRedFlag(p models.Player) (score, formDecline, outputDrop float64, reaso
 
 	// ── 4. Shot accuracy decline ──────────────────────────────────────────────
 	shotAccDecline := 0.0
-	if p.TotalShots >= 10 && p.RecentTotalShots > 0 && p.Position != "GK" {
+	if p.TotalShots >= 10 && p.RecentTotalShots > 0 && (p.Position == "MID" || p.Position == "FWD") {
 		overallShotAcc := float64(p.ShotsOnTarget) / float64(p.TotalShots)
 		recentShotAcc := float64(p.RecentShotsOnTarget) / float64(p.RecentTotalShots)
 		if overallShotAcc > 0.10 {

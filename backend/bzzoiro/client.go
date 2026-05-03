@@ -35,8 +35,13 @@ func New(baseURL, token string) *Client {
 // ProxyPlayerPhoto fetches the player photo from the bzzoiro image endpoint and
 // copies it into w, calling headerSetter with the Content-Type before writing body bytes.
 func (c *Client) ProxyPlayerPhoto(w io.Writer, headerSetter func(string), apiID uint) error {
-	url := fmt.Sprintf("%s/img/player/%d/?token=%s", c.baseURL, apiID, c.token)
-	resp, err := photoClient.Get(url)
+	url := fmt.Sprintf("%s/img/player/%d/", c.baseURL, apiID)
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Authorization", "Token "+c.token)
+	resp, err := photoClient.Do(req)
 	if err != nil {
 		return err
 	}

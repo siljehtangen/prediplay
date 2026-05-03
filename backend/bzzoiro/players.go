@@ -100,31 +100,6 @@ func (c *Client) GetPlayerStats(playerID uint) ([]models.PlayerStat, error) {
 	return out, nil
 }
 
-// GetPlayerStatsSince fetches stats for a player from dateFrom onwards (YYYY-MM-DD).
-// Passes date_from to the API if supported; always filters client-side as a fallback.
-func (c *Client) GetPlayerStatsSince(playerID uint, dateFrom string) ([]models.PlayerStat, error) {
-	params := map[string]string{
-		"player":    fmt.Sprintf("%d", playerID),
-		"date_from": dateFrom,
-	}
-	raw, err := fetchAll[rawPlayerStat](c, "/api/player-stats/", params)
-	if err != nil {
-		return nil, err
-	}
-	out := make([]models.PlayerStat, 0, len(raw))
-	for _, r := range raw {
-		// Client-side fallback: keep only stats on or after dateFrom
-		eventDate := r.Event.EventDate
-		if len(eventDate) >= 10 {
-			eventDate = eventDate[:10] // trim to YYYY-MM-DD
-		}
-		if eventDate >= dateFrom {
-			out = append(out, mapRawStat(r))
-		}
-	}
-	return out, nil
-}
-
 // GetPlayerStatsRecent returns the first page of stats for the given player,
 // which contains the most recent matches.
 func (c *Client) GetPlayerStatsRecent(playerID uint) ([]models.PlayerStat, error) {

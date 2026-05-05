@@ -1,13 +1,13 @@
 <div class="page">
-  <h1 class="page__title">Leagues</h1>
-  <p class="page__subtitle">Browse competitions and explore predictions by league</p>
+  <h1 class="page__title">{{ 'leagueList.title' | translate }}</h1>
+  <p class="page__subtitle">{{ 'leagueList.subtitle' | translate }}</p>
 
   @if (loading) {
-    <div class="loading-container"><mat-icon>hourglass_empty</mat-icon><p>Loading leagues...</p></div>
+    <div class="loading-container"><mat-icon>hourglass_empty</mat-icon><p>{{ 'leagueList.loading' | translate }}</p></div>
   } @else if (leagues.length === 0) {
     <div class="empty-state">
       <mat-icon>search_off</mat-icon>
-      <p>No leagues available. Make sure the backend is running.</p>
+      <p>{{ 'leagueList.noLeagues' | translate }}</p>
     </div>
   } @else {
     <div class="leagues-grid">
@@ -18,11 +18,11 @@
             <div class="league-card__name">{{ league.name }}</div>
             <div class="league-card__country">{{ league.country }}</div>
             @if (league.active) {
-              <span class="chip chip--low" style="margin-bottom:12px">Active</span>
+              <span class="chip chip--low" style="margin-bottom:12px">{{ 'leagueList.active' | translate }}</span>
             }
             <button mat-stroked-button (click)="viewPlayers(league)" style="width:100%">
               <mat-icon>leaderboard</mat-icon>
-              View Predictions
+              {{ 'leagueList.viewPredictions' | translate }}
             </button>
           </mat-card-content>
         </mat-card>

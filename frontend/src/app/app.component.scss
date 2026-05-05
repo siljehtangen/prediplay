@@ -59,3 +59,21 @@
   background: #0d0d1a;
   overflow-y: auto;
 }
+
+.sidenav__lang {
+  padding: 16px;
+  display: flex;
+  justify-content: center;
+  margin-top: auto;
+
+  mat-button-toggle-group {
+    border-color: rgba(255, 255, 255, 0.15);
+  }
+
+  mat-button-toggle {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+  }
+}

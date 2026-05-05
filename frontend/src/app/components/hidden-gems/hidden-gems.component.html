@@ -99,9 +99,9 @@
                 <span class="chip" [class]="'chip--' + gem.risk_level">{{ gem.risk_level | titlecase }} Risk</span>
               </div>
               <div class="gem-card__why">
-                <div class="why-item"><mat-icon>trending_up</mat-icon><span>Form: {{ gem.player.form_score | number:'1.1-1' }}/10</span></div>
-                <div class="why-item"><mat-icon>gps_fixed</mat-icon><span>xG {{ gem.player.xG | number:'1.1-1' }} / xA {{ gem.player.xA | number:'1.1-1' }}</span></div>
-                <div class="why-item"><mat-icon>sports_soccer</mat-icon><span>{{ gem.player.goals }}G {{ gem.player.assists }}A (low ownership)</span></div>
+                <div class="why-item"><mat-icon>trending_up</mat-icon><span>{{ 'common.formValue' | translate: { score: (gem.player.form_score | number:'1.1-1') } }}</span></div>
+                <div class="why-item"><mat-icon>gps_fixed</mat-icon><span>{{ 'hiddenGems.why.midXGXA' | translate: { xG: (gem.player.xG | number:'1.1-1'), xA: (gem.player.xA | number:'1.1-1') } }}</span></div>
+                <div class="why-item"><mat-icon>sports_soccer</mat-icon><span>{{ 'hiddenGems.why.fwdGA' | translate: { goals: gem.player.goals, assists: gem.player.assists } }}</span></div>
               </div>
               <div class="gem-card__form">
                 <span class="form-label">Form Index</span>

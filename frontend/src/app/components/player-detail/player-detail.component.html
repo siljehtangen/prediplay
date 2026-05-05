@@ -8,8 +8,8 @@
   } @else if (!prediction) {
     <div class="empty-state" style="padding:60px">
       <mat-icon>error_outline</mat-icon>
-      <p>Could not load player data. Please try again.</p>
-      <button mat-raised-button color="primary" (click)="load()" style="margin-top:12px">Retry</button>
+      <p>{{ 'playerDetail.error' | translate }}</p>
+      <button mat-raised-button color="primary" (click)="load()" style="margin-top:12px">{{ 'common.retry' | translate }}</button>
     </div>
   } @else {
     <div class="detail-layout">
@@ -40,7 +40,7 @@
                     <span class="chip chip--jersey">#{{ prediction.player.jersey_number }}</span>
                   }
                   @if (prediction.hidden_gem) {
-                    <span class="chip chip--gem">🔥 Hidden Gem</span>
+                    <span class="chip chip--gem">🔥 {{ 'nav.hiddenGems' | translate }}</span>
                   }
                 </div>
                 <div class="player-header__bio">

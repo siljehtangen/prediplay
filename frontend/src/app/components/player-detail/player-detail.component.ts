@@ -10,6 +10,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { forkJoin, of, Subscription } from 'rxjs';
 import { catchError, timeout } from 'rxjs/operators';
 import { Chart, BarController, BarElement, LinearScale, CategoryScale, Tooltip } from 'chart.js';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { SoccerService } from '../../services/soccer.service';
 import { MomentumChartComponent } from '../momentum-chart/momentum-chart.component';
 import { PlayerPrediction, PlayerStat } from '../../models';
@@ -21,7 +22,7 @@ Chart.register(BarController, BarElement, LinearScale, CategoryScale, Tooltip);
   standalone: true,
   imports: [CommonModule, RouterLink, MatCardModule, MatButtonModule, MatIconModule,
     MatProgressBarModule, MatTableModule, MatChipsModule,
-    MomentumChartComponent],
+    MomentumChartComponent, TranslateModule],
   templateUrl: './player-detail.component.html',
   styleUrl: './player-detail.component.scss'
 })
@@ -39,7 +40,7 @@ export class PlayerDetailComponent implements OnInit, OnDestroy {
 
   statColumns = ['date', 'opponent', 'score', 'mins', 'rating', 'goals', 'assists', 'xG', 'xA', 'shots', 'key_pass'];
 
-  constructor(private route: ActivatedRoute, private soccer: SoccerService) {}
+  constructor(private route: ActivatedRoute, private soccer: SoccerService, private translate: TranslateService) {}
 
   ngOnInit() {
     this.paramSub = this.route.paramMap.subscribe(params => {
@@ -107,7 +108,8 @@ export class PlayerDetailComponent implements OnInit, OnDestroy {
   }
 
   formatDate(d: string): string {
-    return new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+    const locale = this.translate.currentLang === 'nb' ? 'nb-NO' : 'en-GB';
+    return new Date(d).toLocaleDateString(locale, { day: 'numeric', month: 'short' });
   }
 
   private buildChart(p: PlayerPrediction) {
@@ -116,7 +118,13 @@ export class PlayerDetailComponent implements OnInit, OnDestroy {
     this.chart = new Chart(this.canvasRef.nativeElement, {
       type: 'bar',
       data: {
-        labels: ['Form', 'Threat (xG/xA)', 'Opponent', 'Minutes', 'Defensive'],
+        labels: [
+          this.translate.instant('common.form'),
+          this.translate.instant('common.xG') + '/' + this.translate.instant('common.xA'),
+          this.translate.instant('info.playerScore.opponent.pill'),
+          this.translate.instant('common.minutes'),
+          this.translate.instant('info.playerScore.defensive.pill'),
+        ],
         datasets: [{
           data: [p.form_contribution, p.threat_contribution, p.opponent_difficulty, p.minutes_likelihood, p.defensive_contribution],
           backgroundColor: ['#6c63ff', '#81c784', '#ffd54f', '#64b5f6', '#f06292'],

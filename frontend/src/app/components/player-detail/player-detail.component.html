@@ -110,7 +110,7 @@
                 <table mat-table [dataSource]="stats" class="stats-table">
 
                   <ng-container matColumnDef="date">
-                    <th mat-header-cell *matHeaderCellDef>Date</th>
+                    <th mat-header-cell *matHeaderCellDef>{{ 'playerDetail.date' | translate }}</th>
                     <td mat-cell *matCellDef="let s">{{ formatDate(s.event.event_date) }}</td>
                   </ng-container>
 

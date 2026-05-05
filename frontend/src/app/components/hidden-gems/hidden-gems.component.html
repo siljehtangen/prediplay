@@ -1,12 +1,12 @@
 <div class="page">
-  <h1 class="page__title">Hidden Gems 🔥</h1>
-  <p class="page__subtitle">Under-the-radar players primed to overperform — high score, medium/high risk, low ownership</p>
+  <h1 class="page__title">{{ 'nav.hiddenGems' | translate }} 🔥</h1>
+  <p class="page__subtitle">{{ 'hiddenGems.subtitle' | translate }}</p>
 
   <div class="filters">
     <mat-form-field appearance="outline" subscriptSizing="dynamic">
-      <mat-label>League</mat-label>
+      <mat-label>{{ 'common.league' | translate }}</mat-label>
       <mat-select [(ngModel)]="selectedLeague" (selectionChange)="load()">
-        <mat-option value="">All Leagues</mat-option>
+        <mat-option value="">{{ 'common.allLeagues' | translate }}</mat-option>
         @for (l of leagues; track l.id) {
           <mat-option [value]="l.name">{{ l.name }}</mat-option>
         }
@@ -14,16 +14,16 @@
     </mat-form-field>
 
     <div class="time-filter-toggle">
-      <button [class.active]="timeFilter === 'recent'" (click)="setTimeFilter('recent')">Recent</button>
-      <button [class.active]="timeFilter === 'overall'" (click)="setTimeFilter('overall')">Overall</button>
+      <button [class.active]="timeFilter === 'recent'" (click)="setTimeFilter('recent')">{{ 'common.recent' | translate }}</button>
+      <button [class.active]="timeFilter === 'overall'" (click)="setTimeFilter('overall')">{{ 'common.overall' | translate }}</button>
     </div>
   </div>
 
   @if (loading) {
-    <div class="loading-container"><mat-icon>hourglass_empty</mat-icon><p>Finding hidden gems...</p></div>
+    <div class="loading-container"><mat-icon>hourglass_empty</mat-icon><p>{{ 'hiddenGems.loading' | translate }}</p></div>
   } @else if (showGroups) {
     @if (leagueGroups.length === 0) {
-      <div class="empty-state"><mat-icon>search_off</mat-icon><p>No hidden gems found</p></div>
+      <div class="empty-state"><mat-icon>search_off</mat-icon><p>{{ 'hiddenGems.notFound' | translate }}</p></div>
     } @else {
       @for (group of leagueGroups; track group.name) {
         <div class="league-section">
@@ -34,7 +34,7 @@
                 <mat-card-content>
                   <div class="gem-card__glow"></div>
                   <div class="gem-card__top">
-                    <div class="gem-card__rank">#{{ i + 1 }} Hidden Gem</div>
+                    <div class="gem-card__rank">#{{ i + 1 }} {{ 'nav.hiddenGems' | translate }}</div>
                     <div class="gem-card__fire">🔥</div>
                   </div>
                   <div class="gem-card__header">
@@ -71,7 +71,7 @@
     }
   } @else {
     @if (gems.length === 0) {
-      <div class="empty-state"><mat-icon>search_off</mat-icon><p>No hidden gems found</p></div>
+      <div class="empty-state"><mat-icon>search_off</mat-icon><p>{{ 'hiddenGems.notFound' | translate }}</p></div>
     } @else {
       <div class="gems-grid">
         @for (gem of gems; track gem.player.id; let i = $index) {

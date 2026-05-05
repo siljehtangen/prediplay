@@ -63,8 +63,8 @@
                 <div class="score-circle score-circle--lg" [class]="scoreClass(prediction.risk_level)">
                   {{ prediction.predicted_score | number:'1.1-2' }}
                 </div>
-                <div class="score-label">Overall Score</div>
-                <span class="chip" [class]="'chip--' + prediction.risk_level">{{ prediction.risk_level | titlecase }} Risk</span>
+                <div class="score-label">{{ 'playerDetail.overallScore' | translate }}</div>
+                <span class="chip" [class]="'chip--' + prediction.risk_level">{{ 'common.risk.' + prediction.risk_level | translate }}</span>
               </div>
             </div>
 

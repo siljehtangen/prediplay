@@ -44,7 +44,7 @@
                 <mat-card-content>
                   <div class="flag-card__top">
                     <span class="rank">#{{ i + 1 }}</span>
-                    <span class="severity-badge" [class]="severityClass(flag.red_flag_score)">{{ severityLabel(flag.red_flag_score) }}</span>
+                    <span class="severity-badge" [class]="severityClass(flag.red_flag_score)">{{ severityLabel(flag.red_flag_score) | translate }}</span>
                   </div>
                   <div class="flag-card__header">
                     <div>

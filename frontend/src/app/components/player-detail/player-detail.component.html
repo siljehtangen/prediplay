@@ -72,27 +72,27 @@
             <div class="stats-grid">
               <div class="stat-item">
                 <div class="stat-item__value">{{ prediction.player.goals }}</div>
-                <div class="stat-item__label">Goals</div>
+                <div class="stat-item__label">{{ 'common.goals' | translate }}</div>
               </div>
               <div class="stat-item">
                 <div class="stat-item__value">{{ prediction.player.assists }}</div>
-                <div class="stat-item__label">Assists</div>
+                <div class="stat-item__label">{{ 'common.assists' | translate }}</div>
               </div>
               <div class="stat-item">
                 <div class="stat-item__value">{{ prediction.player.xG | number:'1.2-2' }}</div>
-                <div class="stat-item__label">xG</div>
+                <div class="stat-item__label">{{ 'common.xG' | translate }}</div>
               </div>
               <div class="stat-item">
                 <div class="stat-item__value">{{ prediction.player.xA | number:'1.2-2' }}</div>
-                <div class="stat-item__label">xA</div>
+                <div class="stat-item__label">{{ 'common.xA' | translate }}</div>
               </div>
               <div class="stat-item">
                 <div class="stat-item__value">{{ prediction.player.minutes_played }}</div>
-                <div class="stat-item__label">Minutes</div>
+                <div class="stat-item__label">{{ 'common.minutes' | translate }}</div>
               </div>
               <div class="stat-item">
                 <div class="stat-item__value">{{ prediction.player.form_score | number:'1.1-1' }}</div>
-                <div class="stat-item__label">Form</div>
+                <div class="stat-item__label">{{ 'common.form' | translate }}</div>
               </div>
             </div>
           </mat-card-content>

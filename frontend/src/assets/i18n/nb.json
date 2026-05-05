@@ -1,0 +1,257 @@
+﻿{
+  "nav": {
+    "dashboard": "Oversikt",
+    "topPlayers": "Toppspillere",
+    "hiddenGems": "Skjulte Perler",
+    "redFlags": "Røde Flagg",
+    "benchwarmers": "Benkevarmere",
+    "synergy": "Synergi",
+    "howItWorks": "Slik Fungerer Det"
+  },
+  "common": {
+    "back": "Tilbake",
+    "retry": "Prøv igjen",
+    "viewAll": "Vis alle",
+    "league": "Liga",
+    "position": "Posisjon",
+    "allLeagues": "Alle Ligaer",
+    "allPositions": "Alle Posisjoner",
+    "recent": "Siste",
+    "overall": "Totalt",
+    "form": "Form",
+    "goals": "Mål",
+    "assists": "Assists",
+    "minutes": "Minutter",
+    "mins": "Min",
+    "games": "Kamper",
+    "xG": "xG",
+    "xA": "xA",
+    "saves": "Redninger",
+    "conceded": "Innslupne",
+    "passAcc": "Pasningsnøy.",
+    "duels": "Dueller",
+    "tackles": "Taklinger",
+    "keyPasses": "Nøkkelpassninger",
+    "formIndex": "Formindeks",
+    "formValue": "Form: {{ score }}/10",
+    "age": "Alder {{ age }}",
+    "gem": "Perle",
+    "calculatingPredictions": "Beregner prediksjoner...",
+    "lastNGames": "siste {{ n }} kamper",
+    "trend": { "rising": "stigende", "falling": "fallende", "stable": "stabil" },
+    "risk": { "low": "Lav Risiko", "medium": "Middels Risiko", "high": "Høy Risiko" }
+  },
+  "dashboard": {
+    "title": "Oversikt",
+    "subtitle": "Skjulte perler og røde flagg på tvers av de fem store ligaene",
+    "noData": "Ingen data",
+    "noRedFlags": "Ingen røde flagg",
+    "score": "poeng",
+    "danger": "fare"
+  },
+  "playerDetail": {
+    "loading": "Laster spiller...",
+    "error": "Kunne ikke laste spillerdata. Vennligst prøv igjen.",
+    "overallScore": "Total Score",
+    "recentMatches": "Siste Kamper",
+    "lastAppearances": "Siste {{ n }} opptredener",
+    "date": "Dato",
+    "opponent": "Motstander",
+    "scoreCol": "Resultat",
+    "rating": "Karakter",
+    "goalsCol": "M",
+    "assistsCol": "A",
+    "shots": "Skudd",
+    "keyPass": "NK",
+    "scoreBreakdown": "Score-fordeling",
+    "contributionFactor": "Bidrag fra hver faktor",
+    "formMomentum": "Form-momentum",
+    "last10Games": "Siste 10 kampprestasjoner"
+  },
+  "hiddenGems": {
+    "subtitle": "Undervurderte spillere klare til å overprestere — høy score, middels/høy risiko, lav eierskap",
+    "loading": "Leter etter skjulte perler...",
+    "notFound": "Ingen skjulte perler funnet",
+    "hiddenGemScore": "Perlescore",
+    "why": {
+      "gkShield": "Redninger: {{ saves }} / Innslupne: {{ conceded }}",
+      "gkPass": "Pasningsnøy. {{ acc }} (lav eierskap)",
+      "defShield": "Dueller: {{ duels }} · Taklinger: {{ tackles }}",
+      "defXA": "xA: {{ xA }} (lav eierskap)",
+      "midXGXA": "xG {{ xG }} / xA {{ xA }}",
+      "midKey": "Nøkkelpassninger: {{ kp }} (lav eierskap)",
+      "fwdXGXA": "xG {{ xG }} / xA {{ xA }}",
+      "fwdGA": "{{ goals }}M {{ assists }}A (lav eierskap)"
+    }
+  },
+  "redFlags": {
+    "subtitle": "Spillere med alarmerende form og produksjon — vurder å droppe disse fra laget ditt",
+    "loading": "Analyserer formdata...",
+    "notFound": "Ingen røde flagg funnet — laget ditt ser bra ut",
+    "redFlagScore": "Rødt flagg-score",
+    "formScore": "Formscore",
+    "formDecline": "Formnedgang",
+    "outputDrop": "Produksjonsfall",
+    "severity": { "critical": "Kritisk", "high": "Høy", "medium": "Middels" },
+    "recentSaves": "Siste redninger",
+    "recentConceded": "Siste innslupne",
+    "recentSoT": "Siste skudd på mål",
+    "accPasses": "Nøyaktige pasninger",
+    "recentKeyPasses": "Siste nøkkelpassninger",
+    "recentMins": "Siste minutter",
+    "recentDuels": "Siste dueller",
+    "recentTackles": "Siste taklinger",
+    "recentXA": "Siste xA",
+    "recentPassAcc": "Siste pasningsnøy.",
+    "recentXG": "Siste xG",
+    "recentGoals": "Siste mål",
+    "recentAssists": "Siste assists"
+  },
+  "topPlayers": {
+    "subtitle": "Best forutsagte spillere for kommende kamper",
+    "notFound": "Ingen spillere funnet",
+    "topPlayerScore": "Toppspillerpoeng"
+  },
+  "benchwarmers": {
+    "subtitle": "Konsistente og pålitelige spillere — ikke stjerner, men stabile alternativer verdt å beholde",
+    "loading": "Speider etter pålitelige alternativer...",
+    "notFound": "Ingen benkevarmere funnet",
+    "consistency": "Konsistens",
+    "consistencyIndex": "Konsistensindeks",
+    "labels": {
+      "Rock Solid": "Stødig som en klippe",
+      "Steady Option": "Stabilt alternativ",
+      "Rotation Pick": "Rotasjonsvalg",
+      "Reliable Stopper": "Pålitelig stopper",
+      "Solid Defender": "Solid forsvarsspiller",
+      "Steady Midfielder": "Stabil midtbanespiller",
+      "Impact Substitute": "Innbytter med effekt"
+    }
+  },
+  "synergy": {
+    "subtitle": "Velg en liga, deretter velg 2–5 spillere for å analysere deres kombinerte forutsagte poeng",
+    "selectPlayers": "Velg Spillere",
+    "selectPlayersSubtitle": "Velg en liga, deretter velg 2–5 spillere fra den",
+    "selectLeague": "Velg en liga…",
+    "playersLabel": "Spillere",
+    "analyzing": "Analyserer...",
+    "analyzeButton": "Analyser Synergi",
+    "totalPredicted": "Totalt Forutsagt",
+    "synergyBonus": "Synergibonus",
+    "synergyScore": "Synergipoeng",
+    "synergyComparison": "Synergisammenligning",
+    "selectedPlayers": "Valgte Spillere"
+  },
+  "info": {
+    "title": "Slik Fungerer Det",
+    "subtitle": "En fullstendig forklaring av hver score, flagg og etikett — ingen svarte bokser",
+    "playerScore": {
+      "heading": "Spillerprediksjonsscore (0 – 10)",
+      "intro": "Hver spiller mottar en <strong>Predikert Score</strong> som representerer forventet prestasjon i neste kamp. Vi beregner <strong>7 uavhengige komponenter</strong> (hver 0–10), kombinerer dem med <strong>posisjon- og subrolle-spesifikke vekter</strong>, og anvender deretter en <strong>konfidensdempning</strong> og en <strong>hjemme-/bortemodifikator</strong>.",
+      "componentsHeading": "De 7 Komponentene",
+      "form": { "pill": "Form", "desc": "Sesonggjennomsnitt av kampkarakter blandet med nylig form.<br/>• Utespillere: <strong>60% sesong + 40% siste 3 kamper</strong>.<br/>• MV: <strong>50 / 50</strong> — nylige redninger og tabber er mer prediktive for keepere.<br/>• Reserve: 6,0 hvis ingen karakterdata er tilgjengelig." },
+      "attack": { "pill": "Angrep", "desc": "Målskoringstrussel via tre signaler blandet 60% sesong / 40% nylig:<br/>• <strong>xG per 90</strong> med posisjonsspesifikk skalering.<br/>• <strong>Konverteringsbonus</strong> (0–2): belønner kliniske avsluttere.<br/>• <strong>Skuddsvolum</strong> (0–2): skudd på mål per 90." },
+      "creativity": { "pill": "Kreativitet", "desc": "Fullt posisjonsspesifikk:<br/>• <strong>BACK</strong> — nøkkelpassninger per 90 + assistbonus.<br/>• <strong>MID</strong> — xA per 90 (×16, max 8) + assistbonus + pasningsnøyaktighetsbonus.<br/>• <strong>ANG</strong> — xA per 90 + assistbonus + nøkkelpassningskvalitet." },
+      "defensive": { "pill": "Defensiv", "desc": "Posisjonsspesifikke signaler:<br/>• <strong>MV</strong>: redningsrate + innslupne mål + pasningsnøyaktighet.<br/>• <strong>BACK</strong>: duellvinnrate + taklingsvinnrate + taklingsaktivitet.<br/>• <strong>MID</strong>: duellvinnrate + taklingsvinnrate.<br/>• <strong>ANG</strong>: hold-up spill via duellvinnrate." },
+      "availability": { "pill": "Tilgjengelighet", "desc": "Gjennomsnittlige minutter per kamp vs. 90 fulle minutter.<br/>Blandet <strong>50% sesong / 50% nylig</strong>." },
+      "discipline": { "pill": "Disiplin", "desc": "Starter på 10; hvert gult kort per kamp koster 5 poeng, hvert rødt koster 15.<br/>Blandet <strong>40% sesong + 60% nylig</strong>." },
+      "opponent": { "pill": "Motstander", "desc": "Spillerens historiske prestasjon mot neste motstander.<br/>Formel: <code>5,0 + (snittKarakter − 6,5) × 5,0</code>, begrenset 1–10.<br/>Standard <strong>5,0</strong> (nøytral) når ingen tidligere historikk finnes." },
+      "subRoleHeading": "Subrolleanalyse",
+      "subRoleIntro": "Vi lagrer kun fire posisjoner (MV / BACK / MID / ANG) men ekte fotballspillere spiller svært ulike roller. Motoren utleder en subrolle fra spillerens statistikksignatur og justerer vektene deretter.",
+      "subroles": {
+        "attackingFB": { "name": "Offensiv Back", "trigger": "≥ 1,0 nøkkelpassninger/kamp <em>eller</em> ≥ 0,15 assists/kamp" },
+        "cb": { "name": "Midtstopper", "trigger": "Alle andre forsvarsspillere" },
+        "dm": { "name": "Defensiv Midtbanespiller", "trigger": "≥ 6 dueller/90 OG &lt; 1,5 nøkkelpassninger/kamp" },
+        "am": { "name": "Offensiv / Box-to-Box", "trigger": "Alle andre midtbanespillere" },
+        "cf": { "name": "Kreativ / Falsk Ni", "trigger": "Kreativitetsscore ≥ 5,5 <em>eller</em> ≥ 0,20 assists/kamp" },
+        "striker": { "name": "Ren Spiss", "trigger": "Alle andre angripere" },
+        "gk": { "name": "Målvakt", "trigger": "Faste vekter — ingen subrolle" }
+      },
+      "venueHeading": "Hjemme-/Bortefordel",
+      "venueDesc": "Etter at scoren er beregnet:<br/><strong>Hjemme:</strong> +0,25 × konfidensgrad &nbsp;|&nbsp; <strong>Borte:</strong> −0,20 × konfidensgrad",
+      "confidenceHeading": "Konfidensdempning basert på utvalgsstørrelse",
+      "confidenceDesc": "Vi trekker rå scoren mot et nøytralt 5,5 for spillere med lite data:<br/><strong>Konfidensgrad = min(1,0, 0,55 + (kamperSpilt − 3) × 0,0265)</strong>",
+      "penaltiesHeading": "Inaktivitets- og Lavminuttpenalti",
+      "penaltiesIntro": "Spillere som ikke har spilt nylig trekkes mot en <strong>under-nøytral baseline på 2,5</strong>. Formelen er: <code>score × faktor + 2,5 × (1 − faktor)</code>.",
+      "inactivity": { "pill": "Inaktivitet", "desc": "Basert på <strong>dager siden siste kamp</strong>:<br/>• <strong>0–14 dager</strong>: faktor = 1,00<br/>• <strong>14–28 dager</strong>: faktor 1,00 → 0,70<br/>• <strong>28–56 dager</strong>: faktor 0,70 → 0,35<br/>• <strong>56+ dager</strong>: faktor = 0,35" },
+      "lowMinutes": { "pill": "Lave Minutter", "desc": "Basert på <strong>gjennomsnittlige minutter per kamp (siste 3)</strong>:<br/>• <strong>≥ 60 min/kamp</strong>: faktor = 1,00<br/>• <strong>45–60 min/kamp</strong>: faktor 1,00 → 0,85<br/>• <strong>30–45 min/kamp</strong>: faktor 0,85 → 0,60<br/>• <strong>&lt; 30 min/kamp</strong>: faktor = 0,40" },
+      "note": "På spillerprofilen skalerer Prediksjonskontroller Form / Trussel / Motstander / Minutter / Hjemme-Borte og normaliserer på nytt."
+    },
+    "riskLevels": {
+      "heading": "Risikonivåer",
+      "intro": "Hver spiller tildeles et risikonivå basert på predikert score.",
+      "low": { "label": "Lav Risiko", "range": "Score ≥ 7,0", "desc": "Trygt å starte — sterk form, jevnlige minutter, god matchup." },
+      "medium": { "label": "Middels Risiko", "range": "Score 4,5 – 6,9", "desc": "Forsiktig videre — anstendig valg men noe usikkerhet." },
+      "high": { "label": "Høy Risiko", "range": "Score &lt; 4,5", "desc": "Vurder benking — dårlig form, rotasjonsrisiko, eller tøff kamp." },
+      "note": "Scorer normaliseres innen hver posisjonsgruppe når Alle Posisjoner vises."
+    },
+    "hiddenGems": {
+      "heading": "Skjulte Perler",
+      "intro": "Skjulte Perler er undervurderte spillere med score mellom <strong>4,5 og 8,0</strong>. <strong>Ethvert enkelt</strong> av 7 signaler kvalifiserer dem:",
+      "signals": {
+        "1": { "title": "xG+xA overgår M+A", "desc": "forventet produksjon ≥ 0,25/90 og overstiger faktiske resultater med 40%+." },
+        "2": { "title": "Høyt skuddsvolum, konverteringen har ikke klikket", "desc": "≥ 15 totale skudd men mål under 22% av skudd på mål." },
+        "3": { "title": "Kreativ men ubelønnet", "desc": "Kreativitetsscore ≥ 5,0 men assists er under 15% av nøkkelpassninger." },
+        "4": { "title": "Høy trussel, få resultater", "desc": "Angrepkomponent ≥ 5,0 men M+A total under posisjonsgrensen (BACK: 4 | MID: 6 | ANG: 8)." },
+        "5": { "title": "Premiumskuddsposisjoner", "desc": "xG per skudd ≥ 0,12 på tvers av ≥ 6 skudd men under målgrensen." },
+        "6": { "title": "Forbedret bane", "desc": "Nylig xG+xA/90 er ≥ 30% over sesongsgjennomsnittet (krever ≥ 3 nylige kamper)." },
+        "7": { "title": "Posisjonsspesifikk spesialistkvalitet", "desc": "<em>MV</em>: ≥ 3,0 redninger/kamp + ≥ 68% redningsrate.<br/><em>BACK</em>: ≥ 87% pasningsnøyaktighet + ≥ 52% duellvinnrate.<br/><em>MID</em>: ≥ 5 dueller/90 + kreativitet ≥ 4,5.<br/><em>ANG</em>: xG per skudd ≥ 0,16 på tvers av ≥ 10 skudd." }
+      },
+      "note": "Skjulte Perler vises separat fra Toppvalg slik at de to gruppene aldri overlapper."
+    },
+    "redFlags": {
+      "heading": "Røde Flagg",
+      "intro": "Røde Flagg fremhever spillere med <strong>270+ minutter totalt</strong> (eller 45+ nylig) som viser alarmerende nedgang.",
+      "signalsHeading": "De 10 Signalene",
+      "signals": {
+        "1": { "title": "Formnedgang", "desc": "det verste av: absolutt avstand under 7,0-grensen og relativ nedgang fra sesongsgjennomsnitt." },
+        "2": { "title": "Produksjonsfall", "desc": "M+A per 90 vs. posisjonsgrunnlinjer (BACK: 0,10 | MID: 0,22 | ANG: 0,35)." },
+        "3": { "title": "xG+xA-nedgang", "desc": "forventet trussel per 90 faller vs. sesongsgjennomsnitt." },
+        "4": { "title": "Skudsnøyaktighet-nedgang", "desc": "skudd-på-mål-rate faller vs. sesongsgjennomsnitt (krever ≥ 10 skudd)." },
+        "5": { "title": "Involveringsfall", "desc": "pasningsnøyaktighet faller vs. sesongsgjennomsnitt (krever ≥ 20 pasninger)." },
+        "6": { "title": "Disiplinrisiko", "desc": "gult kort: 2,5; rødt kort: 8,0 (max 10)." },
+        "7": { "title": "MV-spesifikk: Redningsrate og Innslupne", "desc": "nylig redningsrate faller vs. sesongsgjennomsnitt." },
+        "8": { "title": "BACK: Duellvinnrate-nedgang", "desc": "sesong vs. nylig duellvinnrate (krever ≥ 15 sesongdueller + ≥ 4 nylige)." },
+        "9": { "title": "MID: Nøkkelpassnings-nedgang", "desc": "nøkkelpassninger per 90 faller (krever ≥ 8 totale nøkkelpassninger)." },
+        "10": { "title": "ANG: xG per skudd-nedgang", "desc": "skudskvalitet faller vs. sesongsgjennomsnitt (krever ≥ 10 sesongsskudd + ≥ 3 nylige)." }
+      },
+      "weightsHeading": "Posisjonsvekter",
+      "severity": {
+        "critical": { "label": "Kritisk", "desc": "dropp umiddelbart" },
+        "high": { "label": "Høy", "desc": "vurder alternativer seriøst" },
+        "medium": { "label": "Middels", "desc": "følg nøye med" }
+      }
+    },
+    "benchwarmers": {
+      "heading": "Benkevarmere",
+      "intro": "Benkevarmere er konsistente, pålitelige spillere. De må <strong>ikke</strong> være Skjulte Perler eller Røde Flagg, og trenger 270+ minutter totalt (eller 45+ nylig).",
+      "componentsHeading": "De 5 Konsistenskomponentene",
+      "components": {
+        "availability": { "pill": "Tilgjengelighet", "desc": "Gjennomsnittlige minutter per kamp vs. 90 fulle minutter." },
+        "formConsistency": { "pill": "Formkonsistens", "desc": "To delsignaler (60/40): bandpoeng (nærhet til 6,0–7,5-båndet) og stabilitetspoeng (nylig form vs. sesongsgjennomsnitt)." },
+        "outputReliability": { "pill": "Produksjonspålitelighet", "desc": "Nærhet til moderat M+A/90-grunnlinje — for langt over ELLER under reduserer scoren." },
+        "passingReliability": { "pill": "Pasningspålitelighet", "desc": "Pasningsnøyaktighet nærhet til et posisjonsspesifikt mål." },
+        "discipline": { "pill": "Disiplin", "desc": "Kortrate per kamp — pålitelige spillere holder seg på banen." }
+      },
+      "labels": {
+        "rockSolid": { "label": "Stødig som en klippe", "range": "Konsistens ≥ 7,5" },
+        "steadyOption": { "label": "Stabilt alternativ", "range": "Konsistens 5,5 – 7,4" },
+        "rotationPick": { "label": "Rotasjonsvalg", "range": "Konsistens 4,0 – 5,4" }
+      }
+    },
+    "matchPredictions": {
+      "heading": "Kamppredikasjoner",
+      "intro": "Sannsynligheter for kampresultater drives av en maskinlæringsmodell trent på historiske kampdata.",
+      "homeWin": { "label": "Hjemmeseier %", "desc": "Sannsynlighet for at hjemmelaget vinner på 90 minutter" },
+      "draw": { "label": "Uavgjort %", "desc": "Sannsynlighet for at kampen ender uavgjort etter 90 minutter" },
+      "awayWin": { "label": "Borteseier %", "desc": "Sannsynlighet for at bortelaget vinner på 90 minutter" },
+      "over25": { "label": "Over 2,5 mål %", "desc": "Sannsynlighet for at kampen har 3 eller flere mål totalt" },
+      "btts": { "label": "Begge lag scorer %", "desc": "Sannsynlighet for at begge lag scorer minst én gang" }
+    },
+    "synergy": {
+      "heading": "Synergi",
+      "intro": "Synergiverktøyet lar deg evaluere spillere samlet. Å plukke spillere fra forskjellige posisjoner gir en mangfoldsbonus.",
+      "note": "En tropp som dekker alle fire posisjonstyper (MV, BACK, MID, ANG) får en +1,5 bonus. Dette belønner balanserte tropper."
+    }
+  }
+}

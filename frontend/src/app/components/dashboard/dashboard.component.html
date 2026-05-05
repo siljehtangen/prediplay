@@ -1,17 +1,17 @@
 <div class="page">
   <div class="dash-header">
     <div>
-      <h1 class="page__title">Dashboard</h1>
-      <p class="page__subtitle">Hidden gems and red flags across all five major leagues</p>
+      <h1 class="page__title">{{ 'dashboard.title' | translate }}</h1>
+      <p class="page__subtitle">{{ 'dashboard.subtitle' | translate }}</p>
     </div>
     <div class="time-filter-toggle">
-      <button [class.active]="timeFilter === 'recent'" (click)="setTimeFilter('recent')">Recent</button>
-      <button [class.active]="timeFilter === 'overall'" (click)="setTimeFilter('overall')">Overall</button>
+      <button [class.active]="timeFilter === 'recent'" (click)="setTimeFilter('recent')">{{ 'common.recent' | translate }}</button>
+      <button [class.active]="timeFilter === 'overall'" (click)="setTimeFilter('overall')">{{ 'common.overall' | translate }}</button>
     </div>
   </div>
 
   @if (loading) {
-    <div class="loading-container"><mat-icon>hourglass_empty</mat-icon><p>Calculating predictions...</p></div>
+    <div class="loading-container"><mat-icon>hourglass_empty</mat-icon><p>{{ 'common.calculatingPredictions' | translate }}</p></div>
   } @else {
     @for (league of leagues; track league.name) {
       <section class="league-section">
@@ -26,12 +26,12 @@
           <div class="league-col">
             <div class="col-label col-label--picks">
               <mat-icon>leaderboard</mat-icon>
-              Hidden Gems
-              <a routerLink="/hidden-gems" class="col-link">View all</a>
+              {{ 'nav.hiddenGems' | translate }}
+              <a routerLink="/hidden-gems" class="col-link">{{ 'common.viewAll' | translate }}</a>
             </div>
 
             @if (league.hiddenGems.length === 0) {
-              <div class="empty-state-inline"><mat-icon>search_off</mat-icon><span>No data</span></div>
+              <div class="empty-state-inline"><mat-icon>search_off</mat-icon><span>{{ 'dashboard.noData' | translate }}</span></div>
             } @else {
               <!-- Featured #1 with donut chart -->
               <div class="featured-card" [routerLink]="['/player', league.hiddenGems[0].player.id]">
@@ -41,7 +41,7 @@
                     <div class="donut" [style.background]="donutStyle(league.hiddenGems[0])"></div>
                     <div class="donut__hole">
                       <span class="donut__score">{{ league.hiddenGems[0].predicted_score | number:'1.1-2' }}</span>
-                      <span class="donut__label">score</span>
+                      <span class="donut__label">{{ 'dashboard.score' | translate }}</span>
                     </div>
                   </div>
                 </div>
@@ -67,11 +67,11 @@
               @if (league.topMomentum) {
                 <div class="form-graph form-graph--pick">
                   <div class="form-graph__header">
-                    <span class="form-graph__label">Form</span>
-                    <span class="form-graph__games">last {{ league.topMomentum.games.length > 3 ? 3 : league.topMomentum.games.length }} games</span>
+                    <span class="form-graph__label">{{ 'common.form' | translate }}</span>
+                    <span class="form-graph__games">{{ 'common.lastNGames' | translate: { n: league.topMomentum.games.length > 3 ? 3 : league.topMomentum.games.length } }}</span>
                     <span class="form-graph__trend" [style.color]="trendColor(league.topMomentum.trend)">
                       <mat-icon>{{ trendIcon(league.topMomentum.trend) }}</mat-icon>
-                      {{ league.topMomentum.trend }}
+                      {{ 'common.trend.' + league.topMomentum.trend | translate }}
                     </span>
                   </div>
                   @if (league.topMomentum.games.length >= 2) {
@@ -138,12 +138,12 @@
           <div class="league-col">
             <div class="col-label col-label--flags">
               <mat-icon>flag</mat-icon>
-              Red Flags
-              <a routerLink="/red-flags" class="col-link col-link--flags">View all</a>
+              {{ 'nav.redFlags' | translate }}
+              <a routerLink="/red-flags" class="col-link col-link--flags">{{ 'common.viewAll' | translate }}</a>
             </div>
 
             @if (league.redFlags.length === 0) {
-              <div class="empty-state-inline empty-state-inline--green"><mat-icon>check_circle</mat-icon><span>No red flags</span></div>
+              <div class="empty-state-inline empty-state-inline--green"><mat-icon>check_circle</mat-icon><span>{{ 'dashboard.noRedFlags' | translate }}</span></div>
             } @else {
               <!-- Featured #1 with danger donut -->
               <div class="featured-card featured-card--flag" [routerLink]="['/player', league.redFlags[0].player.id]">
@@ -153,7 +153,7 @@
                     <div class="donut" [style.background]="dangerStyle(league.redFlags[0].red_flag_score)"></div>
                     <div class="donut__hole donut__hole--flag">
                   <span class="donut__score donut__score--flag">{{ league.redFlags[0].red_flag_score | number:'1.1-2' }}</span>
-                      <span class="donut__label">danger</span>
+                      <span class="donut__label">{{ 'dashboard.danger' | translate }}</span>
                     </div>
                   </div>
                 </div>
@@ -179,11 +179,11 @@
               @if (league.flagMomentum) {
                 <div class="form-graph form-graph--flag">
                   <div class="form-graph__header">
-                    <span class="form-graph__label">Form</span>
-                    <span class="form-graph__games">last {{ league.flagMomentum.games.length > 3 ? 3 : league.flagMomentum.games.length }} games</span>
+                    <span class="form-graph__label">{{ 'common.form' | translate }}</span>
+                    <span class="form-graph__games">{{ 'common.lastNGames' | translate: { n: league.flagMomentum.games.length > 3 ? 3 : league.flagMomentum.games.length } }}</span>
                     <span class="form-graph__trend" [style.color]="trendColor(league.flagMomentum.trend)">
                       <mat-icon>{{ trendIcon(league.flagMomentum.trend) }}</mat-icon>
-                      {{ league.flagMomentum.trend }}
+                      {{ 'common.trend.' + league.flagMomentum.trend | translate }}
                     </span>
                   </div>
                   @if (league.flagMomentum.games.length >= 2) {

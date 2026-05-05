@@ -33,7 +33,7 @@
     <div class="loading-container"><mat-icon>hourglass_empty</mat-icon><p>{{ 'redFlags.loading' | translate }}</p></div>
   } @else if (showGroups) {
     @if (leagueGroups.length === 0) {
-      <div class="empty-state"><mat-icon>check_circle</mat-icon><p>No red flags found — your squad looks clean</p></div>
+      <div class="empty-state"><mat-icon>check_circle</mat-icon><p>{{ 'redFlags.notFound' | translate }}</p></div>
     } @else {
       @for (group of leagueGroups; track group.name) {
         <div class="league-section">
@@ -97,7 +97,7 @@
     }
   } @else {
     @if (players.length === 0) {
-      <div class="empty-state"><mat-icon>check_circle</mat-icon><p>No red flags found — your squad looks clean</p></div>
+      <div class="empty-state"><mat-icon>check_circle</mat-icon><p>{{ 'redFlags.notFound' | translate }}</p></div>
     } @else {
       <div class="flags-grid">
         @for (flag of players; track flag.player.id; let i = $index) {

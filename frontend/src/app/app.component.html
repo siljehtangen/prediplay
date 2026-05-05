@@ -12,10 +12,17 @@
            routerLinkActive="active"
            [routerLinkActiveOptions]="{ exact: item.path === '/' }">
           <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
-          <span matListItemTitle>{{ item.label }}</span>
+          <span matListItemTitle>{{ item.key | translate }}</span>
         </a>
       }
     </mat-nav-list>
+
+    <div class="sidenav__lang">
+      <mat-button-toggle-group [value]="lang.current" (change)="setLang($event.value)">
+        <mat-button-toggle value="en">EN</mat-button-toggle>
+        <mat-button-toggle value="nb">NO</mat-button-toggle>
+      </mat-button-toggle-group>
+    </div>
   </mat-sidenav>
 
   <mat-sidenav-content class="main-content">

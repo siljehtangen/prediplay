@@ -3,7 +3,7 @@
     <div class="loading-container" style="padding:30px"><mat-icon>hourglass_empty</mat-icon></div>
   } @else if (data) {
     <div class="momentum__header">
-      <span class="momentum__label">Form Trend (last 10 games)</span>
+      <span class="momentum__label">{{ 'playerDetail.formTrend' | translate: { n: 10 } }}</span>
       <span class="trend-badge" [class]="trendClass">
         <mat-icon>{{ trendIcon }}</mat-icon>
         {{ data.trend | titlecase }}

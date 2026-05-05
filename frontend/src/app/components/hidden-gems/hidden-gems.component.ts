@@ -9,6 +9,7 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { forkJoin } from 'rxjs';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { SoccerService } from '../../services/soccer.service';
 import { ALL_LEAGUES, League, Player, PlayerPrediction, scoreClass } from '../../models';
 
@@ -21,7 +22,7 @@ interface LeagueGroup {
   selector: 'app-hidden-gems',
   standalone: true,
   imports: [CommonModule, RouterLink, FormsModule, MatCardModule, MatButtonModule, MatIconModule,
-    MatProgressBarModule, MatFormFieldModule, MatSelectModule],
+    MatProgressBarModule, MatFormFieldModule, MatSelectModule, TranslateModule],
   templateUrl: './hidden-gems.component.html',
   styleUrl: './hidden-gems.component.scss'
 })
@@ -35,7 +36,7 @@ export class HiddenGemsComponent implements OnInit {
 
   get showGroups(): boolean { return this.selectedLeague === ''; }
 
-  constructor(private soccer: SoccerService) {}
+  constructor(private soccer: SoccerService, private translate: TranslateService) {}
 
   ngOnInit() {
     this.soccer.getLeagues().subscribe(l => this.leagues = l);
@@ -84,36 +85,36 @@ export class HiddenGemsComponent implements OnInit {
       return `${won ?? 0}/${total}`;
     };
 
-    const form = { icon: 'trending_up', text: `Form: ${fmt1(player.form_score)}/10` };
+    const form = { icon: 'trending_up', text: this.translate.instant('common.formValue', { score: fmt1(player.form_score) }) };
 
     if (player.position === 'GK') {
       return [
         form,
-        { icon: 'shield', text: `Saves: ${fmtInt(player.saves)} / Conceded: ${fmtInt(player.goals_conceded)}` },
-        { icon: 'swap_horiz', text: `Pass acc. ${ratio(player.accurate_passes, player.total_passes)} (low ownership)` },
+        { icon: 'shield', text: this.translate.instant('hiddenGems.why.gkShield', { saves: fmtInt(player.saves), conceded: fmtInt(player.goals_conceded) }) },
+        { icon: 'swap_horiz', text: this.translate.instant('hiddenGems.why.gkPass', { acc: ratio(player.accurate_passes, player.total_passes) }) },
       ];
     }
 
     if (player.position === 'DEF') {
       return [
         form,
-        { icon: 'shield', text: `Duels: ${ratio(player.duels_won, player.duels_total)} · Tackles: ${ratio(player.tackles_won, player.tackles_total)}` },
-        { icon: 'gps_fixed', text: `xA: ${fmt1(player.xA)} (low ownership)` },
+        { icon: 'shield', text: this.translate.instant('hiddenGems.why.defShield', { duels: ratio(player.duels_won, player.duels_total), tackles: ratio(player.tackles_won, player.tackles_total) }) },
+        { icon: 'gps_fixed', text: this.translate.instant('hiddenGems.why.defXA', { xA: fmt1(player.xA) }) },
       ];
     }
 
     if (player.position === 'MID') {
       return [
         form,
-        { icon: 'gps_fixed', text: `xG ${fmt1(player.xG)} / xA ${fmt1(player.xA)}` },
-        { icon: 'key', text: `Key passes: ${fmtInt(player.key_passes)} (low ownership)` },
+        { icon: 'gps_fixed', text: this.translate.instant('hiddenGems.why.midXGXA', { xG: fmt1(player.xG), xA: fmt1(player.xA) }) },
+        { icon: 'key', text: this.translate.instant('hiddenGems.why.midKey', { kp: fmtInt(player.key_passes) }) },
       ];
     }
 
     return [
       form,
-      { icon: 'gps_fixed', text: `xG ${fmt1(player.xG)} / xA ${fmt1(player.xA)}` },
-      { icon: 'sports_soccer', text: `${fmtInt(player.goals)}G ${fmtInt(player.assists)}A (low ownership)` },
+      { icon: 'gps_fixed', text: this.translate.instant('hiddenGems.why.fwdXGXA', { xG: fmt1(player.xG), xA: fmt1(player.xA) }) },
+      { icon: 'sports_soccer', text: this.translate.instant('hiddenGems.why.fwdGA', { goals: fmtInt(player.goals), assists: fmtInt(player.assists) }) },
     ];
   }
 }

@@ -4,7 +4,7 @@
   </a>
 
   @if (loading) {
-    <div class="loading-container"><mat-icon>hourglass_empty</mat-icon><p>Loading player...</p></div>
+    <div class="loading-container"><mat-icon>hourglass_empty</mat-icon><p>{{ 'playerDetail.loading' | translate }}</p></div>
   } @else if (!prediction) {
     <div class="empty-state" style="padding:60px">
       <mat-icon>error_outline</mat-icon>

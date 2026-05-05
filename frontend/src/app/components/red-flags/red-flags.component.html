@@ -56,7 +56,7 @@
                     </div>
                     <div class="danger-score">
                       <div class="danger-score__value">{{ flag.red_flag_score | number:'1.1-2' }}</div>
-                      <div class="danger-score__label">Red flag score</div>
+                      <div class="danger-score__label">{{ 'redFlags.redFlagScore' | translate }}</div>
                     </div>
                   </div>
                   <div class="flag-card__reasons">
@@ -66,18 +66,18 @@
                   </div>
                   <div class="flag-card__metrics">
                     <div class="metric">
-                      <span class="metric__label">Form score</span>
+                      <span class="metric__label">{{ 'redFlags.formScore' | translate }}</span>
                       <div class="metric__bar-wrap"><mat-progress-bar mode="determinate" [value]="flag.player.form_score * 10" color="warn"></mat-progress-bar></div>
                       <span class="metric__val">{{ flag.player.form_score | number:'1.1-1' }}/10</span>
                     </div>
                     <div class="metric">
-                      <span class="metric__label">Form decline</span>
+                      <span class="metric__label">{{ 'redFlags.formDecline' | translate }}</span>
                       <div class="metric__bar-wrap"><mat-progress-bar mode="determinate" [value]="flag.form_decline * 10" color="warn"></mat-progress-bar></div>
                       <span class="metric__val">{{ flag.form_decline | number:'1.1-1' }}/10</span>
                     </div>
                     @if (flag.player.position !== 'GK') {
                       <div class="metric">
-                        <span class="metric__label">Output drop</span>
+                        <span class="metric__label">{{ 'redFlags.outputDrop' | translate }}</span>
                         <div class="metric__bar-wrap"><mat-progress-bar mode="determinate" [value]="flag.output_drop * 10" color="warn"></mat-progress-bar></div>
                         <span class="metric__val">{{ flag.output_drop | number:'1.1-1' }}/10</span>
                       </div>
@@ -85,7 +85,7 @@
                   </div>
                   <div class="flag-card__stats">
                     @for (s of statsFor(flag.player); track $index) {
-                      <div class="stat"><span class="stat__label">{{ s.label }}</span><span class="stat__value">{{ s.value }}</span></div>
+                      <div class="stat"><span class="stat__label">{{ s.label | translate }}</span><span class="stat__value">{{ s.value }}</span></div>
                     }
                   </div>
                 </mat-card-content>
@@ -120,7 +120,7 @@
                 </div>
                 <div class="danger-score">
                   <div class="danger-score__value">{{ flag.red_flag_score | number:'1.1-2' }}</div>
-                  <div class="danger-score__label">Red flag score</div>
+                  <div class="danger-score__label">{{ 'redFlags.redFlagScore' | translate }}</div>
                 </div>
               </div>
               <div class="flag-card__reasons">
@@ -149,7 +149,7 @@
               </div>
               <div class="flag-card__stats">
                 @for (s of statsFor(flag.player); track $index) {
-                  <div class="stat"><span class="stat__label">{{ s.label }}</span><span class="stat__value">{{ s.value }}</span></div>
+                  <div class="stat"><span class="stat__label">{{ s.label | translate }}</span><span class="stat__value">{{ s.value }}</span></div>
                 }
               </div>
             </mat-card-content>

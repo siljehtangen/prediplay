@@ -24,13 +24,13 @@
     </mat-form-field>
 
     <div class="time-filter-toggle">
-      <button [class.active]="timeFilter === 'recent'" (click)="setTimeFilter('recent')">Recent</button>
-      <button [class.active]="timeFilter === 'overall'" (click)="setTimeFilter('overall')">Overall</button>
+      <button [class.active]="timeFilter === 'recent'" (click)="setTimeFilter('recent')">{{ 'common.recent' | translate }}</button>
+      <button [class.active]="timeFilter === 'overall'" (click)="setTimeFilter('overall')">{{ 'common.overall' | translate }}</button>
     </div>
   </div>
 
   @if (loading) {
-    <div class="loading-container"><mat-icon>hourglass_empty</mat-icon><p>Analysing form data...</p></div>
+    <div class="loading-container"><mat-icon>hourglass_empty</mat-icon><p>{{ 'redFlags.loading' | translate }}</p></div>
   } @else if (showGroups) {
     @if (leagueGroups.length === 0) {
       <div class="empty-state"><mat-icon>check_circle</mat-icon><p>No red flags found — your squad looks clean</p></div>

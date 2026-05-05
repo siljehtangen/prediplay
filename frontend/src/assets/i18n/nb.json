@@ -66,7 +66,8 @@
     "scoreBreakdown": "Score-fordeling",
     "contributionFactor": "Bidrag fra hver faktor",
     "formMomentum": "Form-momentum",
-    "last10Games": "Siste 10 kampprestasjoner"
+    "last10Games": "Siste 10 kampprestasjoner",
+    "formTrend": "Formtrend (siste {{ n }} kamper)"
   },
   "hiddenGems": {
     "subtitle": "Undervurderte spillere klare til å overprestere — høy score, middels/høy risiko, lav eierskap",
@@ -141,6 +142,14 @@
     "synergyScore": "Synergipoeng",
     "synergyComparison": "Synergisammenligning",
     "selectedPlayers": "Valgte Spillere"
+  },
+  "leagueList": {
+    "title": "Ligaer",
+    "subtitle": "Bla gjennom konkurranser og utforsk prediksjoner etter liga",
+    "loading": "Laster ligaer...",
+    "noLeagues": "Ingen ligaer tilgjengelig. Sjekk at backend kjører.",
+    "active": "Aktiv",
+    "viewPredictions": "Vis Prediksjoner"
   },
   "info": {
     "title": "Slik Fungerer Det",

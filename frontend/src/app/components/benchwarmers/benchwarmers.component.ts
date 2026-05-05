@@ -9,6 +9,7 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { forkJoin } from 'rxjs';
+import { TranslateModule } from '@ngx-translate/core';
 import { SoccerService } from '../../services/soccer.service';
 import { ALL_LEAGUES, BenchwarmerPlayer, League, Player } from '../../models';
 
@@ -21,7 +22,7 @@ interface LeagueGroup {
   selector: 'app-benchwarmers',
   standalone: true,
   imports: [CommonModule, RouterLink, FormsModule, MatCardModule, MatButtonModule, MatIconModule,
-    MatProgressBarModule, MatFormFieldModule, MatSelectModule],
+    MatProgressBarModule, MatFormFieldModule, MatSelectModule, TranslateModule],
   templateUrl: './benchwarmers.component.html',
   styleUrl: './benchwarmers.component.scss'
 })
@@ -102,44 +103,44 @@ export class BenchwarmersComponent implements OnInit {
 
     if (pos === 'GK') {
       return [
-        { label: 'Mins', value: fmtInt(player.minutes_played) },
-        { label: 'Form', value: fmt1(player.form_score) },
-        { label: 'Saves', value: fmtInt(player.saves) },
-        { label: 'Conceded', value: fmtInt(player.goals_conceded) },
-        { label: 'Pass acc.', value: passAcc(player.accurate_passes, player.total_passes) },
-        { label: 'Games', value: fmtInt(player.games_played) },
+        { label: 'common.mins', value: fmtInt(player.minutes_played) },
+        { label: 'common.form', value: fmt1(player.form_score) },
+        { label: 'common.saves', value: fmtInt(player.saves) },
+        { label: 'common.conceded', value: fmtInt(player.goals_conceded) },
+        { label: 'common.passAcc', value: passAcc(player.accurate_passes, player.total_passes) },
+        { label: 'common.games', value: fmtInt(player.games_played) },
       ];
     }
 
     if (pos === 'DEF') {
       return [
-        { label: 'Mins', value: fmtInt(player.minutes_played) },
-        { label: 'Form', value: fmt1(player.form_score) },
-        { label: 'Duels', value: ratio(player.duels_won, player.duels_total) },
-        { label: 'Tackles', value: ratio(player.tackles_won, player.tackles_total) },
-        { label: 'Pass acc.', value: passAcc(player.accurate_passes, player.total_passes) },
-        { label: 'Games', value: fmtInt(player.games_played) },
+        { label: 'common.mins', value: fmtInt(player.minutes_played) },
+        { label: 'common.form', value: fmt1(player.form_score) },
+        { label: 'common.duels', value: ratio(player.duels_won, player.duels_total) },
+        { label: 'common.tackles', value: ratio(player.tackles_won, player.tackles_total) },
+        { label: 'common.passAcc', value: passAcc(player.accurate_passes, player.total_passes) },
+        { label: 'common.games', value: fmtInt(player.games_played) },
       ];
     }
 
     if (pos === 'MID') {
       return [
-        { label: 'Mins', value: fmtInt(player.minutes_played) },
-        { label: 'Form', value: fmt1(player.form_score) },
-        { label: 'Key passes', value: fmtInt(player.key_passes) },
-        { label: 'Pass acc.', value: passAcc(player.accurate_passes, player.total_passes) },
-        { label: 'xG', value: fmt1(player.xG) },
-        { label: 'Games', value: fmtInt(player.games_played) },
+        { label: 'common.mins', value: fmtInt(player.minutes_played) },
+        { label: 'common.form', value: fmt1(player.form_score) },
+        { label: 'common.keyPasses', value: fmtInt(player.key_passes) },
+        { label: 'common.passAcc', value: passAcc(player.accurate_passes, player.total_passes) },
+        { label: 'common.xG', value: fmt1(player.xG) },
+        { label: 'common.games', value: fmtInt(player.games_played) },
       ];
     }
 
     return [
-      { label: 'Mins', value: fmtInt(player.minutes_played) },
-      { label: 'Form', value: fmt1(player.form_score) },
-      { label: 'Goals', value: fmtInt(player.goals) },
-      { label: 'Assists', value: fmtInt(player.assists) },
-      { label: 'xG', value: fmt1(player.xG) },
-      { label: 'Games', value: fmtInt(player.games_played) },
+      { label: 'common.mins', value: fmtInt(player.minutes_played) },
+      { label: 'common.form', value: fmt1(player.form_score) },
+      { label: 'common.goals', value: fmtInt(player.goals) },
+      { label: 'common.assists', value: fmtInt(player.assists) },
+      { label: 'common.xG', value: fmt1(player.xG) },
+      { label: 'common.games', value: fmtInt(player.games_played) },
     ];
   }
 }

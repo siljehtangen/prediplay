@@ -9,6 +9,7 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { forkJoin } from 'rxjs';
+import { TranslateModule } from '@ngx-translate/core';
 import { SoccerService } from '../../services/soccer.service';
 import { ALL_LEAGUES, League, Player, RedFlagPlayer } from '../../models';
 
@@ -21,7 +22,7 @@ interface LeagueGroup {
   selector: 'app-red-flags',
   standalone: true,
   imports: [CommonModule, RouterLink, FormsModule, MatCardModule, MatButtonModule, MatIconModule,
-    MatProgressBarModule, MatFormFieldModule, MatSelectModule],
+    MatProgressBarModule, MatFormFieldModule, MatSelectModule, TranslateModule],
   templateUrl: './red-flags.component.html',
   styleUrl: './red-flags.component.scss'
 })
@@ -78,9 +79,9 @@ export class RedFlagsComponent implements OnInit {
   }
 
   severityLabel(score: number): string {
-    if (score >= 7.5) return 'Critical';
-    if (score >= 5.5) return 'High';
-    return 'Medium';
+    if (score >= 7.5) return 'redFlags.severity.critical';
+    if (score >= 5.5) return 'redFlags.severity.high';
+    return 'redFlags.severity.medium';
   }
 
   private sortByRedFlag(players: RedFlagPlayer[]): RedFlagPlayer[] {
@@ -102,44 +103,44 @@ export class RedFlagsComponent implements OnInit {
 
     if (pos === 'GK') {
       return [
-        { label: 'Recent saves', value: fmtInt(player.recent_saves) },
-        { label: 'Recent conceded', value: fmtInt(player.recent_goals_conceded) },
-        { label: 'Recent SoT', value: fmtInt(player.recent_shots_on_target) },
-        { label: 'Acc. passes', value: passAcc(player.recent_accurate_passes, player.recent_total_passes) },
-        { label: 'Recent key passes', value: fmtInt(player.recent_key_passes) },
-        { label: 'Recent mins', value: fmtInt(player.recent_minutes) },
+        { label: 'redFlags.recentSaves', value: fmtInt(player.recent_saves) },
+        { label: 'redFlags.recentConceded', value: fmtInt(player.recent_goals_conceded) },
+        { label: 'redFlags.recentSoT', value: fmtInt(player.recent_shots_on_target) },
+        { label: 'redFlags.accPasses', value: passAcc(player.recent_accurate_passes, player.recent_total_passes) },
+        { label: 'redFlags.recentKeyPasses', value: fmtInt(player.recent_key_passes) },
+        { label: 'redFlags.recentMins', value: fmtInt(player.recent_minutes) },
       ];
     }
 
     if (pos === 'DEF') {
       return [
-        { label: 'Recent duels', value: ratio(player.recent_duels_won, player.recent_duels_total) },
-        { label: 'Recent tackles', value: ratio(player.recent_tackles_won, player.recent_tackles_total) },
-        { label: 'Recent key passes', value: fmtInt(player.recent_key_passes) },
-        { label: 'Recent xA', value: fmt1(player.recent_xa) },
-        { label: 'Recent pass acc.', value: passAcc(player.recent_accurate_passes, player.recent_total_passes) },
-        { label: 'Recent mins', value: fmtInt(player.recent_minutes) },
+        { label: 'redFlags.recentDuels', value: ratio(player.recent_duels_won, player.recent_duels_total) },
+        { label: 'redFlags.recentTackles', value: ratio(player.recent_tackles_won, player.recent_tackles_total) },
+        { label: 'redFlags.recentKeyPasses', value: fmtInt(player.recent_key_passes) },
+        { label: 'redFlags.recentXA', value: fmt1(player.recent_xa) },
+        { label: 'redFlags.recentPassAcc', value: passAcc(player.recent_accurate_passes, player.recent_total_passes) },
+        { label: 'redFlags.recentMins', value: fmtInt(player.recent_minutes) },
       ];
     }
 
     if (pos === 'MID') {
       return [
-        { label: 'Recent key passes', value: fmtInt(player.recent_key_passes) },
-        { label: 'Recent pass acc.', value: passAcc(player.recent_accurate_passes, player.recent_total_passes) },
-        { label: 'Recent xG', value: fmt1(player.recent_xg) },
-        { label: 'Recent xA', value: fmt1(player.recent_xa) },
-        { label: 'Recent duels', value: ratio(player.recent_duels_won, player.recent_duels_total) },
-        { label: 'Recent mins', value: fmtInt(player.recent_minutes) },
+        { label: 'redFlags.recentKeyPasses', value: fmtInt(player.recent_key_passes) },
+        { label: 'redFlags.recentPassAcc', value: passAcc(player.recent_accurate_passes, player.recent_total_passes) },
+        { label: 'redFlags.recentXG', value: fmt1(player.recent_xg) },
+        { label: 'redFlags.recentXA', value: fmt1(player.recent_xa) },
+        { label: 'redFlags.recentDuels', value: ratio(player.recent_duels_won, player.recent_duels_total) },
+        { label: 'redFlags.recentMins', value: fmtInt(player.recent_minutes) },
       ];
     }
 
     return [
-      { label: 'Recent goals', value: fmtInt(player.recent_goals) },
-      { label: 'Recent assists', value: fmtInt(player.recent_assists) },
-      { label: 'Recent xG', value: fmt1(player.recent_xg) },
-      { label: 'Recent xA', value: fmt1(player.recent_xa) },
-      { label: 'Recent SoT', value: fmtInt(player.recent_shots_on_target) },
-      { label: 'Recent mins', value: fmtInt(player.recent_minutes) },
+      { label: 'redFlags.recentGoals', value: fmtInt(player.recent_goals) },
+      { label: 'redFlags.recentAssists', value: fmtInt(player.recent_assists) },
+      { label: 'redFlags.recentXG', value: fmt1(player.recent_xg) },
+      { label: 'redFlags.recentXA', value: fmt1(player.recent_xa) },
+      { label: 'redFlags.recentSoT', value: fmtInt(player.recent_shots_on_target) },
+      { label: 'redFlags.recentMins', value: fmtInt(player.recent_minutes) },
     ];
   }
 }

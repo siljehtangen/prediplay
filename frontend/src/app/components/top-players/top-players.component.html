@@ -15,9 +15,9 @@
         </mat-form-field>
 
         <mat-form-field appearance="outline" subscriptSizing="dynamic">
-          <mat-label>Position</mat-label>
+          <mat-label>{{ 'common.position' | translate }}</mat-label>
           <mat-select [(ngModel)]="selectedPosition" (selectionChange)="load()">
-            <mat-option value="">All Positions</mat-option>
+            <mat-option value="">{{ 'common.allPositions' | translate }}</mat-option>
             @for (p of positions.slice(1); track p) {
               <mat-option [value]="p">{{ p }}</mat-option>
             }

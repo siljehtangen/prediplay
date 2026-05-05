@@ -1,226 +1,138 @@
-<div class="page">
-  <h1 class="page__title">How It Works</h1>
-  <p class="page__subtitle">A full breakdown of every score, flag, and label — no black boxes</p>
+﻿<div class="page">
+  <h1 class="page__title">{{ 'info.title' | translate }}</h1>
+  <p class="page__subtitle">{{ 'info.subtitle' | translate }}</p>
 
   <!-- ── Player Prediction Score ─────────────────────────────────────────── -->
   <mat-card class="info-card">
     <mat-card-content>
       <div class="info-card__heading">
         <mat-icon class="info-icon info-icon--purple">leaderboard</mat-icon>
-        <h2>Player Prediction Score (0 – 10)</h2>
+        <h2>{{ 'info.playerScore.heading' | translate }}</h2>
       </div>
-      <p class="info-card__intro">
-        Every player receives a <strong>Predicted Score</strong> representing their expected performance in the upcoming match.
-        We compute <strong>7 independent components</strong> (each 0–10), combine them with
-        <strong>position- and sub-role-specific weights</strong>, then apply a
-        <strong>sample-size confidence dampening</strong> and a <strong>venue advantage modifier</strong>.
-      </p>
+      <p class="info-card__intro" [innerHTML]="'info.playerScore.intro' | translate | safeHtml"></p>
 
-      <!-- 7 components -->
-      <h3 class="section-label">The 7 Components</h3>
+      <h3 class="section-label">{{ 'info.playerScore.componentsHeading' | translate }}</h3>
       <div class="factor-list">
-
         <div class="factor">
-          <div class="factor__pill factor__pill--form">Form</div>
+          <div class="factor__pill factor__pill--form">{{ 'info.playerScore.form.pill' | translate }}</div>
           <div class="factor__body">
-            <div class="factor__desc">
-              Season average match rating blended with recent form.
-              <br/>• Outfield: <strong>60% season + 40% last-3-games</strong> — rewards current momentum while keeping seasonal stability.
-              <br/>• GK: <strong>50 / 50</strong> — recent clean sheets and blunders are more predictive game-to-game for keepers.
-              <br/>• Fallback: 6.0 if no rating data is available.
-            </div>
+            <div class="factor__desc" [innerHTML]="'info.playerScore.form.desc' | translate | safeHtml"></div>
           </div>
         </div>
-
         <div class="factor">
-          <div class="factor__pill factor__pill--attack">Attack</div>
+          <div class="factor__pill factor__pill--attack">{{ 'info.playerScore.attack.pill' | translate }}</div>
           <div class="factor__body">
-            <div class="factor__desc">
-              Goal-scoring threat via three independent signals blended 60% season / 40% recent:
-              <br/>• <strong>xG per 90</strong> with position-specific scaling (FWD ×14 cap 10 | MID ×14 cap 8 | DEF ×10 cap 5 | GK ×6 cap 3)
-              <br/>• <strong>Conversion bonus</strong> (0–2): rewards clinical finishers whose goals exceed their xG.
-              <br/>• <strong>Shot volume</strong> (0–2): shots on target per 90, regardless of xG quality.
-            </div>
+            <div class="factor__desc" [innerHTML]="'info.playerScore.attack.desc' | translate | safeHtml"></div>
           </div>
         </div>
-
         <div class="factor">
-          <div class="factor__pill factor__pill--creativity">Creativity</div>
+          <div class="factor__pill factor__pill--creativity">{{ 'info.playerScore.creativity.pill' | translate }}</div>
           <div class="factor__body">
-            <div class="factor__desc">
-              Fully position-specific:
-              <br/>• <strong>DEF</strong> — key passes per 90 (build-up quality) + assist delivery bonus. Typical CB ≈ 2; attacking FB ≈ 8.
-              <br/>• <strong>MID</strong> — xA per 90 (×16, cap 8) + assist bonus + xA-per-key-pass quality + pass accuracy bonus (72%→0, 88%→2).
-              <br/>• <strong>FWD</strong> — xA per 90 + assist bonus + key pass quality (without the pass accuracy bonus).
-            </div>
+            <div class="factor__desc" [innerHTML]="'info.playerScore.creativity.desc' | translate | safeHtml"></div>
           </div>
         </div>
-
         <div class="factor">
-          <div class="factor__pill factor__pill--defensive">Defensive</div>
+          <div class="factor__pill factor__pill--defensive">{{ 'info.playerScore.defensive.pill' | translate }}</div>
           <div class="factor__body">
-            <div class="factor__desc">
-              Position-specific signals:
-              <br/>• <strong>GK</strong>: save rate (0–7) + goals conceded per game (0–2) + recent save-rate trend (±1.5) + save volume (0–0.5) + pass accuracy (0–1.0).
-              <br/>• <strong>DEF</strong>: duel win rate (0–4.5) + tackle win rate (0–4.0) + tackle activity (0–1.5) + pass accuracy (0–1.5).
-              <br/>• <strong>MID</strong>: duel win rate (0–5) + tackle win rate (0–3) + floor of 1.0. DMs score 8+; AMs score ~4.5.
-              <br/>• <strong>FWD</strong>: hold-up play via duel win rate only (range 1–6).
-            </div>
+            <div class="factor__desc" [innerHTML]="'info.playerScore.defensive.desc' | translate | safeHtml"></div>
           </div>
         </div>
-
         <div class="factor">
-          <div class="factor__pill factor__pill--avail">Availability</div>
+          <div class="factor__pill factor__pill--avail">{{ 'info.playerScore.availability.pill' | translate }}</div>
           <div class="factor__body">
-            <div class="factor__desc">
-              Average minutes per game vs a full 90 — detects rotation risk and injury absences.
-              <br/>Blended <strong>50% season / 50% recent</strong>. A player averaging 88 min all season but subbed at 45 for 3 games
-              drops from ~8.6 to ~7.2 — a meaningful rotation signal.
-            </div>
+            <div class="factor__desc" [innerHTML]="'info.playerScore.availability.desc' | translate | safeHtml"></div>
           </div>
         </div>
-
         <div class="factor">
-          <div class="factor__pill factor__pill--disc">Discipline</div>
+          <div class="factor__pill factor__pill--disc">{{ 'info.playerScore.discipline.pill' | translate }}</div>
           <div class="factor__body">
-            <div class="factor__desc">
-              Starts at 10; each yellow card per game costs 5 points, each red card costs 15.
-              <br/>Blended <strong>40% season + 60% recent</strong> — suspension risk is driven by recent behaviour.
-              A player with 3 yellows in 3 games is an immediate concern regardless of a clean season.
-            </div>
+            <div class="factor__desc" [innerHTML]="'info.playerScore.discipline.desc' | translate | safeHtml"></div>
           </div>
         </div>
-
         <div class="factor">
-          <div class="factor__pill factor__pill--opp">Opponent</div>
+          <div class="factor__pill factor__pill--opp">{{ 'info.playerScore.opponent.pill' | translate }}</div>
           <div class="factor__body">
-            <div class="factor__desc">
-              Player's historical performance against the next opponent specifically.
-              Uses match ratings (and G+A where ratings are missing) across all past meetings.
-              <br/>Formula: <code>5.0 + (avgRatingVsOpponent − 6.5) × 5.0</code>, clamped 1–10.
-              <br/>Defaults to <strong>5.0</strong> (neutral) when no prior history exists.
-            </div>
+            <div class="factor__desc" [innerHTML]="'info.playerScore.opponent.desc' | translate | safeHtml"></div>
           </div>
         </div>
-
       </div>
 
       <!-- Sub-role inference -->
-      <h3 class="section-label">Sub-Role Inference</h3>
-      <p class="info-card__intro">
-        We only store four positions (GK / DEF / MID / FWD) but real footballers play very different roles.
-        The engine infers a sub-role from the player's actual stat signature and adjusts weights accordingly —
-        so a defensive midfielder isn't penalised by the creativity-heavy weights designed for an attacking mid.
-      </p>
+      <h3 class="section-label">{{ 'info.playerScore.subRoleHeading' | translate }}</h3>
+      <p class="info-card__intro">{{ 'info.playerScore.subRoleIntro' | translate }}</p>
       <div class="subrole-grid">
         <div class="subrole-card">
           <div class="subrole-card__pos">DEF</div>
-          <div class="subrole-card__name">Attacking Full-Back</div>
-          <div class="subrole-card__trigger">≥ 1.0 key passes/game <em>or</em> ≥ 0.15 assists/game</div>
+          <div class="subrole-card__name">{{ 'info.playerScore.subroles.attackingFB.name' | translate }}</div>
+          <div class="subrole-card__trigger" [innerHTML]="'info.playerScore.subroles.attackingFB.trigger' | translate | safeHtml"></div>
           <div class="formula-box formula-box--inline">form·0.20 + atk·0.10 + cre·0.14 + def·0.28 + avail·0.12 + disc·0.08 + opp·0.08</div>
         </div>
         <div class="subrole-card">
           <div class="subrole-card__pos">DEF</div>
-          <div class="subrole-card__name">Centre-Back</div>
-          <div class="subrole-card__trigger">All other defenders</div>
+          <div class="subrole-card__name">{{ 'info.playerScore.subroles.cb.name' | translate }}</div>
+          <div class="subrole-card__trigger" [innerHTML]="'info.playerScore.subroles.cb.trigger' | translate | safeHtml"></div>
           <div class="formula-box formula-box--inline">form·0.22 + atk·0.05 + cre·0.05 + def·0.35 + avail·0.13 + disc·0.10 + opp·0.10</div>
         </div>
         <div class="subrole-card">
           <div class="subrole-card__pos">MID</div>
-          <div class="subrole-card__name">Defensive Midfielder</div>
-          <div class="subrole-card__trigger">≥ 6 duels/90 AND &lt; 1.5 key passes/game</div>
+          <div class="subrole-card__name">{{ 'info.playerScore.subroles.dm.name' | translate }}</div>
+          <div class="subrole-card__trigger" [innerHTML]="'info.playerScore.subroles.dm.trigger' | translate | safeHtml"></div>
           <div class="formula-box formula-box--inline">form·0.20 + atk·0.10 + cre·0.14 + def·0.24 + avail·0.11 + disc·0.11 + opp·0.10</div>
         </div>
         <div class="subrole-card">
           <div class="subrole-card__pos">MID</div>
-          <div class="subrole-card__name">Attacking / Box-to-Box</div>
-          <div class="subrole-card__trigger">All other midfielders</div>
+          <div class="subrole-card__name">{{ 'info.playerScore.subroles.am.name' | translate }}</div>
+          <div class="subrole-card__trigger" [innerHTML]="'info.playerScore.subroles.am.trigger' | translate | safeHtml"></div>
           <div class="formula-box formula-box--inline">form·0.20 + atk·0.17 + cre·0.24 + def·0.12 + avail·0.10 + disc·0.09 + opp·0.08</div>
         </div>
         <div class="subrole-card">
           <div class="subrole-card__pos">FWD</div>
-          <div class="subrole-card__name">Creative / False Nine</div>
-          <div class="subrole-card__trigger">Creativity score ≥ 5.5 <em>or</em> ≥ 0.20 assists/game</div>
+          <div class="subrole-card__name">{{ 'info.playerScore.subroles.cf.name' | translate }}</div>
+          <div class="subrole-card__trigger" [innerHTML]="'info.playerScore.subroles.cf.trigger' | translate | safeHtml"></div>
           <div class="formula-box formula-box--inline">form·0.18 + atk·0.27 + cre·0.23 + def·0.02 + avail·0.10 + disc·0.08 + opp·0.12</div>
         </div>
         <div class="subrole-card">
           <div class="subrole-card__pos">FWD</div>
-          <div class="subrole-card__name">Pure Striker</div>
-          <div class="subrole-card__trigger">All other forwards</div>
+          <div class="subrole-card__name">{{ 'info.playerScore.subroles.striker.name' | translate }}</div>
+          <div class="subrole-card__trigger" [innerHTML]="'info.playerScore.subroles.striker.trigger' | translate | safeHtml"></div>
           <div class="formula-box formula-box--inline">form·0.18 + atk·0.35 + cre·0.14 + def·0.02 + avail·0.10 + disc·0.08 + opp·0.13</div>
         </div>
         <div class="subrole-card subrole-card--full">
           <div class="subrole-card__pos">GK</div>
-          <div class="subrole-card__name">Goalkeeper</div>
-          <div class="subrole-card__trigger">Fixed weights — no sub-role</div>
+          <div class="subrole-card__name">{{ 'info.playerScore.subroles.gk.name' | translate }}</div>
+          <div class="subrole-card__trigger">{{ 'info.playerScore.subroles.gk.trigger' | translate }}</div>
           <div class="formula-box formula-box--inline">form·0.22 + def·0.60 + avail·0.06 + disc·0.04 + opp·0.08</div>
         </div>
       </div>
 
       <!-- Venue advantage -->
-      <h3 class="section-label">Venue Advantage</h3>
-      <div class="formula-box">
-        After the weighted score is computed and confidence-dampened, a venue modifier is applied when the next fixture is known:
-        <br/><strong>Home:</strong> +0.25 × confidence &nbsp;|&nbsp; <strong>Away:</strong> −0.20 × confidence
-        <br/>The modifier is scaled by the player's confidence factor so small-sample players aren't
-        over-boosted by venue alone. If no next fixture is scheduled, no modifier is applied.
-      </div>
+      <h3 class="section-label">{{ 'info.playerScore.venueHeading' | translate }}</h3>
+      <div class="formula-box" [innerHTML]="'info.playerScore.venueDesc' | translate | safeHtml"></div>
 
       <!-- Confidence dampening -->
-      <h3 class="section-label">Sample-Size Confidence Dampening</h3>
-      <div class="formula-box">
-        Per-90 stats become unstable with few games played. We pull the raw score toward a neutral 5.5
-        for players with limited samples:
-        <br/><strong>Confidence = min(1.0, 0.55 + (gamesPlayed − 3) × 0.0265)</strong>
-        <br/><br/>
-        3 games → 55% actual + 45% neutral &nbsp;|&nbsp; 10 games → 87% actual &nbsp;|&nbsp; 20+ games → 100% actual (no dampening)
-      </div>
+      <h3 class="section-label">{{ 'info.playerScore.confidenceHeading' | translate }}</h3>
+      <div class="formula-box" [innerHTML]="'info.playerScore.confidenceDesc' | translate | safeHtml"></div>
 
       <!-- Inactivity & minutes penalties -->
-      <h3 class="section-label">Inactivity &amp; Low-Minutes Penalties</h3>
-      <p class="info-card__intro" style="margin-bottom:12px">
-        Players who haven't played recently, or are only receiving cameo minutes, are dragged toward a
-        <strong>below-neutral baseline of 2.5</strong> so they can never rank positively on stale or limited stats.
-        The formula is: <code>score × factor + 2.5 × (1 − factor)</code>.
-        Both penalties are applied independently — in practice they target mutually exclusive situations.
-      </p>
+      <h3 class="section-label" [innerHTML]="'info.playerScore.penaltiesHeading' | translate | safeHtml"></h3>
+      <p class="info-card__intro" style="margin-bottom:12px" [innerHTML]="'info.playerScore.penaltiesIntro' | translate | safeHtml"></p>
 
       <div class="factor-list factor-list--compact">
-
         <div class="factor">
-          <div class="factor__pill factor__pill--avail">Inactivity</div>
+          <div class="factor__pill factor__pill--avail">{{ 'info.playerScore.inactivity.pill' | translate }}</div>
           <div class="factor__body">
-            <div class="factor__desc">
-              Based on <strong>days since the player's last match</strong>:
-              <br/>• <strong>0 – 14 days</strong>: factor = 1.00 — no penalty, player is active
-              <br/>• <strong>14 – 28 days</strong>: factor 1.00 → 0.70 — mild (rotation rest or short knock)
-              <br/>• <strong>28 – 56 days</strong>: factor 0.70 → 0.35 — significant (injury / dropped from squad)
-              <br/>• <strong>56+ days or no data</strong>: factor = 0.35 — score pulled hard toward 2.5
-              <br/><em>Example: a strong player (raw 9.0) absent 60 days → 9 × 0.35 + 2.5 × 0.65 ≈ 4.8 (below neutral)</em>
-            </div>
+            <div class="factor__desc" [innerHTML]="'info.playerScore.inactivity.desc' | translate | safeHtml"></div>
           </div>
         </div>
-
         <div class="factor">
-          <div class="factor__pill factor__pill--disc">Low Minutes</div>
+          <div class="factor__pill factor__pill--disc">{{ 'info.playerScore.lowMinutes.pill' | translate }}</div>
           <div class="factor__body">
-            <div class="factor__desc">
-              Based on <strong>average minutes per game in the last 3 appearances</strong>:
-              <br/>• <strong>≥ 60 min/game</strong>: factor = 1.00 — starter or near-starter, no penalty
-              <br/>• <strong>45 – 60 min/game</strong>: factor 1.00 → 0.85 — regular rotation, mild drag
-              <br/>• <strong>30 – 45 min/game</strong>: factor 0.85 → 0.60 — fringe player
-              <br/>• <strong>&lt; 30 min/game</strong>: factor = 0.40 — cameo role, score pushed clearly below neutral
-              <br/><em>Example: a raw score of 7.0 at 15 min/game → 7 × 0.40 + 2.5 × 0.60 = 4.3</em>
-            </div>
+            <div class="factor__desc" [innerHTML]="'info.playerScore.lowMinutes.desc' | translate | safeHtml"></div>
           </div>
         </div>
-
       </div>
 
-      <p class="info-card__note">
-        On the player profile page, Prediction Controls scale Form / Threat / Opponent / Minutes / Home-Away
-        and then renormalize. The league grids use default controls.
-      </p>
+      <p class="info-card__note">{{ 'info.playerScore.note' | translate }}</p>
     </mat-card-content>
   </mat-card>
 
@@ -229,32 +141,27 @@
     <mat-card-content>
       <div class="info-card__heading">
         <mat-icon class="info-icon info-icon--green">shield</mat-icon>
-        <h2>Risk Levels</h2>
+        <h2>{{ 'info.riskLevels.heading' | translate }}</h2>
       </div>
-      <p class="info-card__intro">
-        Each player is assigned a risk level based on their predicted score. Use this as a guide when deciding who to start.
-      </p>
+      <p class="info-card__intro">{{ 'info.riskLevels.intro' | translate }}</p>
       <div class="risk-table">
         <div class="risk-row">
-          <span class="chip chip--low">Low Risk</span>
-          <span class="risk-range">Score ≥ 7.0</span>
-          <span class="risk-desc">Safe to start — strong form, regular minutes, good matchup.</span>
+          <span class="chip chip--low">{{ 'info.riskLevels.low.label' | translate }}</span>
+          <span class="risk-range">{{ 'info.riskLevels.low.range' | translate }}</span>
+          <span class="risk-desc">{{ 'info.riskLevels.low.desc' | translate }}</span>
         </div>
         <div class="risk-row">
-          <span class="chip chip--medium">Medium Risk</span>
-          <span class="risk-range">Score 4.5 – 6.9</span>
-          <span class="risk-desc">Proceed with caution — decent pick but some uncertainty.</span>
+          <span class="chip chip--medium">{{ 'info.riskLevels.medium.label' | translate }}</span>
+          <span class="risk-range">{{ 'info.riskLevels.medium.range' | translate }}</span>
+          <span class="risk-desc">{{ 'info.riskLevels.medium.desc' | translate }}</span>
         </div>
         <div class="risk-row">
-          <span class="chip chip--high">High Risk</span>
-          <span class="risk-range">Score &lt; 4.5</span>
-          <span class="risk-desc">Consider benching — poor form, rotation risk, or tough fixture.</span>
+          <span class="chip chip--high">{{ 'info.riskLevels.high.label' | translate }}</span>
+          <span class="risk-range" [innerHTML]="'info.riskLevels.high.range' | translate | safeHtml"></span>
+          <span class="risk-desc">{{ 'info.riskLevels.high.desc' | translate }}</span>
         </div>
       </div>
-      <p class="info-card__note">
-        When viewing All Positions, scores are first normalized within each position group before ranking,
-        so GKs and FWDs compete fairly. The raw score (shown in the card) is restored for display consistency.
-      </p>
+      <p class="info-card__note">{{ 'info.riskLevels.note' | translate }}</p>
     </mat-card-content>
   </mat-card>
 
@@ -263,72 +170,20 @@
     <mat-card-content>
       <div class="info-card__heading">
         <mat-icon class="info-icon info-icon--orange">auto_awesome</mat-icon>
-        <h2>Hidden Gems</h2>
+        <h2>{{ 'info.hiddenGems.heading' | translate }}</h2>
       </div>
-      <p class="info-card__intro">
-        Hidden Gems are undervalued players whose underlying metrics significantly outpace their visible
-        returns — suggesting untapped potential or a breakout incoming.
-        They must have a predicted score between <strong>4.5 and 8.0</strong> (not too weak, not already elite)
-        and fewer G+A than a position-typical cap (GK: 6 | DEF: 10 | MID: 12 | FWD: 14).
-        <strong>Any single one</strong> of 7 signals qualifies them:
-      </p>
+      <p class="info-card__intro" [innerHTML]="'info.hiddenGems.intro' | translate | safeHtml"></p>
       <div class="signal-list">
-        <div class="signal">
-          <span class="signal__num">1</span>
-          <div class="signal__body">
-            <strong>xG+xA outpacing G+A</strong> — expected output ≥ 0.25/90 and exceeds actual returns by 40%+.
-            Regression to mean is in their favour.
+        @for (n of ['1','2','3','4','5','6','7']; track n) {
+          <div class="signal">
+            <span class="signal__num">{{ n }}</span>
+            <div class="signal__body">
+              <strong>{{ 'info.hiddenGems.signals.' + n + '.title' | translate }}</strong> — <span [innerHTML]="'info.hiddenGems.signals.' + n + '.desc' | translate | safeHtml"></span>
+            </div>
           </div>
-        </div>
-        <div class="signal">
-          <span class="signal__num">2</span>
-          <div class="signal__body">
-            <strong>High shot volume, conversion hasn't clicked</strong> — ≥ 15 total shots but goals below 22%
-            of shots on target. Consistently in shooting positions; finishing will follow.
-          </div>
-        </div>
-        <div class="signal">
-          <span class="signal__num">3</span>
-          <div class="signal__body">
-            <strong>Creative but unrewarded</strong> — Creativity score ≥ 5.0 but assists are below 15% of key passes.
-            Team-mates are spurning the chances, not the player.
-          </div>
-        </div>
-        <div class="signal">
-          <span class="signal__num">4</span>
-          <div class="signal__body">
-            <strong>High threat, few returns</strong> — Attack component ≥ 5.0 but G+A total below the position low-return
-            threshold (DEF: 4 | MID: 6 | FWD: 8). Quality not yet visible in the stat line.
-          </div>
-        </div>
-        <div class="signal">
-          <span class="signal__num">5</span>
-          <div class="signal__body">
-            <strong>Premium shot positions</strong> — xG per shot ≥ 0.12 across ≥ 6 shots but below the goals threshold.
-            Getting into top-quality positions; conversion is due.
-          </div>
-        </div>
-        <div class="signal">
-          <span class="signal__num">6</span>
-          <div class="signal__body">
-            <strong>Improving trajectory</strong> — Recent xG+xA/90 is ≥ 30% above the season average (requires ≥ 3 recent games).
-            Underlying form is genuinely trending up right now.
-          </div>
-        </div>
-        <div class="signal">
-          <span class="signal__num">7</span>
-          <div class="signal__body">
-            <strong>Position-specific specialist quality</strong>:
-            <br/>• <em>GK</em>: ≥ 3.0 saves/game + ≥ 1.2 GC/game + ≥ 68% save rate — bailing out a weak defence.
-            <br/>• <em>DEF</em>: ≥ 87% pass accuracy + ≥ 52% duel win rate — elite ball-playing defender not rewarded in G+A.
-            <br/>• <em>MID</em>: ≥ 5 duels/90 + creativity ≥ 4.5 — high-energy engine with creative upside.
-            <br/>• <em>FWD</em>: xG per shot ≥ 0.16 across ≥ 10 shots — consistently occupying premium scoring positions.
-          </div>
-        </div>
+        }
       </div>
-      <p class="info-card__note">
-        Hidden Gems appear separately from Top Picks so the two groups never overlap.
-      </p>
+      <p class="info-card__note">{{ 'info.hiddenGems.note' | translate }}</p>
     </mat-card-content>
   </mat-card>
 
@@ -337,94 +192,23 @@
     <mat-card-content>
       <div class="info-card__heading">
         <mat-icon class="info-icon info-icon--red">flag</mat-icon>
-        <h2>Red Flags</h2>
+        <h2>{{ 'info.redFlags.heading' | translate }}</h2>
       </div>
-      <p class="info-card__intro">
-        Red Flags highlight players showing alarming declines in form and output.
-        Only players with <strong>270+ minutes overall</strong> (or 45+ in recent view) are assessed
-        so new signings aren't unfairly penalised.
-        Ten signals are computed and combined with position-specific weights into a 0–10 alarm score.
-      </p>
+      <p class="info-card__intro" [innerHTML]="'info.redFlags.intro' | translate | safeHtml"></p>
 
-      <h3 class="section-label">The 10 Signals</h3>
+      <h3 class="section-label">{{ 'info.redFlags.signalsHeading' | translate }}</h3>
       <div class="signal-list">
-        <div class="signal">
-          <span class="signal__num signal__num--red">1</span>
-          <div class="signal__body">
-            <strong>Form Decline</strong> — takes the worse of two sub-signals:
-            absolute distance below the 7.0 "good form" baseline
-            (<code>(7.0 − recentRating) / 3.0 × 10</code>) and
-            a relative drop from the season average (each rating point dropped scores 2.5).
+        @for (n of ['1','2','3','4','5','6','7','8','9','10']; track n) {
+          <div class="signal">
+            <span class="signal__num signal__num--red">{{ n }}</span>
+            <div class="signal__body">
+              <strong>{{ 'info.redFlags.signals.' + n + '.title' | translate }}</strong> — <span [innerHTML]="'info.redFlags.signals.' + n + '.desc' | translate | safeHtml"></span>
+            </div>
           </div>
-        </div>
-        <div class="signal">
-          <span class="signal__num signal__num--red">2</span>
-          <div class="signal__body">
-            <strong>Output Drop</strong> — G+A per 90 compared against position baselines
-            (DEF: 0.10 | MID: 0.22 | FWD: 0.35). Takes the worse of the absolute shortfall
-            and the relative decline from the player's own season average.
-          </div>
-        </div>
-        <div class="signal">
-          <span class="signal__num signal__num--red">3</span>
-          <div class="signal__body">
-            <strong>xG+xA Decline</strong> — expected threat per 90 falling vs the season average.
-            An early-warning signal before G+A actually drops.
-          </div>
-        </div>
-        <div class="signal">
-          <span class="signal__num signal__num--red">4</span>
-          <div class="signal__body">
-            <strong>Shot Accuracy Decline</strong> — shots-on-target rate falling vs the season average
-            (requires ≥ 10 total shots). Signals a player struggling to test the keeper.
-          </div>
-        </div>
-        <div class="signal">
-          <span class="signal__num signal__num--red">5</span>
-          <div class="signal__body">
-            <strong>Involvement Decline</strong> — pass accuracy falling vs the season average
-            (requires ≥ 20 total passes). Fading touch/influence in build-up play.
-          </div>
-        </div>
-        <div class="signal">
-          <span class="signal__num signal__num--red">6</span>
-          <div class="signal__body">
-            <strong>Discipline Risk</strong> — recent period only.
-            Each yellow card scores 2.5; each red scores 8.0 (capped at 10).
-            Players on the edge of suspension are surfaced quickly.
-          </div>
-        </div>
-        <div class="signal">
-          <span class="signal__num signal__num--red">7</span>
-          <div class="signal__body">
-            <strong>GK-Specific: Save Rate &amp; Conceding</strong> — recent save rate falling vs the season
-            average, plus an additional penalty when conceding ≥ 2.5 goals per game recently.
-          </div>
-        </div>
-        <div class="signal">
-          <span class="signal__num signal__num--red">8</span>
-          <div class="signal__body">
-            <strong>DEF: Duel Win Rate Decline</strong> — season vs recent duel win rate comparison
-            (requires ≥ 15 season duels + ≥ 4 recent). Opponents increasingly getting past them.
-          </div>
-        </div>
-        <div class="signal">
-          <span class="signal__num signal__num--red">9</span>
-          <div class="signal__body">
-            <strong>MID: Key Pass Decline</strong> — key passes per 90 falling sharply vs season average
-            (requires ≥ 8 total key passes). Creative influence fading — often an early sign of fatigue or loss of role.
-          </div>
-        </div>
-        <div class="signal">
-          <span class="signal__num signal__num--red">10</span>
-          <div class="signal__body">
-            <strong>FWD: xG Per Shot Decline</strong> — shot quality (xG per shot) falling vs season average
-            (requires ≥ 10 season shots + ≥ 3 recent). Striker no longer getting into premium positions.
-          </div>
-        </div>
+        }
       </div>
 
-      <h3 class="section-label">Position Weights</h3>
+      <h3 class="section-label">{{ 'info.redFlags.weightsHeading' | translate }}</h3>
       <div class="formula-box formula-box--danger">
         GK: &nbsp;FormDecline·0.25 + gkDecline·0.45 + DisciplineRisk·0.10 + InvolvementDecline·0.20
         <br/>DEF: FormDecline·0.22 + OutputDrop·0.15 + xThreatDecline·0.10 + InvolvementDecline·0.18 + DisciplineRisk·0.20 + DuelWinDecline·0.15
@@ -434,16 +218,16 @@
 
       <div class="severity-list">
         <div class="sev-row">
-          <span class="sev-badge sev-badge--critical">Critical</span>
-          <span>Danger Score ≥ 7.5 — drop immediately</span>
+          <span class="sev-badge sev-badge--critical">{{ 'info.redFlags.severity.critical.label' | translate }}</span>
+          <span>{{ 'info.redFlags.severity.critical.desc' | translate }}</span>
         </div>
         <div class="sev-row">
-          <span class="sev-badge sev-badge--high">High</span>
-          <span>Danger Score 5.5 – 7.4 — seriously consider alternatives</span>
+          <span class="sev-badge sev-badge--high">{{ 'info.redFlags.severity.high.label' | translate }}</span>
+          <span>{{ 'info.redFlags.severity.high.desc' | translate }}</span>
         </div>
         <div class="sev-row">
-          <span class="sev-badge sev-badge--medium">Medium</span>
-          <span>Danger Score 5.0 – 5.4 — monitor closely</span>
+          <span class="sev-badge sev-badge--medium">{{ 'info.redFlags.severity.medium.label' | translate }}</span>
+          <span>{{ 'info.redFlags.severity.medium.desc' | translate }}</span>
         </div>
       </div>
     </mat-card-content>
@@ -454,51 +238,40 @@
     <mat-card-content>
       <div class="info-card__heading">
         <mat-icon class="info-icon info-icon--blue">airline_seat_recline_normal</mat-icon>
-        <h2>Benchwarmers</h2>
+        <h2>{{ 'info.benchwarmers.heading' | translate }}</h2>
       </div>
-      <p class="info-card__intro">
-        Benchwarmers are consistent, reliable players who won't blow you away but won't hurt you either.
-        Great for filling out your squad when premium options aren't available.
-        They must <strong>not</strong> be Hidden Gems or Red Flags, and need 270+ minutes overall (or 45+ recent).
-      </p>
+      <p class="info-card__intro" [innerHTML]="'info.benchwarmers.intro' | translate | safeHtml"></p>
 
-      <h3 class="section-label">The 5 Consistency Components</h3>
+      <h3 class="section-label">{{ 'info.benchwarmers.componentsHeading' | translate }}</h3>
       <div class="factor-list factor-list--compact">
         <div class="factor">
-          <div class="factor__pill factor__pill--avail">Availability</div>
+          <div class="factor__pill factor__pill--avail">{{ 'info.benchwarmers.components.availability.pill' | translate }}</div>
           <div class="factor__body">
-            <div class="factor__desc">Average minutes per game vs a full 90. A starter playing every minute scores 10.</div>
+            <div class="factor__desc" [innerHTML]="'info.benchwarmers.components.availability.desc' | translate | safeHtml"></div>
           </div>
         </div>
         <div class="factor">
-          <div class="factor__pill factor__pill--form">Form Consistency</div>
+          <div class="factor__pill factor__pill--form">{{ 'info.benchwarmers.components.formConsistency.pill' | translate }}</div>
           <div class="factor__body">
-            <div class="factor__desc">
-              Two sub-signals combined 60/40:
-              <br/>• <strong>Band score</strong>: how close the season average is to the reliable 6.0–7.5 band (centre 6.75). Volatile highs or lows score low.
-              <br/>• <strong>Stability score</strong>: how close recent form is to the season average. A player at 6.8 overall but 4.5 recently is <em>not</em> a benchwarmer — they're declining.
-            </div>
+            <div class="factor__desc" [innerHTML]="'info.benchwarmers.components.formConsistency.desc' | translate | safeHtml"></div>
           </div>
         </div>
         <div class="factor">
-          <div class="factor__pill factor__pill--attack">Output Reliability</div>
+          <div class="factor__pill factor__pill--attack">{{ 'info.benchwarmers.components.outputReliability.pill' | translate }}</div>
           <div class="factor__body">
-            <div class="factor__desc">
-              Proximity to a <em>moderate</em> G+A/90 baseline — too far above OR below reduces the score.
-              Benchwarmers are steady, not elite. GKs use save rate proximity instead.
-            </div>
+            <div class="factor__desc" [innerHTML]="'info.benchwarmers.components.outputReliability.desc' | translate | safeHtml"></div>
           </div>
         </div>
         <div class="factor">
-          <div class="factor__pill factor__pill--creativity">Passing Reliability</div>
+          <div class="factor__pill factor__pill--creativity">{{ 'info.benchwarmers.components.passingReliability.pill' | translate }}</div>
           <div class="factor__body">
-            <div class="factor__desc">Pass accuracy proximity to a position-specific target. Reliable players recycle the ball cleanly without errors or heroics.</div>
+            <div class="factor__desc" [innerHTML]="'info.benchwarmers.components.passingReliability.desc' | translate | safeHtml"></div>
           </div>
         </div>
         <div class="factor">
-          <div class="factor__pill factor__pill--disc">Discipline</div>
+          <div class="factor__pill factor__pill--disc">{{ 'info.benchwarmers.components.discipline.pill' | translate }}</div>
           <div class="factor__body">
-            <div class="factor__desc">Card rate per game — reliable players stay on the pitch.</div>
+            <div class="factor__desc" [innerHTML]="'info.benchwarmers.components.discipline.desc' | translate | safeHtml"></div>
           </div>
         </div>
       </div>
@@ -511,9 +284,9 @@
       </div>
 
       <div class="label-list">
-        <div class="label-row"><span class="label-badge label-badge--solid">Rock Solid</span><span>Consistency ≥ 7.5</span></div>
-        <div class="label-row"><span class="label-badge label-badge--steady">Steady Option</span><span>Consistency 5.5 – 7.4</span></div>
-        <div class="label-row"><span class="label-badge label-badge--rotation">Rotation Pick</span><span>Consistency 4.0 – 5.4</span></div>
+        <div class="label-row"><span class="label-badge label-badge--solid">{{ 'info.benchwarmers.labels.rockSolid.label' | translate }}</span><span>{{ 'info.benchwarmers.labels.rockSolid.range' | translate }}</span></div>
+        <div class="label-row"><span class="label-badge label-badge--steady">{{ 'info.benchwarmers.labels.steadyOption.label' | translate }}</span><span>{{ 'info.benchwarmers.labels.steadyOption.range' | translate }}</span></div>
+        <div class="label-row"><span class="label-badge label-badge--rotation">{{ 'info.benchwarmers.labels.rotationPick.label' | translate }}</span><span>{{ 'info.benchwarmers.labels.rotationPick.range' | translate }}</span></div>
       </div>
     </mat-card-content>
   </mat-card>
@@ -523,46 +296,43 @@
     <mat-card-content>
       <div class="info-card__heading">
         <mat-icon class="info-icon info-icon--purple">event</mat-icon>
-        <h2>Match Predictions</h2>
+        <h2>{{ 'info.matchPredictions.heading' | translate }}</h2>
       </div>
-      <p class="info-card__intro">
-        Match outcome probabilities are powered by a machine-learning model trained on historical match data
-        across all five supported leagues.
-      </p>
+      <p class="info-card__intro">{{ 'info.matchPredictions.intro' | translate }}</p>
       <div class="match-pred-grid">
         <div class="match-pred-item">
           <div class="match-pred-icon match-pred-icon--home"></div>
           <div>
-            <div class="match-pred-label">Home Win %</div>
-            <div class="match-pred-desc">Probability the home side wins in 90 minutes</div>
+            <div class="match-pred-label">{{ 'info.matchPredictions.homeWin.label' | translate }}</div>
+            <div class="match-pred-desc">{{ 'info.matchPredictions.homeWin.desc' | translate }}</div>
           </div>
         </div>
         <div class="match-pred-item">
           <div class="match-pred-icon match-pred-icon--draw"></div>
           <div>
-            <div class="match-pred-label">Draw %</div>
-            <div class="match-pred-desc">Probability the match ends level after 90 minutes</div>
+            <div class="match-pred-label">{{ 'info.matchPredictions.draw.label' | translate }}</div>
+            <div class="match-pred-desc">{{ 'info.matchPredictions.draw.desc' | translate }}</div>
           </div>
         </div>
         <div class="match-pred-item">
           <div class="match-pred-icon match-pred-icon--away"></div>
           <div>
-            <div class="match-pred-label">Away Win %</div>
-            <div class="match-pred-desc">Probability the away side wins in 90 minutes</div>
+            <div class="match-pred-label">{{ 'info.matchPredictions.awayWin.label' | translate }}</div>
+            <div class="match-pred-desc">{{ 'info.matchPredictions.awayWin.desc' | translate }}</div>
           </div>
         </div>
         <div class="match-pred-item">
           <div class="match-pred-icon match-pred-icon--goals"></div>
           <div>
-            <div class="match-pred-label">Over 2.5 Goals %</div>
-            <div class="match-pred-desc">Probability the match has 3 or more goals in total</div>
+            <div class="match-pred-label">{{ 'info.matchPredictions.over25.label' | translate }}</div>
+            <div class="match-pred-desc">{{ 'info.matchPredictions.over25.desc' | translate }}</div>
           </div>
         </div>
         <div class="match-pred-item">
           <div class="match-pred-icon match-pred-icon--btts"></div>
           <div>
-            <div class="match-pred-label">Both Teams Score %</div>
-            <div class="match-pred-desc">Probability both teams find the net at least once</div>
+            <div class="match-pred-label">{{ 'info.matchPredictions.btts.label' | translate }}</div>
+            <div class="match-pred-desc">{{ 'info.matchPredictions.btts.desc' | translate }}</div>
           </div>
         </div>
       </div>
@@ -574,19 +344,13 @@
     <mat-card-content>
       <div class="info-card__heading">
         <mat-icon class="info-icon info-icon--purple">group_work</mat-icon>
-        <h2>Synergy</h2>
+        <h2>{{ 'info.synergy.heading' | translate }}</h2>
       </div>
-      <p class="info-card__intro">
-        The Synergy tool lets you evaluate a group of players together rather than individually.
-        Picking players from different positions adds a diversity bonus.
-      </p>
+      <p class="info-card__intro">{{ 'info.synergy.intro' | translate }}</p>
       <div class="formula-box">
         Synergy Score = Σ Individual Predicted Scores + (Distinct Positions − 1) × 0.5
       </div>
-      <p class="info-card__note">
-        A squad covering all four position types (GK, DEF, MID, FWD) earns a +1.5 bonus on top of their combined scores.
-        This rewards balanced squads over stacking one position.
-      </p>
+      <p class="info-card__note">{{ 'info.synergy.note' | translate }}</p>
     </mat-card-content>
   </mat-card>
 

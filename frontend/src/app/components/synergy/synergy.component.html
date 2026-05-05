@@ -96,9 +96,9 @@
                   </div>
                   <div class="player-row__stats">
                     <span class="chip chip--pos">{{ p.position }}</span>
-                    <span class="stat-mini">{{ p.goals }}G</span>
-                    <span class="stat-mini">{{ p.assists }}A</span>
-                    <span class="stat-mini">xG {{ p.xG | number:'1.1-1' }}</span>
+                    <span class="stat-mini">{{ p.goals }}{{ 'playerDetail.goalsCol' | translate }}</span>
+                    <span class="stat-mini">{{ p.assists }}{{ 'playerDetail.assistsCol' | translate }}</span>
+                    <span class="stat-mini">{{ 'common.xG' | translate }} {{ p.xG | number:'1.1-1' }}</span>
                   </div>
                 </div>
               }

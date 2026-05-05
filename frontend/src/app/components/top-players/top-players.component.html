@@ -25,8 +25,8 @@
         </mat-form-field>
 
         <div class="time-filter-toggle">
-          <button [class.active]="timeFilter === 'recent'" (click)="setTimeFilter('recent')">Recent</button>
-          <button [class.active]="timeFilter === 'overall'" (click)="setTimeFilter('overall')">Overall</button>
+          <button [class.active]="timeFilter === 'recent'" (click)="setTimeFilter('recent')">{{ 'common.recent' | translate }}</button>
+          <button [class.active]="timeFilter === 'overall'" (click)="setTimeFilter('overall')">{{ 'common.overall' | translate }}</button>
         </div>
       </div>
 

@@ -48,7 +48,7 @@
                     <span class="bio-item"><mat-icon>flag</mat-icon>{{ prediction.player.nationality }}</span>
                   }
                   @if (prediction.player.date_of_birth) {
-                    <span class="bio-item"><mat-icon>cake</mat-icon>Age {{ age(prediction.player.date_of_birth) }}</span>
+                    <span class="bio-item"><mat-icon>cake</mat-icon>{{ 'common.age' | translate: { age: age(prediction.player.date_of_birth) } }}</span>
                   }
                   @if (prediction.player.height) {
                     <span class="bio-item"><mat-icon>height</mat-icon>{{ prediction.player.height }} cm</span>

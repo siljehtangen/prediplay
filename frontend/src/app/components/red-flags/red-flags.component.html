@@ -1,12 +1,12 @@
 <div class="page">
-  <h1 class="page__title">Red Flags</h1>
-  <p class="page__subtitle">Players showing alarming form and output — consider dropping these from your team</p>
+  <h1 class="page__title">{{ 'nav.redFlags' | translate }}</h1>
+  <p class="page__subtitle">{{ 'redFlags.subtitle' | translate }}</p>
 
   <div class="filters">
     <mat-form-field appearance="outline" subscriptSizing="dynamic">
-      <mat-label>League</mat-label>
+      <mat-label>{{ 'common.league' | translate }}</mat-label>
       <mat-select [(ngModel)]="selectedLeague" (selectionChange)="load()">
-        <mat-option value="">All Leagues</mat-option>
+        <mat-option value="">{{ 'common.allLeagues' | translate }}</mat-option>
         @for (l of leagues; track l.id) {
           <mat-option [value]="l.name">{{ l.name }}</mat-option>
         }
@@ -14,9 +14,9 @@
     </mat-form-field>
 
     <mat-form-field appearance="outline" subscriptSizing="dynamic">
-      <mat-label>Position</mat-label>
+      <mat-label>{{ 'common.position' | translate }}</mat-label>
       <mat-select [(ngModel)]="selectedPosition" (selectionChange)="load()">
-        <mat-option value="">All Positions</mat-option>
+        <mat-option value="">{{ 'common.allPositions' | translate }}</mat-option>
         @for (p of positions; track p) {
           <mat-option [value]="p">{{ p }}</mat-option>
         }

@@ -63,7 +63,7 @@
                       </div>
                       <div class="player-card__stats">
                         @for (stat of statsFor(pred.player); track stat.label) {
-                          <div class="stat"><span class="stat__label">{{ stat.label }}</span><span class="stat__value">{{ stat.value }}</span></div>
+                          <div class="stat"><span class="stat__label">{{ stat.label | translate }}</span><span class="stat__value">{{ stat.value }}</span></div>
                         }
                       </div>
                       <div class="player-card__form">
@@ -108,10 +108,10 @@
                     </div>
                   </div>
                   <div class="player-card__stats">
-                    <div class="stat"><span class="stat__label">Goals</span><span class="stat__value">{{ pred.player.goals }}</span></div>
-                    <div class="stat"><span class="stat__label">Assists</span><span class="stat__value">{{ pred.player.assists }}</span></div>
-                    <div class="stat"><span class="stat__label">xG</span><span class="stat__value">{{ pred.player.xG | number:'1.1-1' }}</span></div>
-                    <div class="stat"><span class="stat__label">xA</span><span class="stat__value">{{ pred.player.xA | number:'1.1-1' }}</span></div>
+                    <div class="stat"><span class="stat__label">{{ 'common.goals' | translate }}</span><span class="stat__value">{{ pred.player.goals }}</span></div>
+                    <div class="stat"><span class="stat__label">{{ 'common.assists' | translate }}</span><span class="stat__value">{{ pred.player.assists }}</span></div>
+                    <div class="stat"><span class="stat__label">{{ 'common.xG' | translate }}</span><span class="stat__value">{{ pred.player.xG | number:'1.1-1' }}</span></div>
+                    <div class="stat"><span class="stat__label">{{ 'common.xA' | translate }}</span><span class="stat__value">{{ pred.player.xA | number:'1.1-1' }}</span></div>
                   </div>
                   <div class="player-card__form">
                     <span class="form-label">Form</span>

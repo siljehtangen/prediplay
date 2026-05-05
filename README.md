@@ -27,15 +27,16 @@ BZZOIRO_API_TOKEN=your_token_here
 BZZOIRO_BASE_URL=https://sports.bzzoiro.com
 DATABASE_PATH=./prediplay_fresh.db
 PORT=8080
+CORS_ORIGINS=http://localhost:4200
 ```
 
-`BZZOIRO_API_TOKEN` is required. All other values are optional with defaults shown above.
+`BZZOIRO_API_TOKEN` is required. All other values are optional with defaults shown above. `CORS_ORIGINS` accepts a comma-separated list of allowed origins.
 
 ```bash
 cd backend && go run .
 ```
 
-Server starts on `http://localhost:8080`. Player sync runs in the background on startup.
+Server starts on `http://localhost:8080`. Player data syncs from the Bzzoiro API in the background on startup and every 6 hours thereafter.
 
 ### Frontend
 
@@ -44,6 +45,22 @@ cd frontend && npm install && ng serve
 ```
 
 App runs on `http://localhost:4200` and proxies API calls to the backend.
+
+```bash
+ng build          # production build
+npm test          # run unit tests
+```
+
+## Languages
+
+The UI supports two languages, toggled from the top-right corner of the app:
+
+| Code | Language |
+|------|----------|
+| EN | English |
+| NO | Norwegian Bokmål |
+
+Translation files live in `frontend/src/assets/i18n/`.
 
 ## API Endpoints
 

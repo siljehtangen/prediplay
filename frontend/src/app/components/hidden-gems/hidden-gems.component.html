@@ -79,7 +79,7 @@
             <mat-card-content>
               <div class="gem-card__glow"></div>
               <div class="gem-card__top">
-                <div class="gem-card__rank">#{{ i + 1 }} Hidden Gem</div>
+                <div class="gem-card__rank">#{{ i + 1 }} {{ 'nav.hiddenGems' | translate }}</div>
                 <div class="gem-card__fire">🔥</div>
               </div>
               <div class="gem-card__header">
@@ -96,7 +96,7 @@
               </div>
               <div class="gem-card__badges">
                 <span class="chip chip--pos">{{ gem.player.position }}</span>
-                <span class="chip" [class]="'chip--' + gem.risk_level">{{ gem.risk_level | titlecase }} Risk</span>
+                <span class="chip" [class]="'chip--' + gem.risk_level">{{ 'common.risk.' + gem.risk_level | translate }}</span>
               </div>
               <div class="gem-card__why">
                 <div class="why-item"><mat-icon>trending_up</mat-icon><span>{{ 'common.formValue' | translate: { score: (gem.player.form_score | number:'1.1-1') } }}</span></div>
@@ -104,7 +104,7 @@
                 <div class="why-item"><mat-icon>sports_soccer</mat-icon><span>{{ 'hiddenGems.why.fwdGA' | translate: { goals: gem.player.goals, assists: gem.player.assists } }}</span></div>
               </div>
               <div class="gem-card__form">
-                <span class="form-label">Form Index</span>
+                <span class="form-label">{{ 'common.formIndex' | translate }}</span>
                 <mat-progress-bar mode="determinate" [value]="gem.player.form_score * 10" color="accent"></mat-progress-bar>
               </div>
             </mat-card-content>

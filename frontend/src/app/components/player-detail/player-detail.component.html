@@ -115,24 +115,24 @@
                   </ng-container>
 
                   <ng-container matColumnDef="opponent">
-                    <th mat-header-cell *matHeaderCellDef>Opponent</th>
+                    <th mat-header-cell *matHeaderCellDef>{{ 'playerDetail.opponent' | translate }}</th>
                     <td mat-cell *matCellDef="let s" class="opponent-cell">
                       {{ opponent(s, prediction.player.team_name) }}
                     </td>
                   </ng-container>
 
                   <ng-container matColumnDef="score">
-                    <th mat-header-cell *matHeaderCellDef>Score</th>
+                    <th mat-header-cell *matHeaderCellDef>{{ 'playerDetail.scoreCol' | translate }}</th>
                     <td mat-cell *matCellDef="let s" class="score-cell">{{ matchScore(s) }}</td>
                   </ng-container>
 
                   <ng-container matColumnDef="mins">
-                    <th mat-header-cell *matHeaderCellDef>Mins</th>
+                    <th mat-header-cell *matHeaderCellDef>{{ 'common.mins' | translate }}</th>
                     <td mat-cell *matCellDef="let s">{{ s.minutes_played }}'</td>
                   </ng-container>
 
                   <ng-container matColumnDef="rating">
-                    <th mat-header-cell *matHeaderCellDef>Rating</th>
+                    <th mat-header-cell *matHeaderCellDef>{{ 'playerDetail.rating' | translate }}</th>
                     <td mat-cell *matCellDef="let s">
                       <span class="rating-badge" [class.rating-high]="s.rating >= 7" [class.rating-low]="s.rating > 0 && s.rating < 6">
                         {{ s.rating > 0 ? (s.rating | number:'1.1-1') : '—' }}
@@ -141,14 +141,14 @@
                   </ng-container>
 
                   <ng-container matColumnDef="goals">
-                    <th mat-header-cell *matHeaderCellDef>G</th>
+                    <th mat-header-cell *matHeaderCellDef>{{ 'playerDetail.goalsCol' | translate }}</th>
                     <td mat-cell *matCellDef="let s">
                       <span [class.stat-highlight]="s.goals > 0">{{ s.goals }}</span>
                     </td>
                   </ng-container>
 
                   <ng-container matColumnDef="assists">
-                    <th mat-header-cell *matHeaderCellDef>A</th>
+                    <th mat-header-cell *matHeaderCellDef>{{ 'playerDetail.assistsCol' | translate }}</th>
                     <td mat-cell *matCellDef="let s">
                       <span [class.stat-highlight]="s.goal_assist > 0">{{ s.goal_assist }}</span>
                     </td>
@@ -165,12 +165,12 @@
                   </ng-container>
 
                   <ng-container matColumnDef="shots">
-                    <th mat-header-cell *matHeaderCellDef>Shots</th>
+                    <th mat-header-cell *matHeaderCellDef>{{ 'playerDetail.shots' | translate }}</th>
                     <td mat-cell *matCellDef="let s">{{ s.shots_on_target }}/{{ s.total_shots }}</td>
                   </ng-container>
 
                   <ng-container matColumnDef="key_pass">
-                    <th mat-header-cell *matHeaderCellDef>KP</th>
+                    <th mat-header-cell *matHeaderCellDef>{{ 'playerDetail.keyPass' | translate }}</th>
                     <td mat-cell *matCellDef="let s">{{ s.key_pass }}</td>
                   </ng-container>
 
@@ -185,8 +185,8 @@
         <!-- Score breakdown chart -->
         <mat-card class="chart-card">
           <mat-card-header>
-            <mat-card-title>Score Breakdown</mat-card-title>
-            <mat-card-subtitle>Contribution of each factor</mat-card-subtitle>
+            <mat-card-title>{{ 'playerDetail.scoreBreakdown' | translate }}</mat-card-title>
+            <mat-card-subtitle>{{ 'playerDetail.contributionFactor' | translate }}</mat-card-subtitle>
           </mat-card-header>
           <mat-card-content>
             <div class="chart-container">
@@ -198,8 +198,8 @@
         <!-- Momentum chart -->
         <mat-card class="chart-card">
           <mat-card-header>
-            <mat-card-title>Form Momentum</mat-card-title>
-            <mat-card-subtitle>Last 10 game performances</mat-card-subtitle>
+            <mat-card-title>{{ 'playerDetail.formMomentum' | translate }}</mat-card-title>
+            <mat-card-subtitle>{{ 'playerDetail.last10Games' | translate }}</mat-card-subtitle>
           </mat-card-header>
           <mat-card-content>
             <app-momentum-chart [playerId]="playerId"></app-momentum-chart>

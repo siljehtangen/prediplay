@@ -1,0 +1,257 @@
+﻿{
+  "nav": {
+    "dashboard": "Dashboard",
+    "topPlayers": "Top Players",
+    "hiddenGems": "Hidden Gems",
+    "redFlags": "Red Flags",
+    "benchwarmers": "Benchwarmers",
+    "synergy": "Synergy",
+    "howItWorks": "How It Works"
+  },
+  "common": {
+    "back": "Back",
+    "retry": "Retry",
+    "viewAll": "View all",
+    "league": "League",
+    "position": "Position",
+    "allLeagues": "All Leagues",
+    "allPositions": "All Positions",
+    "recent": "Recent",
+    "overall": "Overall",
+    "form": "Form",
+    "goals": "Goals",
+    "assists": "Assists",
+    "minutes": "Minutes",
+    "mins": "Mins",
+    "games": "Games",
+    "xG": "xG",
+    "xA": "xA",
+    "saves": "Saves",
+    "conceded": "Conceded",
+    "passAcc": "Pass acc.",
+    "duels": "Duels",
+    "tackles": "Tackles",
+    "keyPasses": "Key passes",
+    "formIndex": "Form Index",
+    "formValue": "Form: {{ score }}/10",
+    "age": "Age {{ age }}",
+    "gem": "Gem",
+    "calculatingPredictions": "Calculating predictions...",
+    "lastNGames": "last {{ n }} games",
+    "trend": { "rising": "rising", "falling": "falling", "stable": "stable" },
+    "risk": { "low": "Low Risk", "medium": "Medium Risk", "high": "High Risk" }
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "subtitle": "Hidden gems and red flags across all five major leagues",
+    "noData": "No data",
+    "noRedFlags": "No red flags",
+    "score": "score",
+    "danger": "danger"
+  },
+  "playerDetail": {
+    "loading": "Loading player...",
+    "error": "Could not load player data. Please try again.",
+    "overallScore": "Overall Score",
+    "recentMatches": "Recent Matches",
+    "lastAppearances": "Last {{ n }} appearances",
+    "date": "Date",
+    "opponent": "Opponent",
+    "scoreCol": "Score",
+    "rating": "Rating",
+    "goalsCol": "G",
+    "assistsCol": "A",
+    "shots": "Shots",
+    "keyPass": "KP",
+    "scoreBreakdown": "Score Breakdown",
+    "contributionFactor": "Contribution of each factor",
+    "formMomentum": "Form Momentum",
+    "last10Games": "Last 10 game performances"
+  },
+  "hiddenGems": {
+    "subtitle": "Under-the-radar players primed to overperform — high score, medium/high risk, low ownership",
+    "loading": "Finding hidden gems...",
+    "notFound": "No hidden gems found",
+    "hiddenGemScore": "Hidden gem score",
+    "why": {
+      "gkShield": "Saves: {{ saves }} / Conceded: {{ conceded }}",
+      "gkPass": "Pass acc. {{ acc }} (low ownership)",
+      "defShield": "Duels: {{ duels }} · Tackles: {{ tackles }}",
+      "defXA": "xA: {{ xA }} (low ownership)",
+      "midXGXA": "xG {{ xG }} / xA {{ xA }}",
+      "midKey": "Key passes: {{ kp }} (low ownership)",
+      "fwdXGXA": "xG {{ xG }} / xA {{ xA }}",
+      "fwdGA": "{{ goals }}G {{ assists }}A (low ownership)"
+    }
+  },
+  "redFlags": {
+    "subtitle": "Players showing alarming form and output — consider dropping these from your team",
+    "loading": "Analysing form data...",
+    "notFound": "No red flags found — your squad looks clean",
+    "redFlagScore": "Red flag score",
+    "formScore": "Form score",
+    "formDecline": "Form decline",
+    "outputDrop": "Output drop",
+    "severity": { "critical": "Critical", "high": "High", "medium": "Medium" },
+    "recentSaves": "Recent saves",
+    "recentConceded": "Recent conceded",
+    "recentSoT": "Recent SoT",
+    "accPasses": "Acc. passes",
+    "recentKeyPasses": "Recent key passes",
+    "recentMins": "Recent mins",
+    "recentDuels": "Recent duels",
+    "recentTackles": "Recent tackles",
+    "recentXA": "Recent xA",
+    "recentPassAcc": "Recent pass acc.",
+    "recentXG": "Recent xG",
+    "recentGoals": "Recent goals",
+    "recentAssists": "Recent assists"
+  },
+  "topPlayers": {
+    "subtitle": "Best predicted performers for the upcoming matches",
+    "notFound": "No players found",
+    "topPlayerScore": "Top player score"
+  },
+  "benchwarmers": {
+    "subtitle": "Consistent and reliable players — not stars, but steady options worth keeping around",
+    "loading": "Scouting reliable options...",
+    "notFound": "No benchwarmers found",
+    "consistency": "Consistency",
+    "consistencyIndex": "Consistency index",
+    "labels": {
+      "Rock Solid": "Rock Solid",
+      "Steady Option": "Steady Option",
+      "Rotation Pick": "Rotation Pick",
+      "Reliable Stopper": "Reliable Stopper",
+      "Solid Defender": "Solid Defender",
+      "Steady Midfielder": "Steady Midfielder",
+      "Impact Substitute": "Impact Substitute"
+    }
+  },
+  "synergy": {
+    "subtitle": "Select a league, then pick 2–5 players to analyze their combined predicted points",
+    "selectPlayers": "Select Players",
+    "selectPlayersSubtitle": "Pick a league, then choose 2–5 players from it",
+    "selectLeague": "Select a league…",
+    "playersLabel": "Players",
+    "analyzing": "Analyzing...",
+    "analyzeButton": "Analyze Synergy",
+    "totalPredicted": "Total Predicted",
+    "synergyBonus": "Synergy Bonus",
+    "synergyScore": "Synergy Score",
+    "synergyComparison": "Synergy Comparison",
+    "selectedPlayers": "Selected Players"
+  },
+  "info": {
+    "title": "How It Works",
+    "subtitle": "A full breakdown of every score, flag, and label — no black boxes",
+    "playerScore": {
+      "heading": "Player Prediction Score (0 – 10)",
+      "intro": "Every player receives a <strong>Predicted Score</strong> representing their expected performance in the upcoming match. We compute <strong>7 independent components</strong> (each 0–10), combine them with <strong>position- and sub-role-specific weights</strong>, then apply a <strong>sample-size confidence dampening</strong> and a <strong>venue advantage modifier</strong>.",
+      "componentsHeading": "The 7 Components",
+      "form": { "pill": "Form", "desc": "Season average match rating blended with recent form.<br/>• Outfield: <strong>60% season + 40% last-3-games</strong> — rewards current momentum while keeping seasonal stability.<br/>• GK: <strong>50 / 50</strong> — recent clean sheets and blunders are more predictive game-to-game for keepers.<br/>• Fallback: 6.0 if no rating data is available." },
+      "attack": { "pill": "Attack", "desc": "Goal-scoring threat via three independent signals blended 60% season / 40% recent:<br/>• <strong>xG per 90</strong> with position-specific scaling (FWD ×14 cap 10 | MID ×14 cap 8 | DEF ×10 cap 5 | GK ×6 cap 3)<br/>• <strong>Conversion bonus</strong> (0–2): rewards clinical finishers whose goals exceed their xG.<br/>• <strong>Shot volume</strong> (0–2): shots on target per 90, regardless of xG quality." },
+      "creativity": { "pill": "Creativity", "desc": "Fully position-specific:<br/>• <strong>DEF</strong> — key passes per 90 (build-up quality) + assist delivery bonus. Typical CB ≈ 2; attacking FB ≈ 8.<br/>• <strong>MID</strong> — xA per 90 (×16, cap 8) + assist bonus + xA-per-key-pass quality + pass accuracy bonus (72%→0, 88%→2).<br/>• <strong>FWD</strong> — xA per 90 + assist bonus + key pass quality (without the pass accuracy bonus)." },
+      "defensive": { "pill": "Defensive", "desc": "Position-specific signals:<br/>• <strong>GK</strong>: save rate (0–7) + goals conceded per game (0–2) + recent save-rate trend (±1.5) + save volume (0–0.5) + pass accuracy (0–1.0).<br/>• <strong>DEF</strong>: duel win rate (0–4.5) + tackle win rate (0–4.0) + tackle activity (0–1.5) + pass accuracy (0–1.5).<br/>• <strong>MID</strong>: duel win rate (0–5) + tackle win rate (0–3) + floor of 1.0.<br/>• <strong>FWD</strong>: hold-up play via duel win rate only (range 1–6)." },
+      "availability": { "pill": "Availability", "desc": "Average minutes per game vs a full 90 — detects rotation risk and injury absences.<br/>Blended <strong>50% season / 50% recent</strong>. A player averaging 88 min all season but subbed at 45 for 3 games drops from ~8.6 to ~7.2 — a meaningful rotation signal." },
+      "discipline": { "pill": "Discipline", "desc": "Starts at 10; each yellow card per game costs 5 points, each red card costs 15.<br/>Blended <strong>40% season + 60% recent</strong> — suspension risk is driven by recent behaviour." },
+      "opponent": { "pill": "Opponent", "desc": "Player’s historical performance against the next opponent. Uses match ratings (and G+A where ratings are missing) across all past meetings.<br/>Formula: <code>5.0 + (avgRatingVsOpponent − 6.5) × 5.0</code>, clamped 1–10.<br/>Defaults to <strong>5.0</strong> (neutral) when no prior history exists." },
+      "subRoleHeading": "Sub-Role Inference",
+      "subRoleIntro": "We only store four positions (GK / DEF / MID / FWD) but real footballers play very different roles. The engine infers a sub-role from the player’s actual stat signature and adjusts weights accordingly.",
+      "subroles": {
+        "attackingFB": { "name": "Attacking Full-Back", "trigger": "≥ 1.0 key passes/game <em>or</em> ≥ 0.15 assists/game" },
+        "cb": { "name": "Centre-Back", "trigger": "All other defenders" },
+        "dm": { "name": "Defensive Midfielder", "trigger": "≥ 6 duels/90 AND &lt; 1.5 key passes/game" },
+        "am": { "name": "Attacking / Box-to-Box", "trigger": "All other midfielders" },
+        "cf": { "name": "Creative / False Nine", "trigger": "Creativity score ≥ 5.5 <em>or</em> ≥ 0.20 assists/game" },
+        "striker": { "name": "Pure Striker", "trigger": "All other forwards" },
+        "gk": { "name": "Goalkeeper", "trigger": "Fixed weights — no sub-role" }
+      },
+      "venueHeading": "Venue Advantage",
+      "venueDesc": "After the weighted score is computed and confidence-dampened, a venue modifier is applied:<br/><strong>Home:</strong> +0.25 × confidence &nbsp;|&nbsp; <strong>Away:</strong> −0.20 × confidence",
+      "confidenceHeading": "Sample-Size Confidence Dampening",
+      "confidenceDesc": "Per-90 stats become unstable with few games played. We pull the raw score toward a neutral 5.5:<br/><strong>Confidence = min(1.0, 0.55 + (gamesPlayed − 3) × 0.0265)</strong><br/><br/>3 games → 55% actual + 45% neutral &nbsp;|&nbsp; 10 games → 87% actual &nbsp;|&nbsp; 20+ games → 100% actual",
+      "penaltiesHeading": "Inactivity &amp; Low-Minutes Penalties",
+      "penaltiesIntro": "Players who haven’t played recently are dragged toward a <strong>below-neutral baseline of 2.5</strong>. Formula: <code>score × factor + 2.5 × (1 − factor)</code>.",
+      "inactivity": { "pill": "Inactivity", "desc": "Based on <strong>days since last match</strong>:<br/>• <strong>0–14 days</strong>: factor = 1.00<br/>• <strong>14–28 days</strong>: factor 1.00 → 0.70<br/>• <strong>28–56 days</strong>: factor 0.70 → 0.35<br/>• <strong>56+ days</strong>: factor = 0.35" },
+      "lowMinutes": { "pill": "Low Minutes", "desc": "Based on <strong>avg minutes per game in last 3 appearances</strong>:<br/>• <strong>≥ 60 min/game</strong>: factor = 1.00<br/>• <strong>45–60 min/game</strong>: factor 1.00 → 0.85<br/>• <strong>30–45 min/game</strong>: factor 0.85 → 0.60<br/>• <strong>&lt; 30 min/game</strong>: factor = 0.40" },
+      "note": "On the player profile page, Prediction Controls scale Form / Threat / Opponent / Minutes / Home-Away and then renormalize. The league grids use default controls."
+    },
+    "riskLevels": {
+      "heading": "Risk Levels",
+      "intro": "Each player is assigned a risk level based on their predicted score.",
+      "low": { "label": "Low Risk", "range": "Score ≥ 7.0", "desc": "Safe to start — strong form, regular minutes, good matchup." },
+      "medium": { "label": "Medium Risk", "range": "Score 4.5 – 6.9", "desc": "Proceed with caution — decent pick but some uncertainty." },
+      "high": { "label": "High Risk", "range": "Score &lt; 4.5", "desc": "Consider benching — poor form, rotation risk, or tough fixture." },
+      "note": "When viewing All Positions, scores are first normalized within each position group before ranking, so GKs and FWDs compete fairly."
+    },
+    "hiddenGems": {
+      "heading": "Hidden Gems",
+      "intro": "Hidden Gems are undervalued players whose underlying metrics outpace their visible returns. Score between <strong>4.5 and 8.0</strong>. <strong>Any single one</strong> of 7 signals qualifies them:",
+      "signals": {
+        "1": { "title": "xG+xA outpacing G+A", "desc": "expected output ≥ 0.25/90 and exceeds actual returns by 40%+." },
+        "2": { "title": "High shot volume, conversion hasn’t clicked", "desc": "≥ 15 total shots but goals below 22% of shots on target." },
+        "3": { "title": "Creative but unrewarded", "desc": "Creativity score ≥ 5.0 but assists are below 15% of key passes." },
+        "4": { "title": "High threat, few returns", "desc": "Attack component ≥ 5.0 but G+A total below position low-return threshold (DEF: 4 | MID: 6 | FWD: 8)." },
+        "5": { "title": "Premium shot positions", "desc": "xG per shot ≥ 0.12 across ≥ 6 shots but below the goals threshold." },
+        "6": { "title": "Improving trajectory", "desc": "Recent xG+xA/90 is ≥ 30% above the season average (requires ≥ 3 recent games)." },
+        "7": { "title": "Position-specific specialist quality", "desc": "<em>GK</em>: ≥ 3.0 saves/game + ≥ 68% save rate.<br/><em>DEF</em>: ≥ 87% pass accuracy + ≥ 52% duel win rate.<br/><em>MID</em>: ≥ 5 duels/90 + creativity ≥ 4.5.<br/><em>FWD</em>: xG per shot ≥ 0.16 across ≥ 10 shots." }
+      },
+      "note": "Hidden Gems appear separately from Top Picks so the two groups never overlap."
+    },
+    "redFlags": {
+      "heading": "Red Flags",
+      "intro": "Red Flags highlight players showing alarming declines. Only players with <strong>270+ minutes overall</strong> (or 45+ in recent view) are assessed.",
+      "signalsHeading": "The 10 Signals",
+      "signals": {
+        "1": { "title": "Form Decline", "desc": "takes the worse of: absolute distance below the 7.0 baseline and relative drop from season average." },
+        "2": { "title": "Output Drop", "desc": "G+A per 90 vs position baselines (DEF: 0.10 | MID: 0.22 | FWD: 0.35)." },
+        "3": { "title": "xG+xA Decline", "desc": "expected threat per 90 falling vs the season average." },
+        "4": { "title": "Shot Accuracy Decline", "desc": "shots-on-target rate falling vs the season average (requires ≥ 10 total shots)." },
+        "5": { "title": "Involvement Decline", "desc": "pass accuracy falling vs the season average (requires ≥ 20 total passes)." },
+        "6": { "title": "Discipline Risk", "desc": "recent period only. Each yellow card scores 2.5; each red scores 8.0 (capped at 10)." },
+        "7": { "title": "GK-Specific: Save Rate &amp; Conceding", "desc": "recent save rate falling vs the season average, plus penalty when conceding ≥ 2.5 goals/game recently." },
+        "8": { "title": "DEF: Duel Win Rate Decline", "desc": "season vs recent duel win rate (requires ≥ 15 season duels + ≥ 4 recent)." },
+        "9": { "title": "MID: Key Pass Decline", "desc": "key passes per 90 falling sharply vs season average (requires ≥ 8 total key passes)." },
+        "10": { "title": "FWD: xG Per Shot Decline", "desc": "shot quality falling vs season average (requires ≥ 10 season shots + ≥ 3 recent)." }
+      },
+      "weightsHeading": "Position Weights",
+      "severity": {
+        "critical": { "label": "Critical", "desc": "drop immediately" },
+        "high": { "label": "High", "desc": "seriously consider alternatives" },
+        "medium": { "label": "Medium", "desc": "monitor closely" }
+      }
+    },
+    "benchwarmers": {
+      "heading": "Benchwarmers",
+      "intro": "Benchwarmers are consistent, reliable players. They must <strong>not</strong> be Hidden Gems or Red Flags, and need 270+ minutes overall (or 45+ recent).",
+      "componentsHeading": "The 5 Consistency Components",
+      "components": {
+        "availability": { "pill": "Availability", "desc": "Average minutes per game vs a full 90. A starter playing every minute scores 10." },
+        "formConsistency": { "pill": "Form Consistency", "desc": "Two sub-signals (60/40): band score (proximity to the 6.0–7.5 reliable band) and stability score (recent form vs season average)." },
+        "outputReliability": { "pill": "Output Reliability", "desc": "Proximity to a <em>moderate</em> G+A/90 baseline — too far above OR below reduces the score." },
+        "passingReliability": { "pill": "Passing Reliability", "desc": "Pass accuracy proximity to a position-specific target." },
+        "discipline": { "pill": "Discipline", "desc": "Card rate per game — reliable players stay on the pitch." }
+      },
+      "labels": {
+        "rockSolid": { "label": "Rock Solid", "range": "Consistency ≥ 7.5" },
+        "steadyOption": { "label": "Steady Option", "range": "Consistency 5.5 – 7.4" },
+        "rotationPick": { "label": "Rotation Pick", "range": "Consistency 4.0 – 5.4" }
+      }
+    },
+    "matchPredictions": {
+      "heading": "Match Predictions",
+      "intro": "Match outcome probabilities are powered by a machine-learning model trained on historical match data.",
+      "homeWin": { "label": "Home Win %", "desc": "Probability the home side wins in 90 minutes" },
+      "draw": { "label": "Draw %", "desc": "Probability the match ends level after 90 minutes" },
+      "awayWin": { "label": "Away Win %", "desc": "Probability the away side wins in 90 minutes" },
+      "over25": { "label": "Over 2.5 Goals %", "desc": "Probability the match has 3 or more goals in total" },
+      "btts": { "label": "Both Teams Score %", "desc": "Probability both teams find the net at least once" }
+    },
+    "synergy": {
+      "heading": "Synergy",
+      "intro": "The Synergy tool lets you evaluate a group of players together. Picking players from different positions adds a diversity bonus.",
+      "note": "A squad covering all four position types (GK, DEF, MID, FWD) earns a +1.5 bonus. This rewards balanced squads over stacking one position."
+    }
+  }
+}

@@ -9,6 +9,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { forkJoin } from 'rxjs';
+import { TranslateModule } from '@ngx-translate/core';
 import { SoccerService } from '../../services/soccer.service';
 import { ALL_LEAGUES, League, Player, PlayerPrediction, scoreClass } from '../../models';
 
@@ -21,7 +22,7 @@ interface LeagueGroup {
   selector: 'app-top-players',
   standalone: true,
   imports: [CommonModule, RouterLink, FormsModule, MatCardModule, MatSelectModule, MatButtonModule,
-    MatIconModule, MatProgressBarModule, MatFormFieldModule],
+    MatIconModule, MatProgressBarModule, MatFormFieldModule, TranslateModule],
   templateUrl: './top-players.component.html',
   styleUrl: './top-players.component.scss'
 })
@@ -96,36 +97,36 @@ export class TopPlayersComponent implements OnInit {
 
     if (player.position === 'GK') {
       return [
-        { label: 'Saves', value: fmtInt(player.saves) },
-        { label: 'Conceded', value: fmtInt(player.goals_conceded) },
-        { label: 'Pass acc.', value: ratio(player.accurate_passes, player.total_passes) },
-        { label: 'Minutes', value: fmtInt(player.minutes_played) },
+        { label: 'common.saves', value: fmtInt(player.saves) },
+        { label: 'common.conceded', value: fmtInt(player.goals_conceded) },
+        { label: 'common.passAcc', value: ratio(player.accurate_passes, player.total_passes) },
+        { label: 'common.minutes', value: fmtInt(player.minutes_played) },
       ];
     }
 
     if (player.position === 'DEF') {
       return [
-        { label: 'Duels', value: ratio(player.duels_won, player.duels_total) },
-        { label: 'Tackles', value: ratio(player.tackles_won, player.tackles_total) },
-        { label: 'Key passes', value: fmtInt(player.key_passes) },
-        { label: 'xA', value: fmt1(player.xA) },
+        { label: 'common.duels', value: ratio(player.duels_won, player.duels_total) },
+        { label: 'common.tackles', value: ratio(player.tackles_won, player.tackles_total) },
+        { label: 'common.keyPasses', value: fmtInt(player.key_passes) },
+        { label: 'common.xA', value: fmt1(player.xA) },
       ];
     }
 
     if (player.position === 'MID') {
       return [
-        { label: 'Key passes', value: fmtInt(player.key_passes) },
-        { label: 'xG', value: fmt1(player.xG) },
-        { label: 'xA', value: fmt1(player.xA) },
-        { label: 'Pass acc.', value: ratio(player.accurate_passes, player.total_passes) },
+        { label: 'common.keyPasses', value: fmtInt(player.key_passes) },
+        { label: 'common.xG', value: fmt1(player.xG) },
+        { label: 'common.xA', value: fmt1(player.xA) },
+        { label: 'common.passAcc', value: ratio(player.accurate_passes, player.total_passes) },
       ];
     }
 
     return [
-      { label: 'Goals', value: fmtInt(player.goals) },
-      { label: 'Assists', value: fmtInt(player.assists) },
-      { label: 'xG', value: fmt1(player.xG) },
-      { label: 'xA', value: fmt1(player.xA) },
+      { label: 'common.goals', value: fmtInt(player.goals) },
+      { label: 'common.assists', value: fmtInt(player.assists) },
+      { label: 'common.xG', value: fmt1(player.xG) },
+      { label: 'common.xA', value: fmt1(player.xA) },
     ];
   }
 }

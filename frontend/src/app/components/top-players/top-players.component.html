@@ -50,7 +50,7 @@
                             {{ pred.player.team_name }}
                             <span class="chip chip--pos">{{ pred.player.position }}</span>
                             @if (pred.hidden_gem) {
-                              <span class="chip chip--gem">🔥 Gem</span>
+                              <span class="chip chip--gem">🔥 {{ 'common.gem' | translate }}</span>
                             }
                           </div>
                         </div>
@@ -58,7 +58,7 @@
                           <div class="list-score__value" [ngClass]="scoreClass(pred.risk_level)">
                             {{ pred.predicted_score | number:'1.1-2' }}
                           </div>
-                          <div class="score-caption">Top player score</div>
+                          <div class="score-caption">{{ 'topPlayers.topPlayerScore' | translate }}</div>
                         </div>
                       </div>
                       <div class="player-card__stats">
@@ -67,12 +67,12 @@
                         }
                       </div>
                       <div class="player-card__form">
-                        <span class="form-label">Form</span>
+                        <span class="form-label">{{ 'common.form' | translate }}</span>
                         <mat-progress-bar mode="determinate" [value]="pred.player.form_score * 10" color="accent"></mat-progress-bar>
                         <span class="form-value">{{ pred.player.form_score | number:'1.1-1' }}</span>
                       </div>
                       <div class="player-card__risk">
-                        <span class="chip" [class]="'chip--' + pred.risk_level">{{ pred.risk_level | titlecase }} Risk</span>
+                        <span class="chip" [class]="'chip--' + pred.risk_level">{{ 'common.risk.' + pred.risk_level | translate }}</span>
                       </div>
                     </mat-card-content>
                   </mat-card>

@@ -66,7 +66,8 @@
     "scoreBreakdown": "Score Breakdown",
     "contributionFactor": "Contribution of each factor",
     "formMomentum": "Form Momentum",
-    "last10Games": "Last 10 game performances"
+    "last10Games": "Last 10 game performances",
+    "formTrend": "Form Trend (last {{ n }} games)"
   },
   "hiddenGems": {
     "subtitle": "Under-the-radar players primed to overperform — high score, medium/high risk, low ownership",
@@ -141,6 +142,14 @@
     "synergyScore": "Synergy Score",
     "synergyComparison": "Synergy Comparison",
     "selectedPlayers": "Selected Players"
+  },
+  "leagueList": {
+    "title": "Leagues",
+    "subtitle": "Browse competitions and explore predictions by league",
+    "loading": "Loading leagues...",
+    "noLeagues": "No leagues available. Make sure the backend is running.",
+    "active": "Active",
+    "viewPredictions": "View Predictions"
   },
   "info": {
     "title": "How It Works",

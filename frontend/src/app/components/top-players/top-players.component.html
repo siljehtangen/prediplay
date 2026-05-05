@@ -1,13 +1,13 @@
 <div class="page">
-  <h1 class="page__title">Top Players</h1>
-  <p class="page__subtitle">Best predicted performers for the upcoming matches</p>
+  <h1 class="page__title">{{ 'nav.topPlayers' | translate }}</h1>
+  <p class="page__subtitle">{{ 'topPlayers.subtitle' | translate }}</p>
 
   <div class="content-layout">
       <div class="filters">
         <mat-form-field appearance="outline" subscriptSizing="dynamic">
-          <mat-label>League</mat-label>
+          <mat-label>{{ 'common.league' | translate }}</mat-label>
           <mat-select [(ngModel)]="selectedLeague" (selectionChange)="load()">
-            <mat-option value="">All Leagues</mat-option>
+            <mat-option value="">{{ 'common.allLeagues' | translate }}</mat-option>
             @for (l of leagues; track l.id) {
               <mat-option [value]="l.name">{{ l.name }}</mat-option>
             }

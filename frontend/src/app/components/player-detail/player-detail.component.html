@@ -155,12 +155,12 @@
                   </ng-container>
 
                   <ng-container matColumnDef="xG">
-                    <th mat-header-cell *matHeaderCellDef>xG</th>
+                    <th mat-header-cell *matHeaderCellDef>{{ 'common.xG' | translate }}</th>
                     <td mat-cell *matCellDef="let s">{{ s.expected_goals | number:'1.2-2' }}</td>
                   </ng-container>
 
                   <ng-container matColumnDef="xA">
-                    <th mat-header-cell *matHeaderCellDef>xA</th>
+                    <th mat-header-cell *matHeaderCellDef>{{ 'common.xA' | translate }}</th>
                     <td mat-cell *matCellDef="let s">{{ s.expected_assists | number:'1.2-2' }}</td>
                   </ng-container>
 

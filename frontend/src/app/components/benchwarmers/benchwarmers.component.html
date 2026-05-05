@@ -1,12 +1,12 @@
 <div class="page">
-  <h1 class="page__title">Benchwarmers</h1>
-  <p class="page__subtitle">Consistent and reliable players — not stars, but steady options worth keeping around</p>
+  <h1 class="page__title">{{ 'nav.benchwarmers' | translate }}</h1>
+  <p class="page__subtitle">{{ 'benchwarmers.subtitle' | translate }}</p>
 
   <div class="filters">
     <mat-form-field appearance="outline" subscriptSizing="dynamic">
-      <mat-label>League</mat-label>
+      <mat-label>{{ 'common.league' | translate }}</mat-label>
       <mat-select [(ngModel)]="selectedLeague" (selectionChange)="load()">
-        <mat-option value="">All Leagues</mat-option>
+        <mat-option value="">{{ 'common.allLeagues' | translate }}</mat-option>
         @for (l of leagues; track l.id) {
           <mat-option [value]="l.name">{{ l.name }}</mat-option>
         }
@@ -14,9 +14,9 @@
     </mat-form-field>
 
     <mat-form-field appearance="outline" subscriptSizing="dynamic">
-      <mat-label>Position</mat-label>
+      <mat-label>{{ 'common.position' | translate }}</mat-label>
       <mat-select [(ngModel)]="selectedPosition" (selectionChange)="load()">
-        <mat-option value="">All Positions</mat-option>
+        <mat-option value="">{{ 'common.allPositions' | translate }}</mat-option>
         @for (p of positions; track p) {
           <mat-option [value]="p">{{ p }}</mat-option>
         }
@@ -24,16 +24,16 @@
     </mat-form-field>
 
     <div class="time-filter-toggle">
-      <button [class.active]="timeFilter === 'recent'" (click)="setTimeFilter('recent')">Recent</button>
-      <button [class.active]="timeFilter === 'overall'" (click)="setTimeFilter('overall')">Overall</button>
+      <button [class.active]="timeFilter === 'recent'" (click)="setTimeFilter('recent')">{{ 'common.recent' | translate }}</button>
+      <button [class.active]="timeFilter === 'overall'" (click)="setTimeFilter('overall')">{{ 'common.overall' | translate }}</button>
     </div>
   </div>
 
   @if (loading) {
-    <div class="loading-container"><mat-icon>hourglass_empty</mat-icon><p>Scouting reliable options...</p></div>
+    <div class="loading-container"><mat-icon>hourglass_empty</mat-icon><p>{{ 'benchwarmers.loading' | translate }}</p></div>
   } @else if (showGroups) {
     @if (leagueGroups.length === 0) {
-      <div class="empty-state"><mat-icon>search_off</mat-icon><p>No benchwarmers found</p></div>
+      <div class="empty-state"><mat-icon>search_off</mat-icon><p>{{ 'benchwarmers.notFound' | translate }}</p></div>
     } @else {
       @for (group of leagueGroups; track group.name) {
         <div class="league-section">
@@ -45,7 +45,7 @@
                   <div class="bench-card__top">
                     <span class="rank">#{{ i + 1 }}</span>
                     <span class="label-badge" [class]="labelClass(bw.label)">
-                      <mat-icon>{{ labelIcon(bw.label) }}</mat-icon>{{ bw.label }}
+                      <mat-icon>{{ labelIcon(bw.label) }}</mat-icon>{{ 'benchwarmers.labels.' + bw.label | translate }}
                     </span>
                   </div>
                   <div class="bench-card__header">
@@ -58,16 +58,16 @@
                     </div>
                     <div class="consistency-score">
                       <div class="consistency-score__value">{{ bw.consistency_score | number:'1.1-2' }}</div>
-                      <div class="consistency-score__label">Consistency</div>
+                      <div class="consistency-score__label">{{ 'benchwarmers.consistency' | translate }}</div>
                     </div>
                   </div>
                   <div class="bench-card__bar">
-                    <span class="bar-label">Consistency index</span>
+                    <span class="bar-label">{{ 'benchwarmers.consistencyIndex' | translate }}</span>
                     <mat-progress-bar mode="determinate" [value]="bw.consistency_score * 10" color="accent"></mat-progress-bar>
                   </div>
                   <div class="bench-card__stats">
                     @for (s of statsFor(bw.player); track $index) {
-                      <div class="stat"><span class="stat__label">{{ s.label }}</span><span class="stat__value">{{ s.value }}</span></div>
+                      <div class="stat"><span class="stat__label">{{ s.label | translate }}</span><span class="stat__value">{{ s.value }}</span></div>
                     }
                   </div>
                 </mat-card-content>
@@ -79,7 +79,7 @@
     }
   } @else {
     @if (players.length === 0) {
-      <div class="empty-state"><mat-icon>search_off</mat-icon><p>No benchwarmers found</p></div>
+      <div class="empty-state"><mat-icon>search_off</mat-icon><p>{{ 'benchwarmers.notFound' | translate }}</p></div>
     } @else {
       <div class="bench-grid">
         @for (bw of players; track bw.player.id; let i = $index) {

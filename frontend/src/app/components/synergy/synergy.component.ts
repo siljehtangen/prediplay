@@ -7,6 +7,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { Chart, BarController, BarElement, LinearScale, CategoryScale, Tooltip, Legend } from 'chart.js';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { SoccerService } from '../../services/soccer.service';
 import { Player, League, SynergyResult } from '../../models';
 
@@ -16,7 +17,7 @@ Chart.register(BarController, BarElement, LinearScale, CategoryScale, Tooltip, L
   selector: 'app-synergy',
   standalone: true,
   imports: [CommonModule, FormsModule, MatCardModule, MatButtonModule, MatIconModule,
-    MatSelectModule, MatFormFieldModule],
+    MatSelectModule, MatFormFieldModule, TranslateModule],
   templateUrl: './synergy.component.html',
   styleUrl: './synergy.component.scss'
 })
@@ -33,7 +34,7 @@ export class SynergyComponent implements OnInit, OnDestroy {
   analyzing = false;
   private chart: Chart | null = null;
 
-  constructor(private soccer: SoccerService) {}
+  constructor(private soccer: SoccerService, private translate: TranslateService) {}
 
   ngOnInit() {
     this.loadingLeagues = true;
@@ -82,7 +83,7 @@ export class SynergyComponent implements OnInit, OnDestroy {
     this.chart = new Chart(this.canvasRef.nativeElement, {
       type: 'bar',
       data: {
-        labels: [...names, 'Combined', 'w/ Synergy'],
+        labels: [...names, this.translate.instant('synergy.totalPredicted'), this.translate.instant('synergy.synergyScore')],
         datasets: [{
           label: 'Score',
           data: [

@@ -88,7 +88,7 @@
               <div class="bench-card__top">
                 <span class="rank">#{{ i + 1 }}</span>
                 <span class="label-badge" [class]="labelClass(bw.label)">
-                  <mat-icon>{{ labelIcon(bw.label) }}</mat-icon>{{ bw.label }}
+                  <mat-icon>{{ labelIcon(bw.label) }}</mat-icon>{{ 'benchwarmers.labels.' + bw.label | translate }}
                 </span>
               </div>
               <div class="bench-card__header">
@@ -104,16 +104,16 @@
                 </div>
                 <div class="consistency-score">
                   <div class="consistency-score__value">{{ bw.consistency_score | number:'1.1-2' }}</div>
-                  <div class="consistency-score__label">Consistency</div>
+                  <div class="consistency-score__label">{{ 'benchwarmers.consistency' | translate }}</div>
                 </div>
               </div>
               <div class="bench-card__bar">
-                <span class="bar-label">Consistency index</span>
+                <span class="bar-label">{{ 'benchwarmers.consistencyIndex' | translate }}</span>
                 <mat-progress-bar mode="determinate" [value]="bw.consistency_score * 10" color="accent"></mat-progress-bar>
               </div>
               <div class="bench-card__stats">
                 @for (s of statsFor(bw.player); track $index) {
-                  <div class="stat"><span class="stat__label">{{ s.label }}</span><span class="stat__value">{{ s.value }}</span></div>
+                  <div class="stat"><span class="stat__label">{{ s.label | translate }}</span><span class="stat__value">{{ s.value }}</span></div>
                 }
               </div>
             </mat-card-content>

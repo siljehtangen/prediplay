@@ -85,7 +85,7 @@
         </mat-card>
 
         <mat-card>
-          <mat-card-header><mat-card-title>Selected Players</mat-card-title></mat-card-header>
+          <mat-card-header><mat-card-title>{{ 'synergy.selectedPlayers' | translate }}</mat-card-title></mat-card-header>
           <mat-card-content>
             <div class="players-list">
               @for (p of result.players; track p.id) {

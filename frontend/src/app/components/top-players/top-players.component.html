@@ -31,10 +31,10 @@
       </div>
 
       @if (loading) {
-        <div class="loading-container"><mat-icon>hourglass_empty</mat-icon><p>Calculating predictions...</p></div>
+        <div class="loading-container"><mat-icon>hourglass_empty</mat-icon><p>{{ 'common.calculatingPredictions' | translate }}</p></div>
       } @else if (showGroups) {
         @if (leagueGroups.length === 0) {
-          <div class="empty-state"><mat-icon>search_off</mat-icon><p>No players found</p></div>
+          <div class="empty-state"><mat-icon>search_off</mat-icon><p>{{ 'topPlayers.notFound' | translate }}</p></div>
         } @else {
           @for (group of leagueGroups; track group.name) {
             <div class="league-section">
@@ -83,7 +83,7 @@
         }
       } @else {
         @if (predictions.length === 0) {
-          <div class="empty-state"><mat-icon>search_off</mat-icon><p>No players found</p></div>
+          <div class="empty-state"><mat-icon>search_off</mat-icon><p>{{ 'topPlayers.notFound' | translate }}</p></div>
         } @else {
           <div class="player-grid">
             @for (pred of predictions; track pred.player.id) {
